@@ -305,12 +305,24 @@ const compile = async (basename) => {
   console.log("done compiling.");
 };
 
+function generateRandomString(length) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    result += chars[randomIndex];
+  }
+  return result;
+}
+
 const compile_reload = async () => {
   console.log(`recompiling...`);
 
+  await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
   const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
   for (const gameFile of gameFiles) {
-    await fs.rm(gameFile, { force: true });
+    await fs.rename(gameFile, path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
+    //await fs.rm(gameFile, { force: true });
   }
 
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);

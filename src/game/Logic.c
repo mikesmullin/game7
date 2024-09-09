@@ -5,7 +5,7 @@
 
 __declspec(dllexport) void logic_init(State* state) {
   state->example = 0;
-  printf("Logic dll loaded!\n");
+  printf("Logic dll loaded!!\n");
 }
 
 __declspec(dllexport) void logic_draw(const State* state) {
