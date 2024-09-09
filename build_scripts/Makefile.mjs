@@ -80,8 +80,12 @@ else if (isMac) {
 const COMPILER_TRANSLATION_UNITS = [
   rel(workspaceFolder, 'src', 'components', '*.c'),
   rel(workspaceFolder, 'src', 'lib', '*.c'),
+  // rel(workspaceFolder, 'src', 'game', '*.c'),
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
+];
+const COMPILER_TRANSLATION_UNITS_RELOAD = [
+  rel(workspaceFolder, 'src', 'game', '*.c'),
 ];
 const C_CONDITIONAL_COMPILER_ARGS = (src) => {
   if (src.includes('cmixer')) {
@@ -172,7 +176,9 @@ const all = async () => {
   await copy_dlls();
   await shaders();
   await protobuf();
-  await compile_run('main');
+  await compile('main');
+  await compile_reload();
+  await run('main');
 };
 
 const copy_dlls = async () => {
@@ -227,7 +233,7 @@ const clean = async () => {
   }
 };
 
-const compile_run = async (basename) => {
+const compile = async (basename) => {
   console.log(`compiling ${basename}...`);
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
 
@@ -296,23 +302,89 @@ const compile_run = async (basename) => {
       '-o', executable,
     ]);
   }
-  if (0 == code) {
-    if (isNix || isMac) {
-      // chmod +x
-      await fs.chmod(path.join(workspaceFolder, BUILD_PATH, executable), 0o755);
-    }
-    if (isMac) {
-      await child_spawn('install_name_tool', [
-        '-change', '@rpath/libvulkan.1.dylib', `${process.env.HOME} /VulkanSDK/1.3.236.0 / macOS / lib / libvulkan.1.dylib`,
-        'Pong_test',
-      ]);
-      // or
-      // export DYLD_LIBRARY_PATH=$HOME/VulkanSDK/1.3.236.0/macOS/lib:$DYLD_LIBRARY_PATH
-    }
-    await child_spawn(path.join(workspaceFolder, BUILD_PATH, executable));
-  }
-  console.log("done making.");
+  console.log("done compiling.");
 };
+
+const compile_reload = async () => {
+  console.log(`recompiling...`);
+
+  const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
+  for (const gameFile of gameFiles) {
+    await fs.rm(gameFile, { force: true });
+  }
+
+  const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
+
+  // compile translation units in parallel (N-at-once)
+  const unit_files = [];
+  const dsts = [];
+  for (const u of COMPILER_TRANSLATION_UNITS_RELOAD) {
+    for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
+      unit_files.push(file);
+      dsts.push(rel(workspaceFolder, BUILD_PATH, `${file}.dll`));
+    }
+  }
+  const compileTranslationUnit = async (unit) => {
+    const dir = path.relative(process.cwd(), absBuild(path.dirname(unit)));
+    await fs.mkdir(dir, { recursive: true });
+
+    const src = rel(workspaceFolder, unit);
+    const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll`);
+
+    let dstExists = false;
+    try {
+      await fs.access(path.join(BUILD_PATH, dst), fs.constants.F_OK);
+      dstExists = true;
+    }
+    catch (e) {
+    }
+    if (dstExists) {
+      const srcStat = await fs.stat(path.join(BUILD_PATH, src));
+      const dstStat = await fs.stat(path.join(BUILD_PATH, dst));
+      if (srcStat.mtime < dstStat.mtime) {
+        return;
+      }
+    }
+
+    const is_c = RX_C.test(src);
+    await child_spawn((is_c ? C_COMPILER_PATH : CPP_COMPILER_PATH), [
+      ...DEBUG_COMPILER_ARGS,
+      ...(is_c ? C_COMPILER_ARGS : CPP_COMPILER_ARGS),
+      ...C_CONDITIONAL_COMPILER_ARGS(src),
+      "-shared",
+      src,
+      // '-c',
+      '-o', dst,
+    ]);
+
+    return dst;
+  };
+  const objs = [];
+  for await (const obj of promiseBatch(CONCURRENCY, unit_files, compileTranslationUnit)) {
+    if (obj) {
+      objs.push(obj);
+    }
+  }
+  console.log("done recompiling.");
+};
+
+const run = async (basename) => {
+  const executable = `${basename}${isWin ? '.exe' : ''} `;
+
+  if (isNix || isMac) {
+    // chmod +x
+    await fs.chmod(path.join(workspaceFolder, BUILD_PATH, executable), 0o755);
+  }
+  if (isMac) {
+    await child_spawn('install_name_tool', [
+      '-change', '@rpath/libvulkan.1.dylib', `${process.env.HOME} /VulkanSDK/1.3.236.0 / macOS / lib / libvulkan.1.dylib`,
+      'Pong_test',
+    ]);
+    // or
+    // export DYLD_LIBRARY_PATH=$HOME/VulkanSDK/1.3.236.0/macOS/lib:$DYLD_LIBRARY_PATH
+  }
+  await child_spawn(path.join(workspaceFolder, BUILD_PATH, executable));
+}
 
 (async () => {
   const [, , ...cmds] = process.argv;
@@ -338,7 +410,10 @@ const compile_run = async (basename) => {
         await generate_clangd_compile_commands();
         break;
       case 'main':
-        await compile_run(cmd);
+        await compile(cmd);
+        break;
+      case 'reload':
+        await compile_reload();
         break;
       case 'help':
       default:

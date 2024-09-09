@@ -5,6 +5,7 @@
 #include "lib/Audio.h"
 #include "lib/Finger.h"
 #include "lib/Gamepad.h"
+#include "lib/HotReload.h"
 #include "lib/Keyboard.h"
 #include "lib/Math.h"
 #include "lib/SDL.h"
@@ -92,8 +93,6 @@ static const char* audioFiles[] = {
 
 enum AUDIO_FILES {
   AUDIO_PICKUP_COIN = 0,
-  AUDIO_FOOTSTEPS = 1,
-  AUDIO_SET_WOOD_WALL = 2,
 };
 
 static ubo_ProjView_t ubo1;  // projection x view matrices
@@ -185,6 +184,8 @@ u8 Animate(AnimationState_t* state, f64 deltaTime) {
   return texId;
 }
 
+State state2;
+
 int main() {
   printf("begin main.\n");
 
@@ -198,6 +199,11 @@ int main() {
   Window__New(&s_Window, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, &s_Vulkan);
   SDL__Init();
   Audio__Init();
+
+  if (load_logic()) {
+    return 1;
+  }
+  logic_init(&state2);
 
   Audio__LoadAudioFile(audioFiles[AUDIO_PICKUP_COIN]);
   Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
@@ -302,6 +308,7 @@ int main() {
 
   // cleanup
   printf("shutdown main.\n");
+  unload_logic();
   Vulkan__DeviceWaitIdle(&s_Vulkan);
   Gamepad__Shutdown(&gamePad1);
   Vulkan__Cleanup(&s_Vulkan);
@@ -348,11 +355,17 @@ static void keyboardCallback() {
     playerAnimationState.state = g_Keyboard__state.pressed ? WALK : IDLE;
     playerAnimationState.anim = &ANIM_VIKING_WALK_LEFT;
     // instances[INSTANCE_PLAYER_1].scale[0] = -instances[INSTANCE_PLAYER_1].scale[0];
+  } else if (114 == g_Keyboard__state.location && 0 == g_Keyboard__state.pressed) {  // R
+    // hot-reload!
+    if (load_logic()) {
+      s_Window.quit = true;
+    }
+    logic_init(&state2);
   }
   if (WALK == playerAnimationState.state) {
-    Audio__ResumeAudio(AUDIO_FOOTSTEPS, false, 10.0f);
+    Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
   } else if (IDLE == playerAnimationState.state) {
-    Audio__StopAudio(AUDIO_FOOTSTEPS);
+    Audio__StopAudio(AUDIO_PICKUP_COIN);
 
     if (BACK == playerAnimationState.facing) {
       // playerAnimationState.anim = &ANIM_VIKING_IDLE_BACK;
@@ -426,12 +439,15 @@ static void fingerCallback() {
     instanceCount++;
     isVBODirty = true;
 
-    Audio__PlayAudio(AUDIO_SET_WOOD_WALL, false, 1.0f);
+    Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
   }
 }
 
 void physicsCallback(const f64 deltaTime) {
   // OnFixedUpdate(deltaTime);
+
+  logic_update(&state2);
+
   if (WALK == playerAnimationState.state) {
     if (LEFT == playerAnimationState.facing) {
       instances[INSTANCE_PLAYER_1].pos[0] -= PLAYER_WALK_SPEED * deltaTime;
@@ -456,6 +472,8 @@ void physicsCallback(const f64 deltaTime) {
 static u8 newTexId;
 static void renderCallback(const f64 deltaTime) {
   // OnUpdate(deltaTime);
+
+  logic_draw(&state2);
 
   // character frame animation
   newTexId = Animate(&playerAnimationState, deltaTime);

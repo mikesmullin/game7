@@ -30,15 +30,20 @@ void Keyboard__OnInput(const SDL_Event* event) {
   switch (event->type) {
     case SDL_KEYDOWN:
     case SDL_KEYUP:
-      switch (event->key.state) {
-        case SDL_PRESSED:
-          g_Keyboard__state.pressed = true;
-          break;
-        case SDL_RELEASED:
-        default:
-          g_Keyboard__state.pressed = false;
-          break;
+      if (SDL_KEYDOWN == event->type) {
+        g_Keyboard__state.pressed = true;
+      } else {
+        g_Keyboard__state.pressed = false;
       }
+      // switch (event->key.state) {
+      //   case SDL_PRESSED:
+      //     g_Keyboard__state.pressed = true;
+      //     break;
+      //   case SDL_RELEASED:
+      //   default:
+      //     g_Keyboard__state.pressed = false;
+      //     break;
+      // }
       g_Keyboard__state.altKey = event->key.keysym.mod & (KMOD_LALT | KMOD_RALT);
       g_Keyboard__state.ctrlKey = event->key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL);
       g_Keyboard__state.shiftKey = event->key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT);
