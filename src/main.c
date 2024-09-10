@@ -23,10 +23,8 @@ static void fingerCallback();
 static void fileModifyCallback();
 
 static Engine__State_t* state = &(Engine__State_t){};
-static FileMonitor_t* fm = &(FileMonitor_t){
-    .directory = "C:\\Users\\mikes\\Desktop\\Desktop\\Making_Games\\Game7\\Code\\build\\src\\game",
-    .fileName = "Logic.c.dll",
-    .cb = fileModifyCallback};
+static FileMonitor_t* fm =
+    &(FileMonitor_t){.directory = "src/game", .fileName = "Logic.c.dll", .cb = fileModifyCallback};
 
 f32 PixelsToUnits(u32 pixels) {
   return (f32)pixels / state->PIXELS_PER_UNIT;
