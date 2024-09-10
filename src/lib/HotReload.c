@@ -5,6 +5,8 @@
 static void* logic = NULL;
 
 logic_init_t logic_init;
+logic_init2_t logic_init2;
+logic_init3_t logic_init3;
 logic_update_t logic_update;
 logic_draw_t logic_draw;
 
@@ -34,6 +36,7 @@ int load_logic(void) {
   }
 
   LOAD_SYMBOL(logic_init);
+  LOAD_SYMBOL(logic_init2);
   LOAD_SYMBOL(logic_update);
   LOAD_SYMBOL(logic_draw);
 
@@ -89,6 +92,8 @@ int load_logic(void) {
   }
 
   logic_init = (void (*)())GetProcAddress(logic, "logic_init");
+  logic_init2 = (void (*)())GetProcAddress(logic, "logic_init2");
+  logic_init3 = (void (*)())GetProcAddress(logic, "logic_init3");
   logic_update = (void (*)())GetProcAddress(logic, "logic_update");
   logic_draw = (void (*)())GetProcAddress(logic, "logic_draw");
 
