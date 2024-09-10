@@ -5,6 +5,7 @@
 #include "game/Logic.h"
 #include "lib/Audio.h"
 #include "lib/Engine.h"
+#include "lib/File.h"
 #include "lib/Finger.h"
 #include "lib/Gamepad.h"
 #include "lib/HotReload.h"
@@ -15,13 +16,17 @@
 #include "lib/Vulkan.h"
 #include "lib/Window.h"
 
-static Engine__State_t estate;
-static Engine__State_t* state = &estate;
-
 static void physicsCallback(const f64 deltaTime);
 static void renderCallback(const f64 deltaTime);
 static void keyboardCallback();
 static void fingerCallback();
+static void fileModifyCallback();
+
+static Engine__State_t* state = &(Engine__State_t){};
+static FileMonitor_t* fm = &(FileMonitor_t){
+    .directory = "C:\\Users\\mikes\\Desktop\\Desktop\\Making_Games\\Game7\\Code\\build\\src\\game",
+    .fileName = "Logic.c.dll",
+    .cb = fileModifyCallback};
 
 f32 PixelsToUnits(u32 pixels) {
   return (f32)pixels / state->PIXELS_PER_UNIT;
@@ -35,6 +40,9 @@ u8 Animate(AnimationState_t* state, f64 deltaTime) {
   return texId;
 }
 
+void fileModifyCallback() {
+}
+
 int main() {
   LOG_INFOF("begin main.");
 
@@ -43,6 +51,8 @@ int main() {
 
   // initialize random seed using current time
   srand(Timer__NowMilliseconds());
+
+  File__StartMonitor(fm);
 
   if (load_logic()) {
     return 1;
@@ -170,6 +180,7 @@ int main() {
 
   // cleanup
   printf("shutdown main.\n");
+  File__EndMonitor(fm);
   unload_logic();
   Vulkan__DeviceWaitIdle(&state->s_Vulkan);
   Gamepad__Shutdown(&gamePad1);
@@ -225,9 +236,9 @@ static void keyboardCallback() {
     logic_init3(state);
   }
   if (WALK == state->playerAnimationState.state) {
-    Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
+    // Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
   } else if (IDLE == state->playerAnimationState.state) {
-    Audio__StopAudio(AUDIO_PICKUP_COIN);
+    // Audio__StopAudio(AUDIO_PICKUP_COIN);
 
     if (BACK == state->playerAnimationState.facing) {
       // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_BACK;
@@ -301,12 +312,20 @@ static void fingerCallback() {
     state->instanceCount++;
     state->isVBODirty = true;
 
-    Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+    // Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
   }
 }
 
 void physicsCallback(const f64 deltaTime) {
   // OnFixedUpdate(deltaTime);
+
+  if (2 == File__CheckMonitor(fm)) {  // TODO: less frequently (ie. once per second)
+    // LOG_DEBUGF("File modified.");
+    if (load_logic()) {
+      return;
+    }
+    logic_init3(state);
+  }
 
   logic_update(state);
 

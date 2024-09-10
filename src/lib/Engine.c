@@ -18,4 +18,5 @@ void Engine__OnLoad(Engine__State_t* state) {
 
   state->Audio__LoadAudioFile = &Audio__LoadAudioFile;
   state->Audio__PlayAudio = &Audio__PlayAudio;
+  state->Audio__ResumeAudio = &Audio__ResumeAudio;
 }

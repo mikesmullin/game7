@@ -57,16 +57,10 @@ __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, bef
   state->ANIM_VIKING_WALK_LEFT.frames[5] = 7;
   state->ANIM_VIKING_WALK_LEFT.frames[6] = 10;
 
-  state->ANIM_VIKING_WALK_FRONT.duration = (1.0f / 3.75) * 8;
-  state->ANIM_VIKING_WALK_FRONT.frameCount = 8;
-  state->ANIM_VIKING_WALK_FRONT.frames[0] = 11;
-  state->ANIM_VIKING_WALK_FRONT.frames[1] = 12;
-  state->ANIM_VIKING_WALK_FRONT.frames[2] = 13;
-  state->ANIM_VIKING_WALK_FRONT.frames[3] = 14;
-  state->ANIM_VIKING_WALK_FRONT.frames[4] = 15;
-  state->ANIM_VIKING_WALK_FRONT.frames[5] = 14;
-  state->ANIM_VIKING_WALK_FRONT.frames[6] = 13;
-  state->ANIM_VIKING_WALK_FRONT.frames[7] = 12;
+  state->ANIM_VIKING_WALK_FRONT = (Animation_t){
+      .duration = (1.0f / 3.75) * 8,
+      .frameCount = 8,
+      .frames = {11, 12, 13, 14, 15, 14, 13, 12}};
 
   state->playerAnimationState.facing = FRONT;
   state->playerAnimationState.state = IDLE;
@@ -86,11 +80,11 @@ __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, bef
 
 __declspec(dllexport) void logic_init2(Engine__State_t* state) {  // on init, after systems
   state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
-  state->Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 }
 
 __declspec(dllexport) void logic_init3(Engine__State_t* state) {  // on reload
-  LOG_DEBUGF("Logic dll loaded.");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.20f);
+  LOG_DEBUGF("Logic dll loaded! jaja");
 }
 
 __declspec(dllexport) void logic_draw(const Engine__State_t* state) {

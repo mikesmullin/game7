@@ -117,6 +117,7 @@ typedef struct {
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
+  void (*Audio__ResumeAudio)(const int id, const bool loop, const double gain);
 } Engine__State_t;
 
 f32 PixelsToUnits(u32 pixels);

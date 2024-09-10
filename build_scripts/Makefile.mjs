@@ -382,6 +382,23 @@ const compile_reload = async () => {
   console.log("done recompiling.");
 };
 
+const watch = async () => {
+  console.log(`watching...`);
+  const watcher = fs.watch(path.join(workspaceFolder, 'src', 'game', 'Logic.c'));
+  let timer;
+  let wait = false;
+  for await (const event of watcher) {
+    clearTimeout(timer);
+    if (!wait) {
+      timer = setTimeout(async () => {
+        wait = true;
+        await compile_reload();
+        wait = false;
+      }, 1000);
+    }
+  }
+};
+
 const run = async (basename) => {
   const executable = `${basename}${isWin ? '.exe' : ''} `;
 
@@ -428,6 +445,9 @@ const run = async (basename) => {
         break;
       case 'reload':
         await compile_reload();
+        break;
+      case 'watch':
+        await watch();
         break;
       case 'help':
       default:
