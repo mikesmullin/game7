@@ -1,10 +1,7 @@
-#include "Logic.h"
-
 #include <stdio.h>
 #include <windows.h>
 
-#include "../lib/Audio.h"
-#include "../lib/Math.h"
+#include "../lib/Engine.h"
 
 __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, before systems
   state->WINDOW_TITLE = "Retro";
@@ -85,8 +82,6 @@ __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, bef
 
   state->playerAnimationState.frame = 0;
   state->playerAnimationState.seek = 0.0f;
-
-  printf("Logic dll loaded!!\n");
 }
 
 __declspec(dllexport) void logic_init2(Engine__State_t* state) {  // on init, after systems
@@ -95,6 +90,7 @@ __declspec(dllexport) void logic_init2(Engine__State_t* state) {  // on init, af
 }
 
 __declspec(dllexport) void logic_init3(Engine__State_t* state) {  // on reload
+  printf("Logic dll loaded!! %d\n", state->pFreeClass(2));
 }
 
 __declspec(dllexport) void logic_draw(const Engine__State_t* state) {

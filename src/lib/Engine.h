@@ -114,12 +114,15 @@ typedef struct {
   u8 RENDER_FPS;
   f32 PLAYER_WALK_SPEED;
   f32 PLAYER_ZOOM_SPEED;
+
+  int (*pFreeClass)(int inc);
 } Engine__State_t;
 
 f32 PixelsToUnits(u32 pixels);
 
 void Engine__OnLoad(Engine__State_t* state);
 
-u8 Animate(AnimationState_t* state, f64 deltaTime);
+static int freestate = 0;
+int FreeClass(int inc);
 
 #endif  // ENGINE_H
