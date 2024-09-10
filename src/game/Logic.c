@@ -1,6 +1,6 @@
-#include <stdio.h>
 #include <windows.h>
 
+#include "../lib/Base.h"
 #include "../lib/Engine.h"
 
 __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, before systems
@@ -85,12 +85,12 @@ __declspec(dllexport) void logic_init(Engine__State_t* state) {  // on init, bef
 }
 
 __declspec(dllexport) void logic_init2(Engine__State_t* state) {  // on init, after systems
-  // Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
-  // Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
+  state->Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 }
 
 __declspec(dllexport) void logic_init3(Engine__State_t* state) {  // on reload
-  printf("Logic dll loaded!! %d\n", state->pFreeClass(2));
+  LOG_DEBUGF("Logic dll loaded.");
 }
 
 __declspec(dllexport) void logic_draw(const Engine__State_t* state) {

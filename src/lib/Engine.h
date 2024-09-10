@@ -115,14 +115,12 @@ typedef struct {
   f32 PLAYER_WALK_SPEED;
   f32 PLAYER_ZOOM_SPEED;
 
-  int (*pFreeClass)(int inc);
+  void (*Audio__LoadAudioFile)(const char* path);
+  void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
 } Engine__State_t;
 
 f32 PixelsToUnits(u32 pixels);
 
 void Engine__OnLoad(Engine__State_t* state);
-
-static int freestate = 0;
-int FreeClass(int inc);
 
 #endif  // ENGINE_H

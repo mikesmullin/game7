@@ -333,9 +333,10 @@ const compile_reload = async () => {
   for (const u of COMPILER_TRANSLATION_UNITS_RELOAD) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       unit_files.push(file);
-      dsts.push(rel(workspaceFolder, BUILD_PATH, `${file}.dll`));
+      // dsts.push(rel(workspaceFolder, BUILD_PATH, file));
     }
   }
+  dsts.push(rel(workspaceFolder, BUILD_PATH, "..\\src\\lib\\Log.c"));
   const compileTranslationUnit = async (unit) => {
     const dir = path.relative(process.cwd(), absBuild(path.dirname(unit)));
     await fs.mkdir(dir, { recursive: true });
@@ -365,6 +366,7 @@ const compile_reload = async () => {
       ...C_CONDITIONAL_COMPILER_ARGS(src),
       "-shared",
       src,
+      ...dsts.filter(s => !s.includes(".pb.")),
       // '-c',
       '-o', dst,
     ]);

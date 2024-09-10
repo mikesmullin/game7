@@ -60,8 +60,8 @@ int main() {
   SDL__Init();
   Audio__Init();
 
-  Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
-  Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  // Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
+  // Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
   logic_init2(state);
   logic_init3(state);
 
