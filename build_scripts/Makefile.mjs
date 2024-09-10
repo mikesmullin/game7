@@ -318,13 +318,6 @@ function generateRandomString(length) {
 const compile_reload = async () => {
   console.log(`recompiling...`);
 
-  await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
-  const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
-  for (const gameFile of gameFiles) {
-    await fs.rename(gameFile, path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
-    //await fs.rm(gameFile, { force: true });
-  }
-
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
 
   // compile translation units in parallel (N-at-once)
@@ -342,7 +335,7 @@ const compile_reload = async () => {
     await fs.mkdir(dir, { recursive: true });
 
     const src = rel(workspaceFolder, unit);
-    const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll`);
+    const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll.tmp`);
 
     let dstExists = false;
     try {
@@ -371,6 +364,18 @@ const compile_reload = async () => {
       '-o', dst,
     ]);
 
+    // swap lib
+    await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
+    // const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
+    // for (const gameFile of gameFiles) {
+    //   await fs.rename(gameFile, path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
+    //   //await fs.rm(gameFile, { force: true });
+    // }
+    try {
+      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
+    } catch (e) { }
+    await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
+
     return dst;
   };
   const objs = [];
@@ -394,7 +399,7 @@ const watch = async () => {
         wait = true;
         await compile_reload();
         wait = false;
-      }, 1000);
+      }, 250);
     }
   }
 };
