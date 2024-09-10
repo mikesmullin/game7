@@ -318,6 +318,8 @@ function generateRandomString(length) {
 const compile_reload = async () => {
   console.log(`recompiling...`);
 
+  await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
+
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
 
   // compile translation units in parallel (N-at-once)
@@ -365,18 +367,22 @@ const compile_reload = async () => {
     ]);
 
     // swap lib
-    await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
     // const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
     // for (const gameFile of gameFiles) {
     //   await fs.rename(gameFile, path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
     //   //await fs.rm(gameFile, { force: true });
     // }
     try {
-      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
-    } catch (e) { }
-    await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
-
-    return dst;
+      await fs.stat(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'));
+      try {
+        await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
+      } catch (e) { }
+      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
+      console.log("recompiled.");
+      return dst;
+    } catch (e) {
+      console.log("recompilation failed.");
+    }
   };
   const objs = [];
   for await (const obj of promiseBatch(CONCURRENCY, unit_files, compileTranslationUnit)) {
@@ -384,7 +390,6 @@ const compile_reload = async () => {
       objs.push(obj);
     }
   }
-  console.log("done recompiling.");
 };
 
 const watch = async () => {

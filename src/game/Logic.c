@@ -83,8 +83,8 @@ __declspec(dllexport) void logic_init2(Engine__State_t* state) {  // on init, af
 }
 
 __declspec(dllexport) void logic_init3(Engine__State_t* state) {  // on reload
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 3.0f);
-  LOG_DEBUGF("Logic dll loaded!!!!!");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  LOG_DEBUGF("Logic dll loaded.");
 }
 
 __declspec(dllexport) void logic_draw(const Engine__State_t* state) {
