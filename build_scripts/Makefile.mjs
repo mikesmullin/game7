@@ -333,6 +333,7 @@ const compile_reload = async () => {
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
+      if (!file.includes('Logic.c') && !file.includes('Log.c')) { continue; }
       dsts.push(rel(workspaceFolder, file));
     }
   }

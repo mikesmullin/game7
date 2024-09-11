@@ -337,7 +337,7 @@ static void fingerCallback() {
 }
 
 static f64 accumulator1 = 0.0f;
-static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f;  // 1 check per second
+static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
 
 static void physicsCallback(const f64 deltaTime) {
   // OnFixedUpdate(deltaTime);
