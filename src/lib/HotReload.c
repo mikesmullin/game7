@@ -7,6 +7,13 @@
 static void* logic = NULL;
 
 logic_boot_t logic_boot;
+logic_oninit_data_t logic_oninit_data;
+logic_oninit_compute_t logic_oninit_compute;
+logic_onreload_t logic_onreload;
+logic_onkey_t logic_onkey;
+logic_onfinger_t logic_onfinger;
+logic_onfixedupdate_t logic_onfixedupdate;
+logic_onupdate_t logic_onupdate;
 
 #if OS_NIX == 1
 #include <dlfcn.h>
@@ -22,7 +29,7 @@ logic_boot_t logic_boot;
 
 int load_logic(void) {
   if (logic != NULL) {
-    if (unload_logic()) {
+    if (!unload_logic()) {
       return 1;
     }
   }
@@ -53,7 +60,7 @@ int unload_logic(void) {
 
 int load_logic(void) {
   if (logic != NULL) {
-    if (unload_logic()) {
+    if (!unload_logic()) {
       return 0;
     }
   }
@@ -87,13 +94,18 @@ int load_logic(void) {
   }
 
   logic_boot = (logic_boot_t)GetProcAddress(logic, "logic_boot");
-
+  logic_oninit_data = (logic_oninit_data_t)GetProcAddress(logic, "logic_oninit_data");
+  logic_oninit_compute = (logic_oninit_compute_t)GetProcAddress(logic, "logic_oninit_compute");
+  logic_onreload = (logic_onreload_t)GetProcAddress(logic, "logic_onreload");
+  logic_onkey = (logic_onkey_t)GetProcAddress(logic, "logic_onkey");
+  logic_onfinger = (logic_onfinger_t)GetProcAddress(logic, "logic_onfinger");
+  logic_onfixedupdate = (logic_onfixedupdate_t)GetProcAddress(logic, "logic_onfixedupdate");
+  logic_onupdate = (logic_onupdate_t)GetProcAddress(logic, "logic_onupdate");
   return 1;
 }
 
 int unload_logic(void) {
-  int r = FreeLibrary(logic);
-  if (r == 0) {
+  if (FreeLibrary(logic) == 0) {
     // Retrieve the error code
     DWORD errorCode = GetLastError();
 

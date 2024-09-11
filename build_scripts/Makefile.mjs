@@ -31,25 +31,27 @@ const C_COMPILER_ARGS = [];
 C_COMPILER_ARGS.push('-m64');
 const CPP_COMPILER_ARGS = [];
 CPP_COMPILER_ARGS.push('-m64');
+const C_COMPILER_INCLUDES = [];
+const CPP_COMPILER_INCLUDES = [];
 
 if (isWin) {
-  C_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'sdl-2.26.1', 'include')}`);
-  C_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'cglm-0.9.2', 'include')}`);
-  C_COMPILER_ARGS.push(`-I${abs('C:', 'VulkanSDK', '1.3.236.0', 'Include')}`);
-  C_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'volk-1.3.270', 'include')}`);
+  C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'sdl-2.26.1', 'include')}`);
+  C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'cglm-0.9.2', 'include')}`);
+  C_COMPILER_INCLUDES.push(`-I${abs('C:', 'VulkanSDK', '1.3.236.0', 'Include')}`);
+  C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'volk-1.3.270', 'include')}`);
 }
 else if (isNix) {
-  // CPP_COMPILER_ARGS.push(`-I/${abs('usr', 'include', 'vulkan')}`);
-  // CPP_COMPILER_ARGS.push(`-I/${abs('usr', 'include', 'lua5.4')}`);
+  // CPP_COMPILER_INCLUDES.push(`-I/${abs('usr', 'include', 'vulkan')}`);
+  // CPP_COMPILER_INCLUDES.push(`-I/${abs('usr', 'include', 'lua5.4')}`);
 }
 else if (isMac) {
-  // CPP_COMPILER_ARGS.push(`-I/${abs('opt', 'homebrew', 'Cellar', 'sdl2', '2.30.0', 'include')}`);
-  // CPP_COMPILER_ARGS.push(`-I/${abs('opt', 'homebrew', 'Cellar', 'lua', '5.4.6', 'include', 'lua5.4')}`);
+  // CPP_COMPILER_INCLUDES.push(`-I/${abs('opt', 'homebrew', 'Cellar', 'sdl2', '2.30.0', 'include')}`);
+  // CPP_COMPILER_INCLUDES.push(`-I/${abs('opt', 'homebrew', 'Cellar', 'lua', '5.4.6', 'include', 'lua5.4')}`);
 }
-// CPP_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'glm-0.9.9.8')}`);
-// CPP_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'tinyobjloader', 'include')}`);
-C_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'stb-2.29', 'include')}`);
-C_COMPILER_ARGS.push(`-I${rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include')}`);
+// CPP_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'glm-0.9.9.8')}`);
+// CPP_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'tinyobjloader', 'include')}`);
+C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'stb-2.29', 'include')}`);
+C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include')}`);
 const LINKER_LIBS = [];
 if (isWin) {
   // LINKER_LIBS.push('-l', 'user32');
@@ -84,6 +86,10 @@ const COMPILER_TRANSLATION_UNITS = [
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
 ];
+// const COMPILER_TRANSLATION_UNITS_DLL = [
+//   rel(workspaceFolder, 'src', 'lib', '*.c'),
+//   rel(workspaceFolder, 'src', 'game', '*.c'),
+// ];
 const C_CONDITIONAL_COMPILER_ARGS = (src) => {
   if (src.includes('cmixer')) {
     return ['-Wno-deprecated-declarations'];
@@ -106,6 +112,7 @@ const generate_clangd_compile_commands = async () => {
         C_COMPILER_PATH,
         //...CPP_COMPILER_ARGS,
         ...C_COMPILER_ARGS,
+        ...C_COMPILER_INCLUDES,
         '-c',
         '-o', `${unit_file}.o`,
         rel(unit_file),
@@ -271,6 +278,7 @@ const compile = async (basename) => {
     await child_spawn((is_c ? C_COMPILER_PATH : CPP_COMPILER_PATH), [
       ...DEBUG_COMPILER_ARGS,
       ...(is_c ? C_COMPILER_ARGS : CPP_COMPILER_ARGS),
+      ...(is_c ? C_COMPILER_INCLUDES : CPP_COMPILER_INCLUDES),
       ...C_CONDITIONAL_COMPILER_ARGS(src),
       src,
       '-c',
@@ -294,6 +302,7 @@ const compile = async (basename) => {
       ...DEBUG_COMPILER_ARGS,
       //...CPP_COMPILER_ARGS,
       ...C_COMPILER_ARGS,
+      ...C_COMPILER_INCLUDES,
       ...LINKER_LIBS,
       ...LINKER_LIB_PATHS,
       ...dsts.filter(s => !s.includes(".pb.")),
@@ -323,7 +332,7 @@ const compile_reload = async () => {
   const dsts = [];
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
-      if (file.includes('HotReload.c')) { continue; }
+      if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
       dsts.push(rel(workspaceFolder, file));
     }
   }
@@ -338,6 +347,7 @@ const compile_reload = async () => {
   await child_spawn(C_COMPILER_PATH, [
     ...DEBUG_COMPILER_ARGS,
     ...C_COMPILER_ARGS,
+    ...C_COMPILER_INCLUDES,
     ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
     ...LINKER_LIBS,
     ...LINKER_LIB_PATHS,
@@ -348,15 +358,11 @@ const compile_reload = async () => {
 
   // swap lib
   try {
-    console.log("a");
     await fs.stat(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'));
     try {
-      console.log("b");
       await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
     } catch (e) {
-      console.log("c");
     }
-    console.log("d");
     await fs.cp(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
     console.log('recompiled.');
     return dst;

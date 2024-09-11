@@ -61,27 +61,33 @@ int File__CheckMonitor(FileMonitor_t* fm) {
 
   if (waitStatus == WAIT_OBJECT_0) {
     // Event triggered by directory change
-    FILE_NOTIFY_INFORMATION* pNotify = (FILE_NOTIFY_INFORMATION*)fm->buffer;
 
-    // Convert wide character file name to multibyte (UTF-8)
-    char changedFileName[MAX_PATH];
-    int len = WideCharToMultiByte(
-        CP_UTF8,
-        0,
-        pNotify->FileName,
-        pNotify->FileNameLength / sizeof(WCHAR),
-        changedFileName,
-        MAX_PATH,
-        NULL,
-        NULL);
-    changedFileName[len] = '\0';  // Null terminate
+    FILE_NOTIFY_INFORMATION* pNotify;
+    pNotify = (FILE_NOTIFY_INFORMATION*)fm->buffer;
 
-    LOG_DEBUGF("changedFileName %s %s", changedFileName, fm->fileName);
-    // Check if the changed file is the one we are monitoring
-    if (strcmp(changedFileName, fm->fileName) == 0) {
-      // fm->cb();
-      r = 2;
-    }
+    do {
+      // Convert wide character file name to multibyte (UTF-8)
+      char changedFileName[MAX_PATH];
+      int len = WideCharToMultiByte(
+          CP_UTF8,
+          0,
+          pNotify->FileName,
+          pNotify->FileNameLength / sizeof(WCHAR),
+          changedFileName,
+          MAX_PATH,
+          NULL,
+          NULL);
+      changedFileName[len] = '\0';  // Null terminate
+
+      // Check if the changed file is the one we are monitoring
+      if (strcmp(changedFileName, fm->fileName) == 0) {
+        // fm->cb();
+        r = 2;
+      }
+
+      pNotify = (FILE_NOTIFY_INFORMATION*)((char*)pNotify + pNotify->NextEntryOffset);
+    } while (pNotify->NextEntryOffset != 0);
+
     // Reset the event and continue monitoring
     ResetEvent(fm->hEvent);
     if (!ReadDirectoryChangesW(
