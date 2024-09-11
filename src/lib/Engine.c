@@ -13,7 +13,6 @@
 #include "Gamepad.h"
 #include "HotReload.h"
 #include "Keyboard.h"
-#include "Math.h"
 #include "SDL.h"
 #include "Timer.h"
 #include "Vulkan.h"
@@ -34,11 +33,6 @@ static int check_load_logic() {
     return r;
   }
   return 0;
-}
-
-// TODO: delete me from here in favor of dll
-static f32 PixelsToUnits(u32 pixels) {
-  return (f32)pixels / state->PIXELS_PER_UNIT;
 }
 
 int Engine__Loop() {
@@ -78,9 +72,6 @@ int Engine__Loop() {
   state->Audio__ResumeAudio = &Audio__ResumeAudio;
   state->Audio__StopAudio = &Audio__StopAudio;
 
-  logic_oninit_compute();
-  logic_onreload();
-
   Keyboard__RegisterCallback(keyboardCallback);
   state->g_Keyboard__state = &g_Keyboard__state;
   Finger__RegisterCallback(fingerCallback);
@@ -115,7 +106,7 @@ int Engine__Loop() {
   state->s_Vulkan.m_aspectRatio = state->world.aspect;
   Window__KeepAspectRatio(&state->s_Window, area.width, area.height);
 
-  // establish vulkan scene
+  // construct vulkan pipeline
   Vulkan__AssertSwapChainSupported(&state->s_Vulkan);
   Vulkan__CreateLogicalDeviceAndQueues(&state->s_Vulkan);
   Vulkan__CreateSwapChain(&state->s_Vulkan, false);
@@ -159,24 +150,8 @@ int Engine__Loop() {
   state->s_Vulkan.m_drawIndexCount = ARRAY_COUNT(state->indices);
 
   // setup scene
-  glm_vec3_copy((vec3){0, 0, 1}, state->world.cam);
-  glm_vec3_copy((vec3){0, 0, 0}, state->world.look);
-
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].rot);
-  glm_vec3_copy(
-      (vec3){PixelsToUnits(2632), PixelsToUnits(1721), 1},
-      state->instances[INSTANCE_FLOOR_0].scale);
-  state->instances[INSTANCE_FLOOR_0].texId = 0;
-  state->instanceCount = 1;
-
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].rot);
-  glm_vec3_copy(
-      (vec3){PixelsToUnits(300), PixelsToUnits(450), 1},
-      state->instances[INSTANCE_PLAYER_1].scale);
-  state->instances[INSTANCE_PLAYER_1].texId = 4;
-  state->instanceCount++;
+  logic_oninit_compute();
+  logic_onreload();
 
   // main loop
   Window__RenderLoop(

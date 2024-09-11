@@ -114,6 +114,26 @@ __declspec(dllexport) void logic_oninit_data() {
 
 __declspec(dllexport) void logic_oninit_compute() {
   state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
+
+  // setup scene
+  glm_vec3_copy((vec3){0, 0, 1}, state->world.cam);
+  glm_vec3_copy((vec3){0, 0, 0}, state->world.look);
+
+  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
+  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].rot);
+  glm_vec3_copy(
+      (vec3){PixelsToUnits(2632), PixelsToUnits(1721), 1},
+      state->instances[INSTANCE_FLOOR_0].scale);
+  state->instances[INSTANCE_FLOOR_0].texId = 0;
+  state->instanceCount = 1;
+
+  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].pos);
+  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].rot);
+  glm_vec3_copy(
+      (vec3){PixelsToUnits(300), PixelsToUnits(450), 1},
+      state->instances[INSTANCE_PLAYER_1].scale);
+  state->instances[INSTANCE_PLAYER_1].texId = 4;
+  state->instanceCount++;
 }
 
 __declspec(dllexport) void logic_onreload() {
