@@ -89,8 +89,8 @@ __declspec(dllexport) void logic_oninit_compute() {
 }
 
 __declspec(dllexport) void logic_onreload() {
-  LOG_DEBUGF("Logic dll loaded!");
-  // state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
+  LOG_DEBUGF("Logic dll loaded.");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 }
 
 __declspec(dllexport) void logic_onkey() {

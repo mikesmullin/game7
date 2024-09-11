@@ -345,6 +345,7 @@ static void physicsCallback(const f64 deltaTime) {
   accumulator1 += deltaTime;
   if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
     if (state->check_load_logic()) {
+      logic_boot(state);
       logic_onreload();
     }
 
