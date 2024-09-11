@@ -65,8 +65,8 @@ mat4 generateModelMatrix(vec3 position, vec3 rotation, vec3 scale) {
     return modelMatrix;
 }
 
-uint ATLAS_W = 2632;
-uint ATLAS_H = 1721;
+uint ATLAS_W = 100;
+uint ATLAS_H = 100;
 
 vec2 TEXTURE_WH = vec2(ATLAS_W,ATLAS_H);
 float pixelsToUnitsX(uint pixels) {
@@ -77,13 +77,13 @@ float pixelsToUnitsY(uint pixels) {
 }
 
 uint SPRITE_X = 0;
-uint SPRITE_Y = 690;
-uint SPRITE_W = 300;
-uint SPRITE_H = 450;
+uint SPRITE_Y = 0;
+uint SPRITE_W = 48;
+uint SPRITE_H = 48;
 uint SPRITE_IDX_OFFSET = 3;
 uint SPRITE_ROW_LEN = 8;
-uint WOOD_WALL_W = 350;
-uint WOOD_WALL_H = 420;
+uint WOOD_WALL_W = 48;
+uint WOOD_WALL_H = 48;
 
 void main() {
     mat4 model = generateModelMatrix(pos, rot, scale);
@@ -92,7 +92,7 @@ void main() {
     // hard-coded map of texId to uvwh coords in texture atlas
     vec4 uvwh;
     if (0 == texId) { // background 0x0 1574x684
-        uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(1574),pixelsToUnitsY(684));
+        uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(100),pixelsToUnitsY(100));
     }
     else if (1 == texId) { // wood-wall 1 1580x0 350x420
         uvwh = vec4(pixelsToUnitsX(1580),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));

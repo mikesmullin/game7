@@ -42,7 +42,7 @@ __declspec(dllexport) void logic_oninit_data() {
   state->VEC3_Y_UP[0] = 0;
   state->VEC3_Y_UP[1] = 1;
   state->VEC3_Y_UP[2] = 0;
-  state->CANVAS_WH = 800;
+  state->CANVAS_WH = 100;
   state->PIXELS_PER_UNIT = state->CANVAS_WH;
   state->instanceCount = 1;
 
@@ -114,6 +114,11 @@ __declspec(dllexport) void logic_oninit_data() {
 
 __declspec(dllexport) void logic_oninit_compute() {
   state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
+}
+
+__declspec(dllexport) void logic_onreload() {
+  // LOG_DEBUGF("Logic dll loaded.");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1}, state->world.cam);
@@ -122,7 +127,7 @@ __declspec(dllexport) void logic_oninit_compute() {
   glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
   glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].rot);
   glm_vec3_copy(
-      (vec3){PixelsToUnits(2632), PixelsToUnits(1721), 1},
+      (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},
       state->instances[INSTANCE_FLOOR_0].scale);
   state->instances[INSTANCE_FLOOR_0].texId = 0;
   state->instanceCount = 1;
@@ -130,15 +135,10 @@ __declspec(dllexport) void logic_oninit_compute() {
   glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].pos);
   glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].rot);
   glm_vec3_copy(
-      (vec3){PixelsToUnits(300), PixelsToUnits(450), 1},
+      (vec3){PixelsToUnits(48), PixelsToUnits(48), 1},
       state->instances[INSTANCE_PLAYER_1].scale);
   state->instances[INSTANCE_PLAYER_1].texId = 4;
-  state->instanceCount++;
-}
-
-__declspec(dllexport) void logic_onreload() {
-  // LOG_DEBUGF("Logic dll loaded.");
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
+  state->instanceCount = 2;
 
   state->instances[INSTANCE_PLAYER_1].pos[0] += 0.10;
   refresh = true;
@@ -237,7 +237,7 @@ __declspec(dllexport) void logic_onfinger() {
     state->isUBODirty[1] = true;
   }
 
-  else if (FINGER_DOWN == state->g_Finger__state->event) {
+  else if (false && FINGER_DOWN == state->g_Finger__state->event) {
     // TODO: how to move this into physics callback? or is it better not to?
     // TODO: animate player walk-to, before placing-down
     // TODO: convert window x,y to world x,y
