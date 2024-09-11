@@ -345,6 +345,7 @@ const compile_reload = async () => {
   const src = rel(workspaceFolder, unit);
   const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll.tmp`);
 
+  const started = performance.now();
   await child_spawn(C_COMPILER_PATH, [
     ...DEBUG_COMPILER_ARGS,
     ...C_COMPILER_ARGS,
@@ -356,6 +357,7 @@ const compile_reload = async () => {
     ...dsts.filter(s => !s.includes('.pb.')),
     '-o', dst,
   ]);
+  const ended = performance.now();
 
   // swap lib
   try {
@@ -365,7 +367,7 @@ const compile_reload = async () => {
     } catch (e) {
     }
     await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
-    console.log('recompiled.');
+    console.log(`recompiled. elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
     return dst;
   } catch (e) {
     console.log('recompilation failed.'/*, e*/);
@@ -444,25 +446,25 @@ const run = async (basename) => {
         console.log(`
 Mike's hand-rolled build system.
 
-USAGE:
-  node build_scripts\\Makefile.mjs <SUBCOMMAND>
+  USAGE:
+  node build_scripts\\Makefile.mjs < SUBCOMMAND >
 
-SUBCOMMANDS:
+    SUBCOMMANDS:
   all
-    Clean, rebuild, and launch the default app.
-  clean
+  Clean, rebuild, and launch the default app.
+    clean
     Delete all build output.
-  copy_dlls
+    copy_dlls
     Copy dynamic libraries to build directory.
-  shaders
+    shaders
     Compile SPIRV shaders with GLSLC.
-  protobuf
+    protobuf
     Compile protobuf.cc code and.bin data files.
-  compile_commands
+    compile_commands
     Generate the.json file needed for clangd for vscode extension.
-  main
+    main
     Compile and run the main app
-`);
+    `);
         break loop;
     }
   }
