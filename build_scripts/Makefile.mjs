@@ -333,7 +333,7 @@ const compile_reload = async () => {
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
-      if (!file.includes('Logic.c') && !file.includes('Log.c')) { continue; }
+      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c')) { continue; }
       dsts.push(rel(workspaceFolder, file));
     }
   }
@@ -364,11 +364,11 @@ const compile_reload = async () => {
       await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
     } catch (e) {
     }
-    await fs.cp(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
+    await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
     console.log('recompiled.');
     return dst;
   } catch (e) {
-    console.log('recompilation failed.', e);
+    console.log('recompilation failed.'/*, e*/);
   }
 };
 

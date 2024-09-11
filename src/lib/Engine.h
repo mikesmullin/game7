@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "Base.h"
+#include "Finger.h"
 #include "Keyboard.h"
 #include "Window.h"
 
@@ -118,12 +119,18 @@ typedef struct {
 
   int (*check_load_logic)();
 
+  void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
+  void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
+
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
   void (*Audio__ResumeAudio)(const int id, const bool loop, const double gain);
   void (*Audio__StopAudio)(const int id);
 
   KeyboardState_t* g_Keyboard__state;
+  FingerState_t* g_Finger__state;
+  u8 newTexId;
+
 } Engine__State_t;
 
 typedef void (*logic_boot_t)(Engine__State_t*);

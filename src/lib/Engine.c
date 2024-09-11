@@ -29,40 +29,21 @@ static void fingerCallback();
 
 static int check_load_logic() {
   if (2 == File__CheckMonitor(fm)) {
-    return load_logic();
+    int r = load_logic();
+    logic_boot(state);
+    return r;
   }
   return 0;
 }
 
+// TODO: delete me from here in favor of dll
 static f32 PixelsToUnits(u32 pixels) {
   return (f32)pixels / state->PIXELS_PER_UNIT;
-}
-
-static u8 Animate(AnimationState_t* state, f64 deltaTime) {
-  state->seek += deltaTime;
-  state->seek = Math__mod(state->seek, state->anim->duration);
-  state->frame = Math__map(state->seek, 0.0f, state->anim->duration, 0, state->anim->frameCount);
-  u8 texId = state->anim->frames[state->frame];
-  return texId;
-}
-
-static void boot_data() {
-  state->isVBODirty = true;
-  state->isUBODirty[0] = true;
-  state->isUBODirty[1] = true;
-  state->VEC3_Y_UP[0] = 0;
-  state->VEC3_Y_UP[1] = 1;
-  state->VEC3_Y_UP[2] = 0;
-  state->CANVAS_WH = 800;
-  state->PIXELS_PER_UNIT = state->CANVAS_WH;
-  state->instanceCount = 1;
 }
 
 int Engine__Loop() {
   LOG_INFOF("begin engine.");
   state->check_load_logic = &check_load_logic;
-
-  boot_data();
 
   File__StartMonitor(fm);
 
@@ -79,6 +60,9 @@ int Engine__Loop() {
   logic_oninit_data();
 
   Vulkan__InitDriver1(&state->s_Vulkan);
+
+  state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
+  state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
 
   Window__New(
       &state->s_Window,
@@ -100,6 +84,7 @@ int Engine__Loop() {
   Keyboard__RegisterCallback(keyboardCallback);
   state->g_Keyboard__state = &g_Keyboard__state;
   Finger__RegisterCallback(fingerCallback);
+  state->g_Finger__state = &g_Finger__state;
 
   Gamepad_t gamePad1;
   Gamepad__New(&gamePad1, 0);
@@ -215,149 +200,17 @@ int Engine__Loop() {
 }
 
 static void keyboardCallback() {
-  // LOG_DEBUGF(
-  //     "SDL_KEY{UP,DOWN} state "
-  //     "code %u location %u pressed %u alt %u "
-  //     "ctrl %u shift %u meta %u",
-  //     g_Keyboard__state.code,
-  //     g_Keyboard__state.location,
-  //     g_Keyboard__state.pressed,
-  //     g_Keyboard__state.altKey,
-  //     g_Keyboard__state.ctrlKey,
-  //     g_Keyboard__state.shiftKey,
-  //     g_Keyboard__state.metaKey);
-
   logic_onkey();
 }
 
 static void fingerCallback() {
-  // LOG_DEBUGF(
-  //     "SDL_FINGER state "
-  //     "event %s "
-  //     "clicks %u pressure %2.5f finger %u "
-  //     "x %u y %u x_rel %d y_rel %d wheel_x %2.5f wheel_y %2.5f "
-  //     "button_l %d button_m %d button_r %d button_x1 %d button_x2 %d ",
-  //     (g_Finger__state.event == FINGER_UP       ? "UP"
-  //      : g_Finger__state.event == FINGER_DOWN   ? "DOWN"
-  //      : g_Finger__state.event == FINGER_MOVE   ? "MOVE"
-  //      : g_Finger__state.event == FINGER_SCROLL ? "SCROLL"
-  //                                        : ""),
-  //     g_Finger__state.clicks,
-  //     g_Finger__state.pressure,
-  //     g_Finger__state.finger,
-  //     g_Finger__state.x,
-  //     g_Finger__state.y,
-  //     g_Finger__state.x_rel,
-  //     g_Finger__state.y_rel,
-  //     g_Finger__state.wheel_x,
-  //     g_Finger__state.wheel_y,
-  //     g_Finger__state.button_l,
-  //     g_Finger__state.button_m,
-  //     g_Finger__state.button_r,
-  //     g_Finger__state.button_x1,
-  //     g_Finger__state.button_x2);
-
   logic_onfinger();
-
-  if (FINGER_SCROLL == g_Finger__state.event) {
-    // TODO: how to animate camera zoom with spring damping/smoothing?
-    // TODO: how to move this into physics callback? or is it better not to?
-    state->world.cam[2] += -g_Finger__state.wheel_y * state->PLAYER_ZOOM_SPEED /* deltaTime*/;
-    state->isUBODirty[0] = true;
-    state->isUBODirty[1] = true;
-  }
-
-  else if (FINGER_DOWN == g_Finger__state.event) {
-    // TODO: how to move this into physics callback? or is it better not to?
-    // TODO: animate player walk-to, before placing-down
-    // TODO: convert window x,y to world x,y
-
-    vec3 pos = (vec3){g_Finger__state.x, g_Finger__state.y, 0.0f};
-    mat4 pvMatrix;
-    glm_mat4_mul(state->ubo1.proj, state->ubo1.view, pvMatrix);
-    vec4 viewport = (vec4){0, 0, state->s_Window.width, state->s_Window.height};
-    vec3 dest;
-    glm_unproject(pos, pvMatrix, viewport, dest);
-
-    state->instances[state->instanceCount].pos[0] = dest[0];
-    state->instances[state->instanceCount].pos[1] = dest[1];
-    state->instances[state->instanceCount].pos[2] = 0.0f;  // dest[2];
-
-    state->instances[state->instanceCount].scale[0] = PixelsToUnits(350 / 2);
-    state->instances[state->instanceCount].scale[1] = PixelsToUnits(420 / 2);
-    state->instances[state->instanceCount].scale[2] = 1.0f;
-    state->instances[state->instanceCount].texId = 2;  // wood-wall 1
-    state->instanceCount++;
-    state->isVBODirty = true;
-
-    // Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
-  }
 }
 
-static f64 accumulator1 = 0.0f;
-static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
-
 static void physicsCallback(const f64 deltaTime) {
-  // OnFixedUpdate(deltaTime);
-
-  accumulator1 += deltaTime;
-  if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
-    if (state->check_load_logic()) {
-      logic_boot(state);
-      logic_onreload();
-    }
-
-    while (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
-      accumulator1 -= FILE_CHECK_MONITOR_TIME_STEP;
-    }
-  }
-
   logic_onfixedupdate(deltaTime);
 }
 
-static u8 newTexId;
 static void renderCallback(const f64 deltaTime) {
-  // OnUpdate(deltaTime);
-
   logic_onupdate(deltaTime);
-
-  // character frame animation
-  newTexId = Animate(&state->playerAnimationState, 0 /*deltaTime*/);
-  if (state->instances[1].texId != newTexId) {
-    state->instances[1].texId = newTexId;
-    state->isVBODirty = true;
-  }
-
-  if (state->isVBODirty) {
-    state->isVBODirty = false;
-
-    state->s_Vulkan.m_instanceCount = state->instanceCount;
-    Vulkan__UpdateVertexBuffer(&state->s_Vulkan, 1, sizeof(state->instances), state->instances);
-  }
-
-  if (state->isUBODirty[state->s_Vulkan.m_currentFrame]) {
-    state->isUBODirty[state->s_Vulkan.m_currentFrame] = false;
-
-    glm_lookat(
-        state->world.cam,
-        state->world.look,
-        state->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
-        state->ubo1.view);
-
-    state->s_Vulkan.m_aspectRatio = state->world.aspect;  // sync viewport
-
-    glm_perspective(
-        glm_rad(45.0f),  // half the actual 90deg fov
-        state->world.aspect,
-        0.1f,  // TODO: adjust clipping range for z depth?
-        10.0f,
-        state->ubo1.proj);
-
-    // glm_ortho(-0.5f, +0.5f, -0.5f, +0.5f, 0.1f, 10.0f, ubo1.proj);
-    glm_vec2_copy(state->world.user1, state->ubo1.user1);
-    glm_vec2_copy(state->world.user2, state->ubo1.user2);
-
-    // TODO: not sure i make use of one UBO per frame, really
-    Vulkan__UpdateUniformBuffer(&state->s_Vulkan, state->s_Vulkan.m_currentFrame, &state->ubo1);
-  }
 }

@@ -1,9 +1,6 @@
 #ifndef FINGER_H
 #define FINGER_H
 
-#define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
-
 #include "Base.h"
 
 typedef enum {
@@ -34,7 +31,7 @@ typedef struct {
 
 extern FingerState_t g_Finger__state;
 
-void Finger__OnInput(const SDL_Event* event);
+void Finger__OnInput(const void* _event);
 void Finger__RegisterCallback(void(*cb));
 void Finger__DispatchCallbacks();
 

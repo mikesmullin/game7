@@ -1,5 +1,8 @@
 #include "Finger.h"
 
+#define SDL_MAIN_HANDLED
+#include <SDL2/SDL.h>
+
 FingerState_t g_Finger__state = {};
 
 #define FINGER_CALLBACKS_CAP 10
@@ -18,7 +21,8 @@ void Finger__DispatchCallbacks() {
   }
 }
 
-void Finger__OnInput(const SDL_Event* event) {
+void Finger__OnInput(const void* _event) {
+  const SDL_Event* event = _event;
   g_Finger__state.event = FINGER_NONE;
   g_Finger__state.clicks = 0;
   g_Finger__state.pressure = 0.0f;
