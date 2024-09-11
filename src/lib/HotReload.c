@@ -2,13 +2,11 @@
 
 #include <stdio.h>
 
+#define LOGIC_FILENAME "src\\game\\Logic.c.dll"
+
 static void* logic = NULL;
 
-logic_init_t logic_init;
-logic_init2_t logic_init2;
-logic_init3_t logic_init3;
-logic_update_t logic_update;
-logic_draw_t logic_draw;
+logic_boot_t logic_boot;
 
 #if OS_NIX == 1
 #include <dlfcn.h>
@@ -35,10 +33,7 @@ int load_logic(void) {
     return 1;
   }
 
-  LOAD_SYMBOL(logic_init);
-  LOAD_SYMBOL(logic_init2);
-  LOAD_SYMBOL(logic_update);
-  LOAD_SYMBOL(logic_draw);
+  LOAD_SYMBOL(logic_boot);
 
   return 0;
 }
@@ -59,7 +54,7 @@ int unload_logic(void) {
 int load_logic(void) {
   if (logic != NULL) {
     if (unload_logic()) {
-      return 1;
+      return 0;
     }
   }
 
@@ -88,16 +83,12 @@ int load_logic(void) {
     // Free the buffer allocated by FormatMessage
     LocalFree(errorMessage);
 
-    return 1;
+    return 0;
   }
 
-  logic_init = (void (*)())GetProcAddress(logic, "logic_init");
-  logic_init2 = (void (*)())GetProcAddress(logic, "logic_init2");
-  logic_init3 = (void (*)())GetProcAddress(logic, "logic_init3");
-  logic_update = (void (*)())GetProcAddress(logic, "logic_update");
-  logic_draw = (void (*)())GetProcAddress(logic, "logic_draw");
+  logic_boot = (logic_boot_t)GetProcAddress(logic, "logic_boot");
 
-  return 0;
+  return 1;
 }
 
 int unload_logic(void) {
@@ -126,12 +117,12 @@ int unload_logic(void) {
     // Free the buffer allocated by FormatMessage
     LocalFree(errorMessage);
 
-    return 1;
+    return 0;
   }
 
   logic = NULL;
 
-  return 0;
+  return 1;
 }
 
 // #endif

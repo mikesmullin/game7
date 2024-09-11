@@ -80,12 +80,9 @@ else if (isMac) {
 const COMPILER_TRANSLATION_UNITS = [
   rel(workspaceFolder, 'src', 'components', '*.c'),
   rel(workspaceFolder, 'src', 'lib', '*.c'),
-  // rel(workspaceFolder, 'src', 'game', '*.c'),
+  rel(workspaceFolder, 'src', 'game', '*.c'),
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
-];
-const COMPILER_TRANSLATION_UNITS_RELOAD = [
-  rel(workspaceFolder, 'src', 'game', '*.c'),
 ];
 const C_CONDITIONAL_COMPILER_ARGS = (src) => {
   if (src.includes('cmixer')) {
@@ -95,10 +92,10 @@ const C_CONDITIONAL_COMPILER_ARGS = (src) => {
 };
 
 const generate_clangd_compile_commands = async () => {
-  console.log("scanning directory...");
+  console.log('scanning directory...');
   const unit_files = await glob('{src,tests}/**/*.c');
 
-  console.debug("unit_files: ", unit_files);
+  console.debug('unit_files: ', unit_files);
 
   const compile_commands = [];
 
@@ -109,8 +106,8 @@ const generate_clangd_compile_commands = async () => {
         C_COMPILER_PATH,
         //...CPP_COMPILER_ARGS,
         ...C_COMPILER_ARGS,
-        "-c",
-        "-o", `${unit_file}.o`,
+        '-c',
+        '-o', `${unit_file}.o`,
         rel(unit_file),
       ],
       file: rel(workspaceFolder, unit_file),
@@ -120,7 +117,7 @@ const generate_clangd_compile_commands = async () => {
   console.log(`writing ${OUT_FILE}...`)
   await fs.writeFile(OUT_FILE, JSON.stringify(compile_commands, null, 2));
 
-  console.log("done making.");
+  console.log('done making.');
 };
 
 const child_spawn = async (cmd, args = [], opts = {}) => {
@@ -243,6 +240,7 @@ const compile = async (basename) => {
   const dsts = [`${main}.o`];
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
+      if (file.includes('Logic.c')) { continue; }
       unit_files.push(file);
       dsts.push(rel(workspaceFolder, BUILD_PATH, `${file}.o`));
     }
@@ -322,73 +320,48 @@ const compile_reload = async () => {
 
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
 
-  // compile translation units in parallel (N-at-once)
-  const unit_files = [];
   const dsts = [];
-  for (const u of COMPILER_TRANSLATION_UNITS_RELOAD) {
+  for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
-      unit_files.push(file);
-      // dsts.push(rel(workspaceFolder, BUILD_PATH, file));
+      if (file.includes('HotReload.c')) { continue; }
+      dsts.push(rel(workspaceFolder, file));
     }
   }
-  dsts.push(rel(workspaceFolder, BUILD_PATH, "..\\src\\lib\\Log.c"));
-  const compileTranslationUnit = async (unit) => {
-    const dir = path.relative(process.cwd(), absBuild(path.dirname(unit)));
-    await fs.mkdir(dir, { recursive: true });
 
-    const src = rel(workspaceFolder, unit);
-    const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll.tmp`);
+  const unit = 'src/game/Logic.c';
+  const dir = path.relative(process.cwd(), absBuild(path.dirname(unit)));
+  await fs.mkdir(dir, { recursive: true });
 
-    let dstExists = false;
+  const src = rel(workspaceFolder, unit);
+  const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll.tmp`);
+
+  await child_spawn(C_COMPILER_PATH, [
+    ...DEBUG_COMPILER_ARGS,
+    ...C_COMPILER_ARGS,
+    ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
+    ...LINKER_LIBS,
+    ...LINKER_LIB_PATHS,
+    '-shared',
+    ...dsts.filter(s => !s.includes('.pb.')),
+    '-o', dst,
+  ]);
+
+  // swap lib
+  try {
+    console.log("a");
+    await fs.stat(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'));
     try {
-      await fs.access(path.join(BUILD_PATH, dst), fs.constants.F_OK);
-      dstExists = true;
-    }
-    catch (e) {
-    }
-    if (dstExists) {
-      const srcStat = await fs.stat(path.join(BUILD_PATH, src));
-      const dstStat = await fs.stat(path.join(BUILD_PATH, dst));
-      if (srcStat.mtime < dstStat.mtime) {
-        return;
-      }
-    }
-
-    const is_c = RX_C.test(src);
-    await child_spawn((is_c ? C_COMPILER_PATH : CPP_COMPILER_PATH), [
-      ...DEBUG_COMPILER_ARGS,
-      ...(is_c ? C_COMPILER_ARGS : CPP_COMPILER_ARGS),
-      ...C_CONDITIONAL_COMPILER_ARGS(src),
-      "-shared",
-      src,
-      ...dsts.filter(s => !s.includes(".pb.")),
-      // '-c',
-      '-o', dst,
-    ]);
-
-    // swap lib
-    // const gameFiles = await glob(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', '*.@(dll|exp|ilk|lib|pdb)').replace(/\\/g, '/'));
-    // for (const gameFile of gameFiles) {
-    //   await fs.rename(gameFile, path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
-    //   //await fs.rm(gameFile, { force: true });
-    // }
-    try {
-      await fs.stat(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'));
-      try {
-        await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
-      } catch (e) { }
-      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
-      console.log("recompiled.");
-      return dst;
+      console.log("b");
+      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
     } catch (e) {
-      console.log("recompilation failed.");
+      console.log("c");
     }
-  };
-  const objs = [];
-  for await (const obj of promiseBatch(CONCURRENCY, unit_files, compileTranslationUnit)) {
-    if (obj) {
-      objs.push(obj);
-    }
+    console.log("d");
+    await fs.cp(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
+    console.log('recompiled.');
+    return dst;
+  } catch (e) {
+    console.log('recompilation failed.', e);
   }
 };
 

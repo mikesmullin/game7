@@ -3,13 +3,7 @@
 
 #include "../game/Logic.h"
 
-#define LOGIC_FILENAME "src\\game\\Logic.c.dll"
-
-extern logic_init_t logic_init;
-extern logic_init2_t logic_init2;
-extern logic_init3_t logic_init3;
-extern logic_update_t logic_update;
-extern logic_draw_t logic_draw;
+extern logic_boot_t logic_boot;
 
 int load_logic(void);
 int unload_logic(void);

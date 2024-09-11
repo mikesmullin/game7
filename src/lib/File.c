@@ -76,6 +76,7 @@ int File__CheckMonitor(FileMonitor_t* fm) {
         NULL);
     changedFileName[len] = '\0';  // Null terminate
 
+    LOG_DEBUGF("changedFileName %s %s", changedFileName, fm->fileName);
     // Check if the changed file is the one we are monitoring
     if (strcmp(changedFileName, fm->fileName) == 0) {
       // fm->cb();
@@ -88,7 +89,7 @@ int File__CheckMonitor(FileMonitor_t* fm) {
             fm->buffer,
             sizeof(fm->buffer),
             FALSE,
-            FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE,
+            FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_LAST_WRITE | FILE_NOTIFY_CHANGE_SIZE,
             &fm->bytesReturned,
             &fm->overlapped,
             NULL)) {
