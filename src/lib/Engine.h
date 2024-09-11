@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "Base.h"
+#include "Keyboard.h"
 #include "Window.h"
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit
@@ -121,6 +122,8 @@ typedef struct {
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
   void (*Audio__ResumeAudio)(const int id, const bool loop, const double gain);
   void (*Audio__StopAudio)(const int id);
+
+  KeyboardState_t* g_Keyboard__state;
 } Engine__State_t;
 
 typedef void (*logic_boot_t)(Engine__State_t*);
@@ -129,8 +132,8 @@ typedef void (*logic_oninit_compute_t)();
 typedef void (*logic_onreload_t)();
 typedef void (*logic_onkey_t)();
 typedef void (*logic_onfinger_t)();
-typedef void (*logic_onfixedupdate_t)();
-typedef void (*logic_onupdate_t)();
+typedef void (*logic_onfixedupdate_t)(const f64 deltaTime);
+typedef void (*logic_onupdate_t)(const f64 deltaTime);
 
 int Engine__Loop();
 

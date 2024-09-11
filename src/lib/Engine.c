@@ -98,6 +98,7 @@ int Engine__Loop() {
   logic_onreload();
 
   Keyboard__RegisterCallback(keyboardCallback);
+  state->g_Keyboard__state = &g_Keyboard__state;
   Finger__RegisterCallback(fingerCallback);
 
   Gamepad_t gamePad1;
@@ -227,49 +228,6 @@ static void keyboardCallback() {
   //     g_Keyboard__state.metaKey);
 
   logic_onkey();
-
-  if (41 == g_Keyboard__state.code) {  // ESC
-    state->s_Window.quit = true;
-  }
-
-  // character locomotion controls
-  if (119 == g_Keyboard__state.location) {  // W
-    state->playerAnimationState.facing = BACK;
-    state->playerAnimationState.state = g_Keyboard__state.pressed ? WALK : IDLE;
-    // state->playerAnimationState.anim = &ANIM_VIKING_WALK_BACK;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
-  } else if (97 == g_Keyboard__state.location) {  // A
-    state->playerAnimationState.facing = LEFT;
-    state->playerAnimationState.state = g_Keyboard__state.pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
-    // instances[INSTANCE_PLAYER_1].scale[0] = +instances[INSTANCE_PLAYER_1].scale[0];
-  } else if (115 == g_Keyboard__state.location) {  // S
-    state->playerAnimationState.facing = FRONT;
-    state->playerAnimationState.state = g_Keyboard__state.pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
-  } else if (100 == g_Keyboard__state.location) {  // D
-    state->playerAnimationState.facing = RIGHT;
-    state->playerAnimationState.state = g_Keyboard__state.pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
-    // instances[INSTANCE_PLAYER_1].scale[0] = -instances[INSTANCE_PLAYER_1].scale[0];
-  }
-  if (WALK == state->playerAnimationState.state) {
-    // Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
-  } else if (IDLE == state->playerAnimationState.state) {
-    // Audio__StopAudio(AUDIO_PICKUP_COIN);
-
-    if (BACK == state->playerAnimationState.facing) {
-      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_BACK;
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
-    } else if (LEFT == state->playerAnimationState.facing) {
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
-    } else if (FRONT == state->playerAnimationState.facing) {
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
-    } else if (RIGHT == state->playerAnimationState.facing) {
-      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_RIGHT;
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
-    }
-  }
 }
 
 static void fingerCallback() {
@@ -354,37 +312,17 @@ static void physicsCallback(const f64 deltaTime) {
     }
   }
 
-  logic_onfixedupdate();
-
-  if (WALK == state->playerAnimationState.state) {
-    if (LEFT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[0] -= state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (RIGHT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[0] += state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (BACK == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[1] -= state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (FRONT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[1] += state->PLAYER_WALK_SPEED * deltaTime;
-    }
-    state->isVBODirty = true;
-
-    state->world.cam[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
-    state->world.cam[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
-    state->world.look[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
-    state->world.look[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
-    state->isUBODirty[0] = true;
-    state->isUBODirty[1] = true;
-  }
+  logic_onfixedupdate(deltaTime);
 }
 
 static u8 newTexId;
 static void renderCallback(const f64 deltaTime) {
   // OnUpdate(deltaTime);
 
-  logic_onupdate();
+  logic_onupdate(deltaTime);
 
   // character frame animation
-  newTexId = Animate(&state->playerAnimationState, deltaTime);
+  newTexId = Animate(&state->playerAnimationState, 0 /*deltaTime*/);
   if (state->instances[1].texId != newTexId) {
     state->instances[1].texId = newTexId;
     state->isVBODirty = true;

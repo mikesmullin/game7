@@ -2,6 +2,8 @@
 
 static Engine__State_t* state;
 
+static bool refresh = false;
+
 // on process start
 __declspec(dllexport) void logic_boot(Engine__State_t* _state) {
   state = _state;
@@ -89,12 +91,58 @@ __declspec(dllexport) void logic_oninit_compute() {
 }
 
 __declspec(dllexport) void logic_onreload() {
-  LOG_DEBUGF("Logic dll loaded.");
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  // LOG_DEBUGF("Logic dll loaded.");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
+
+  state->instances[INSTANCE_PLAYER_1].pos[0] += 0.10;
+  refresh = true;
 }
 
 __declspec(dllexport) void logic_onkey() {
   // LOG_DEBUGF("Logic dll onkey.");
+
+  if (41 == state->g_Keyboard__state->code) {  // ESC
+    state->s_Window.quit = true;
+  }
+
+  // character locomotion controls
+  if (119 == state->g_Keyboard__state->location) {  // W
+    state->playerAnimationState.facing = BACK;
+    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
+    // state->playerAnimationState.anim = &ANIM_VIKING_WALK_BACK;
+    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
+  } else if (97 == state->g_Keyboard__state->location) {  // A
+    state->playerAnimationState.facing = LEFT;
+    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
+    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
+    // instances[INSTANCE_PLAYER_1].scale[0] = +instances[INSTANCE_PLAYER_1].scale[0];
+  } else if (115 == state->g_Keyboard__state->location) {  // S
+    state->playerAnimationState.facing = FRONT;
+    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
+    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
+  } else if (100 == state->g_Keyboard__state->location) {  // D
+    state->playerAnimationState.facing = RIGHT;
+    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
+    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
+    // instances[INSTANCE_PLAYER_1].scale[0] = -instances[INSTANCE_PLAYER_1].scale[0];
+  }
+  if (WALK == state->playerAnimationState.state) {
+    // Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
+  } else if (IDLE == state->playerAnimationState.state) {
+    // Audio__StopAudio(AUDIO_PICKUP_COIN);
+
+    if (BACK == state->playerAnimationState.facing) {
+      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_BACK;
+      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
+    } else if (LEFT == state->playerAnimationState.facing) {
+      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
+    } else if (FRONT == state->playerAnimationState.facing) {
+      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
+    } else if (RIGHT == state->playerAnimationState.facing) {
+      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_RIGHT;
+      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
+    }
+  }
 }
 
 __declspec(dllexport) void logic_onfinger() {
@@ -102,11 +150,32 @@ __declspec(dllexport) void logic_onfinger() {
 }
 
 // on physics
-__declspec(dllexport) void logic_onfixedupdate() {
+__declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
+
+  if (refresh || WALK == state->playerAnimationState.state) {
+    refresh = false;
+    if (LEFT == state->playerAnimationState.facing) {
+      state->instances[INSTANCE_PLAYER_1].pos[0] -= state->PLAYER_WALK_SPEED * deltaTime;
+    } else if (RIGHT == state->playerAnimationState.facing) {
+      state->instances[INSTANCE_PLAYER_1].pos[0] += state->PLAYER_WALK_SPEED * deltaTime;
+    } else if (BACK == state->playerAnimationState.facing) {
+      state->instances[INSTANCE_PLAYER_1].pos[1] -= state->PLAYER_WALK_SPEED * deltaTime;
+    } else if (FRONT == state->playerAnimationState.facing) {
+      state->instances[INSTANCE_PLAYER_1].pos[1] += state->PLAYER_WALK_SPEED * deltaTime;
+    }
+    state->isVBODirty = true;
+
+    state->world.cam[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
+    state->world.cam[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
+    state->world.look[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
+    state->world.look[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
+    state->isUBODirty[0] = true;
+    state->isUBODirty[1] = true;
+  }
 }
 
 // on draw
-__declspec(dllexport) void logic_onupdate() {
+__declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
 }
