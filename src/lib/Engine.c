@@ -57,6 +57,7 @@ int Engine__Loop() {
 
   state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
   state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
+  state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
 
   Window__New(
       &state->s_Window,
@@ -84,6 +85,7 @@ int Engine__Loop() {
 
   Window__Begin(&state->s_Window);
 
+  // vulkan resource setup
   Vulkan__AssertDriverValidationLayersSupported(&state->s_Vulkan);
 
 #if OS_MAC == 1
@@ -106,7 +108,7 @@ int Engine__Loop() {
   state->s_Vulkan.m_aspectRatio = state->world.aspect;
   Window__KeepAspectRatio(&state->s_Window, area.width, area.height);
 
-  // construct vulkan pipeline
+  // vulkan pipeline setup
   Vulkan__AssertSwapChainSupported(&state->s_Vulkan);
   Vulkan__CreateLogicalDeviceAndQueues(&state->s_Vulkan);
   Vulkan__CreateSwapChain(&state->s_Vulkan, false);

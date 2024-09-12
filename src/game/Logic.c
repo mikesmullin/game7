@@ -75,8 +75,11 @@ __declspec(dllexport) void logic_oninit_compute() {
 }
 
 __declspec(dllexport) void logic_onreload() {
-  // LOG_DEBUGF("Logic dll loaded.");
+  LOG_DEBUGF("Logic dll loaded.");
   state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
+
+  // update rgba image texture
+  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, state->textureFiles[0]);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);

@@ -118,6 +118,7 @@ typedef struct {
 
   int (*check_load_logic)();
 
+  void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const char* file);
   void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
 

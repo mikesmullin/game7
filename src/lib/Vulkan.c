@@ -1307,6 +1307,69 @@ void Vulkan__CreateTextureImage(Vulkan_t* self, const char* file) {
   vkFreeMemory(self->m_logicalDevice, stagingBufferMemory, NULL);
 }
 
+void Vulkan__UpdateTextureImage(Vulkan_t* self, const char* file) {
+  // TODO: accept rgba array, instead of reading from disk always
+  int texWidth, texHeight, texChannels;
+  stbi_uc* pixels = stbi_load(file, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+  VkDeviceSize imageSize = texWidth * texHeight * 4;
+
+  ASSERT_CONTEXT(pixels, "failed to load texture image!")
+
+  VkBuffer stagingBuffer;
+  VkDeviceMemory stagingBufferMemory;
+  Vulkan__CreateBuffer(
+      self,
+      imageSize,
+      VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+      &stagingBuffer,
+      &stagingBufferMemory);
+
+  void* data;
+  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
+  memcpy(data, pixels, (size_t)(imageSize));
+  vkUnmapMemory(self->m_logicalDevice, stagingBufferMemory);
+
+  stbi_image_free(pixels);
+
+  // TODO: support image source resize?
+  // vkDestroyImage(self->m_logicalDevice, self->m_textureImage, NULL);
+  // vkFreeMemory(self->m_logicalDevice, self->m_textureImageMemory, NULL);
+
+  // // Vulkan__CreateImage(
+  // //     self,
+  // //     texWidth,
+  // //     texHeight,
+  // //     VK_FORMAT_R8G8B8A8_SRGB,
+  // //     VK_IMAGE_TILING_OPTIMAL,
+  // //     VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+  // //     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+  // //     &self->m_textureImage,
+  // //     &self->m_textureImageMemory);
+
+  Vulkan__TransitionImageLayout(
+      self,
+      &self->m_textureImage,
+      VK_FORMAT_R8G8B8A8_SRGB,
+      VK_IMAGE_LAYOUT_UNDEFINED,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  Vulkan__CopyBufferToImage(
+      self,
+      &stagingBuffer,
+      &self->m_textureImage,
+      (u32)(texWidth),
+      (u32)(texHeight));
+  Vulkan__TransitionImageLayout(
+      self,
+      &self->m_textureImage,
+      VK_FORMAT_R8G8B8A8_SRGB,
+      VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+      VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+  vkDestroyBuffer(self->m_logicalDevice, stagingBuffer, NULL);
+  vkFreeMemory(self->m_logicalDevice, stagingBufferMemory, NULL);
+}
+
 void Vulkan__CreateImageView(
     Vulkan_t* self, VkImage* image, VkFormat format, VkImageView* imageView) {
   VkImageViewCreateInfo viewInfo;
