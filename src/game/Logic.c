@@ -178,6 +178,9 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
   // state->isUBODirty[1] = true;
 }
 
+static Vulkan__FImage_t fhandle;
+static u8 rgbabuf[40000];
+
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
@@ -221,4 +224,39 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
         state->s_Vulkan.m_currentFrame,
         &state->ubo1);
   }
+
+  // spam RGBA pixel updates to texture buffer
+  fhandle.texWidth = 100;
+  fhandle.texHeight = 100;
+  fhandle.imageSize = 100 * 100 * 4;  // RGBA
+  fhandle.pixels = rgbabuf;
+  for (u64 i = 0; i < fhandle.imageSize; i += 4) {
+    // colorful static
+    // rgbabuf[i] = (u8)Math__urandom(0, 255);
+    // rgbabuf[i + 1] = (u8)Math__urandom(0, 255);
+    // rgbabuf[i + 2] = (u8)Math__urandom(0, 255);
+    // rgbabuf[i + 3] = 255;
+
+    // grayscale static
+    rgbabuf[i] = (u8)Math__urandom(0, 255);
+    rgbabuf[i + 1] = rgbabuf[i];
+    rgbabuf[i + 2] = rgbabuf[i];
+    rgbabuf[i + 3] = 255;
+
+    // solid random
+    // rgbabuf[i] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[0]);
+    // rgbabuf[i + 1] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[1]);
+    // rgbabuf[i + 2] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[2]);
+    // rgbabuf[i + 3] = 255;
+
+    // solid white
+    // rgbabuf[i] = 255;
+
+    // white flashing
+    // rgbabuf[i] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[0]);
+    // rgbabuf[i + 1] = rgbabuf[i];
+    // rgbabuf[i + 2] = rgbabuf[i];
+    // rgbabuf[i + 3] = 255;
+  }
+  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
 }

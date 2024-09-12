@@ -13,3 +13,15 @@ f64 Math__mod(f64 a, f64 b) {
   }
   return a;
 }
+
+f32 Math__random(f32 a, f32 b) {
+  return a + (((f32)rand()) / (f32)RAND_MAX) * (b - a);
+}
+
+s32 Math__srandom(s32 a, s32 b) {
+  return a + (((s32)rand()) / (s32)RAND_MAX) * (b - a);
+}
+
+u32 Math__urandom(u32 a, u32 b) {
+  return a + ((rand() / (f32)RAND_MAX) * (b - a));
+}
