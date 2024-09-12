@@ -40,7 +40,6 @@ typedef struct {
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
-  INSTANCE_PLAYER_1 = 1,
 };
 
 enum AUDIO_FILES {

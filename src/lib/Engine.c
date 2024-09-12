@@ -102,7 +102,7 @@ int Engine__Loop() {
 
   DrawableArea_t area = {0, 0};
   Window__GetDrawableAreaExtentBounds(&state->s_Window, &area);
-  state->world.aspect = ASPECT_WIDESCEEN_16_9;
+  state->world.aspect = ASPECT_SQUARE_1_1;
   state->s_Vulkan.m_aspectRatio = state->world.aspect;
   Window__KeepAspectRatio(&state->s_Window, area.width, area.height);
 

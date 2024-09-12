@@ -4,8 +4,6 @@
 
 static Engine__State_t* state;
 
-static bool refresh = false;
-
 static f32 PixelsToUnits(u32 pixels) {
   return (f32)pixels / state->PIXELS_PER_UNIT;
 }
@@ -69,46 +67,6 @@ __declspec(dllexport) void logic_oninit_data() {
 
   state->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
-  state->ANIM_VIKING_IDLE_FRONT.duration = 3.0f;
-  state->ANIM_VIKING_IDLE_FRONT.frameCount = 2;
-  state->ANIM_VIKING_IDLE_FRONT.frames[0] = 3;
-  state->ANIM_VIKING_IDLE_FRONT.frames[1] = 4;
-
-  state->ANIM_VIKING_IDLE_LEFT.duration = 1.0f;
-  state->ANIM_VIKING_IDLE_LEFT.frameCount = 1;
-  state->ANIM_VIKING_IDLE_LEFT.frames[0] = 5;
-
-  state->ANIM_VIKING_WALK_LEFT.duration = (1.0f / 3.75) * 7;
-  state->ANIM_VIKING_WALK_LEFT.frameCount = 7;
-  // state->ANIM_VIKING_WALK_LEFT.frames = {6, 7, 8, 9, 10, 9, 8, 7};
-  state->ANIM_VIKING_WALK_LEFT.frames[0] = 6;
-  state->ANIM_VIKING_WALK_LEFT.frames[1] = 7;
-  state->ANIM_VIKING_WALK_LEFT.frames[2] = 8;
-  state->ANIM_VIKING_WALK_LEFT.frames[3] = 9;
-  state->ANIM_VIKING_WALK_LEFT.frames[4] = 8;
-  state->ANIM_VIKING_WALK_LEFT.frames[5] = 7;
-  state->ANIM_VIKING_WALK_LEFT.frames[6] = 10;
-
-  state->ANIM_VIKING_WALK_FRONT = (Animation_t){
-      .duration = (1.0f / 3.75) * 8,
-      .frameCount = 8,
-      .frames = {11, 12, 13, 14, 15, 14, 13, 12}};
-
-  state->playerAnimationState.facing = FRONT;
-  state->playerAnimationState.state = IDLE;
-  state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
-
-  // state->playerAnimationState.facing = LEFT;
-  // state->playerAnimationState.state = WALK;
-  // state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
-
-  // state->playerAnimationState.facing = FRONT;
-  // state->playerAnimationState.state = WALK;
-  // state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
-
-  state->playerAnimationState.frame = 0;
-  state->playerAnimationState.seek = 0.0f;
-
   state->newTexId = 0;
 }
 
@@ -121,7 +79,7 @@ __declspec(dllexport) void logic_onreload() {
   state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
 
   // setup scene
-  glm_vec3_copy((vec3){0, 0, 1}, state->world.cam);
+  glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
   glm_vec3_copy((vec3){0, 0, 0}, state->world.look);
 
   glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
@@ -132,16 +90,8 @@ __declspec(dllexport) void logic_onreload() {
   state->instances[INSTANCE_FLOOR_0].texId = 0;
   state->instanceCount = 1;
 
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_PLAYER_1].rot);
-  glm_vec3_copy(
-      (vec3){PixelsToUnits(48), PixelsToUnits(48), 1},
-      state->instances[INSTANCE_PLAYER_1].scale);
-  state->instances[INSTANCE_PLAYER_1].texId = 4;
-  state->instanceCount = 2;
-
-  state->instances[INSTANCE_PLAYER_1].pos[0] += 0.10;
-  refresh = true;
+  state->isUBODirty[0] = true;
+  state->isUBODirty[1] = true;
 }
 
 __declspec(dllexport) void logic_onkey() {
@@ -159,45 +109,6 @@ __declspec(dllexport) void logic_onkey() {
 
   if (41 == state->g_Keyboard__state->code) {  // ESC
     state->s_Window.quit = true;
-  }
-
-  // character locomotion controls
-  if (119 == state->g_Keyboard__state->location) {  // W
-    state->playerAnimationState.facing = BACK;
-    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
-    // state->playerAnimationState.anim = &ANIM_VIKING_WALK_BACK;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
-  } else if (97 == state->g_Keyboard__state->location) {  // A
-    state->playerAnimationState.facing = LEFT;
-    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
-    // instances[INSTANCE_PLAYER_1].scale[0] = +instances[INSTANCE_PLAYER_1].scale[0];
-  } else if (115 == state->g_Keyboard__state->location) {  // S
-    state->playerAnimationState.facing = FRONT;
-    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_FRONT;
-  } else if (100 == state->g_Keyboard__state->location) {  // D
-    state->playerAnimationState.facing = RIGHT;
-    state->playerAnimationState.state = state->g_Keyboard__state->pressed ? WALK : IDLE;
-    state->playerAnimationState.anim = &state->ANIM_VIKING_WALK_LEFT;
-    // instances[INSTANCE_PLAYER_1].scale[0] = -instances[INSTANCE_PLAYER_1].scale[0];
-  }
-  if (WALK == state->playerAnimationState.state) {
-    // Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 10.0f);
-  } else if (IDLE == state->playerAnimationState.state) {
-    // Audio__StopAudio(AUDIO_PICKUP_COIN);
-
-    if (BACK == state->playerAnimationState.facing) {
-      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_BACK;
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
-    } else if (LEFT == state->playerAnimationState.facing) {
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
-    } else if (FRONT == state->playerAnimationState.facing) {
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_FRONT;
-    } else if (RIGHT == state->playerAnimationState.facing) {
-      // state->playerAnimationState.anim = &ANIM_VIKING_IDLE_RIGHT;
-      state->playerAnimationState.anim = &state->ANIM_VIKING_IDLE_LEFT;
-    }
   }
 }
 
@@ -236,32 +147,6 @@ __declspec(dllexport) void logic_onfinger() {
     state->isUBODirty[0] = true;
     state->isUBODirty[1] = true;
   }
-
-  else if (false && FINGER_DOWN == state->g_Finger__state->event) {
-    // TODO: how to move this into physics callback? or is it better not to?
-    // TODO: animate player walk-to, before placing-down
-    // TODO: convert window x,y to world x,y
-
-    vec3 pos = (vec3){state->g_Finger__state->x, state->g_Finger__state->y, 0.0f};
-    mat4 pvMatrix;
-    glm_mat4_mul(state->ubo1.proj, state->ubo1.view, pvMatrix);
-    vec4 viewport = (vec4){0, 0, state->s_Window.width, state->s_Window.height};
-    vec3 dest;
-    glm_unproject(pos, pvMatrix, viewport, dest);
-
-    state->instances[state->instanceCount].pos[0] = dest[0];
-    state->instances[state->instanceCount].pos[1] = dest[1];
-    state->instances[state->instanceCount].pos[2] = 0.0f;  // dest[2];
-
-    state->instances[state->instanceCount].scale[0] = PixelsToUnits(350 / 2);
-    state->instances[state->instanceCount].scale[1] = PixelsToUnits(420 / 2);
-    state->instances[state->instanceCount].scale[2] = 1.0f;
-    state->instances[state->instanceCount].texId = 2;  // wood-wall 1
-    state->instanceCount++;
-    state->isVBODirty = true;
-
-    // Audio__PlayAudio(AUDIO_PICKUP_COIN, false, 1.0f);
-  }
 }
 
 static f64 accumulator1 = 0.0f;
@@ -282,38 +167,14 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
     }
   }
 
-  if (refresh || WALK == state->playerAnimationState.state) {
-    refresh = false;
-    if (LEFT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[0] -= state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (RIGHT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[0] += state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (BACK == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[1] -= state->PLAYER_WALK_SPEED * deltaTime;
-    } else if (FRONT == state->playerAnimationState.facing) {
-      state->instances[INSTANCE_PLAYER_1].pos[1] += state->PLAYER_WALK_SPEED * deltaTime;
-    }
-    state->isVBODirty = true;
-
-    state->world.cam[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
-    state->world.cam[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
-    state->world.look[0] = state->instances[INSTANCE_PLAYER_1].pos[0];
-    state->world.look[1] = state->instances[INSTANCE_PLAYER_1].pos[1];
-    state->isUBODirty[0] = true;
-    state->isUBODirty[1] = true;
-  }
+  // state->isVBODirty = true;
+  // state->isUBODirty[0] = true;
+  // state->isUBODirty[1] = true;
 }
 
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
-
-  // character frame animation
-  state->newTexId = Animate(&state->playerAnimationState, 0 /*deltaTime*/);
-  if (state->instances[1].texId != state->newTexId) {
-    state->instances[1].texId = state->newTexId;
-    state->isVBODirty = true;
-  }
 
   if (state->isVBODirty) {
     state->isVBODirty = false;
