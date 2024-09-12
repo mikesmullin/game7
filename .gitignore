@@ -7,3 +7,4 @@
 /vendor/protobuf-25.2/mac
 /vendor/protobuf-25.2/nix
 /src/proto/*.pb.*
+/docs/examples/
