@@ -23,6 +23,14 @@
 #define VULKAN_VERTEX_BUFFERS_CAP 2
 
 typedef struct {
+  int texWidth;
+  int texHeight;
+  int texChannels;
+  void* pixels;
+  u64 imageSize;
+} Vulkan__FImage_t;
+
+typedef struct {
   bool same;
   bool graphics_found;
   u32 graphics__index;
@@ -156,8 +164,10 @@ void Vulkan__CreateBuffer(
     VkMemoryPropertyFlags properties,
     VkBuffer* buffer,
     VkDeviceMemory* bufferMemory);
-void Vulkan__CreateTextureImage(Vulkan_t* self, const char* file);
-void Vulkan__UpdateTextureImage(Vulkan_t* self, const char* file);
+void Vulkan__FReadImage(Vulkan__FImage_t* fhandle, const char* filePath);
+void Vulkan__FCloseImage(const Vulkan__FImage_t* fhandle);
+void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle);
+void Vulkan__UpdateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle);
 u32 Vulkan__FindMemoryType(Vulkan_t* self, u32 typeFilter, VkMemoryPropertyFlags properties);
 void Vulkan__BeginSingleTimeCommands(Vulkan_t* self, VkCommandBuffer* commandBuffer);
 void Vulkan__EndSingleTimeCommands(Vulkan_t* self, VkCommandBuffer* commandBuffer);

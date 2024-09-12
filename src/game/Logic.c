@@ -79,7 +79,10 @@ __declspec(dllexport) void logic_onreload() {
   state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
 
   // update rgba image texture
-  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, state->textureFiles[0]);
+  Vulkan__FImage_t fhandle;
+  state->Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
+  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
+  state->Vulkan__FCloseImage(&fhandle);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);

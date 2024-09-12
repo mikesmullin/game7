@@ -55,6 +55,8 @@ int Engine__Loop() {
 
   Vulkan__InitDriver1(&state->s_Vulkan);
 
+  state->Vulkan__FReadImage = &Vulkan__FReadImage;
+  state->Vulkan__FCloseImage = &Vulkan__FCloseImage;
   state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
   state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
   state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
@@ -138,7 +140,10 @@ int Engine__Loop() {
           offsetof(Instance_t, texId)});
   Vulkan__CreateFrameBuffers(&state->s_Vulkan);
   Vulkan__CreateCommandPool(&state->s_Vulkan);
-  Vulkan__CreateTextureImage(&state->s_Vulkan, state->textureFiles[0]);
+  Vulkan__FImage_t fhandle;
+  Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
+  Vulkan__CreateTextureImage(&state->s_Vulkan, &fhandle);
+  Vulkan__FCloseImage(&fhandle);
   Vulkan__CreateTextureImageView(&state->s_Vulkan);
   Vulkan__CreateTextureSampler(&state->s_Vulkan);
   Vulkan__CreateVertexBuffer(&state->s_Vulkan, 0, sizeof(state->vertices), state->vertices);

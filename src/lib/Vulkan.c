@@ -1246,37 +1246,45 @@ void Vulkan__CopyBufferToImage(
   Vulkan__EndSingleTimeCommands(self, &commandBuffer);
 }
 
+void Vulkan__FReadImage(Vulkan__FImage_t* fhandle, const char* filePath) {
+  fhandle->pixels = stbi_load(
+      filePath,
+      &fhandle->texWidth,
+      &fhandle->texHeight,
+      &fhandle->texChannels,
+      STBI_rgb_alpha);
+  fhandle->imageSize = fhandle->texWidth * fhandle->texHeight * 4;  // RGBA
+
+  ASSERT_CONTEXT(fhandle->pixels, "failed to load texture image!")
+}
+
+void Vulkan__FCloseImage(const Vulkan__FImage_t* fhandle) {
+  stbi_image_free((stbi_uc*)fhandle->pixels);
+}
+
 /**
  * Load an image from disk. Queue it to Vulkan -> Buffer -> Image.
  */
-void Vulkan__CreateTextureImage(Vulkan_t* self, const char* file) {
-  int texWidth, texHeight, texChannels;
-  stbi_uc* pixels = stbi_load(file, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-  VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-  ASSERT_CONTEXT(pixels, "failed to load texture image!")
-
+void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   Vulkan__CreateBuffer(
       self,
-      imageSize,
+      fhandle->imageSize,
       VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &stagingBuffer,
       &stagingBufferMemory);
 
   void* data;
-  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
-  memcpy(data, pixels, (size_t)(imageSize));
+  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, fhandle->imageSize, 0, &data);
+  memcpy(data, fhandle->pixels, (size_t)(fhandle->imageSize));
   vkUnmapMemory(self->m_logicalDevice, stagingBufferMemory);
-
-  stbi_image_free(pixels);
 
   Vulkan__CreateImage(
       self,
-      texWidth,
-      texHeight,
+      fhandle->texWidth,
+      fhandle->texHeight,
       VK_FORMAT_R8G8B8A8_SRGB,
       VK_IMAGE_TILING_OPTIMAL,
       VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1294,8 +1302,8 @@ void Vulkan__CreateTextureImage(Vulkan_t* self, const char* file) {
       self,
       &stagingBuffer,
       &self->m_textureImage,
-      (u32)(texWidth),
-      (u32)(texHeight));
+      (u32)(fhandle->texWidth),
+      (u32)(fhandle->texHeight));
   Vulkan__TransitionImageLayout(
       self,
       &self->m_textureImage,
@@ -1307,30 +1315,21 @@ void Vulkan__CreateTextureImage(Vulkan_t* self, const char* file) {
   vkFreeMemory(self->m_logicalDevice, stagingBufferMemory, NULL);
 }
 
-void Vulkan__UpdateTextureImage(Vulkan_t* self, const char* file) {
-  // TODO: accept rgba array, instead of reading from disk always
-  int texWidth, texHeight, texChannels;
-  stbi_uc* pixels = stbi_load(file, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-  VkDeviceSize imageSize = texWidth * texHeight * 4;
-
-  ASSERT_CONTEXT(pixels, "failed to load texture image!")
-
+void Vulkan__UpdateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   Vulkan__CreateBuffer(
       self,
-      imageSize,
+      fhandle->imageSize,
       VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &stagingBuffer,
       &stagingBufferMemory);
 
   void* data;
-  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
-  memcpy(data, pixels, (size_t)(imageSize));
+  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, fhandle->imageSize, 0, &data);
+  memcpy(data, fhandle->pixels, (size_t)(fhandle->imageSize));
   vkUnmapMemory(self->m_logicalDevice, stagingBufferMemory);
-
-  stbi_image_free(pixels);
 
   // TODO: support image source resize?
   // vkDestroyImage(self->m_logicalDevice, self->m_textureImage, NULL);
@@ -1357,8 +1356,8 @@ void Vulkan__UpdateTextureImage(Vulkan_t* self, const char* file) {
       self,
       &stagingBuffer,
       &self->m_textureImage,
-      (u32)(texWidth),
-      (u32)(texHeight));
+      (u32)(fhandle->texWidth),
+      (u32)(fhandle->texHeight));
   Vulkan__TransitionImageLayout(
       self,
       &self->m_textureImage,
