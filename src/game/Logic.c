@@ -76,13 +76,13 @@ __declspec(dllexport) void logic_oninit_compute() {
 
 __declspec(dllexport) void logic_onreload() {
   LOG_DEBUGF("Logic dll loaded.");
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 0.2f);
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
   // update rgba image texture
-  Vulkan__FImage_t fhandle;
-  state->Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
-  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
-  state->Vulkan__FCloseImage(&fhandle);
+  // Vulkan__FImage_t fhandle;
+  // state->Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
+  // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
+  // state->Vulkan__FCloseImage(&fhandle);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
@@ -180,10 +180,24 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
 
 static Vulkan__FImage_t fhandle;
 static u8 rgbabuf[40000];
+static f64 accumulator2 = 0.0f;
+static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
+static u16 frames = 0;
 
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
+
+  accumulator2 += deltaTime;
+  frames++;
+  if (accumulator2 >= FPS_LOG_TIME_STEP) {
+    LOG_DEBUGF("%dfps", frames);
+    frames = 0;
+
+    while (accumulator2 >= FPS_LOG_TIME_STEP) {
+      accumulator2 -= FPS_LOG_TIME_STEP;
+    }
+  }
 
   if (state->isVBODirty) {
     state->isVBODirty = false;
@@ -231,32 +245,11 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   fhandle.imageSize = 100 * 100 * 4;  // RGBA
   fhandle.pixels = rgbabuf;
   for (u64 i = 0; i < fhandle.imageSize; i += 4) {
-    // colorful static
-    // rgbabuf[i] = (u8)Math__urandom(0, 255);
-    // rgbabuf[i + 1] = (u8)Math__urandom(0, 255);
-    // rgbabuf[i + 2] = (u8)Math__urandom(0, 255);
-    // rgbabuf[i + 3] = 255;
-
     // grayscale static
     rgbabuf[i] = (u8)Math__urandom(0, 255);
     rgbabuf[i + 1] = rgbabuf[i];
     rgbabuf[i + 2] = rgbabuf[i];
     rgbabuf[i + 3] = 255;
-
-    // solid random
-    // rgbabuf[i] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[0]);
-    // rgbabuf[i + 1] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[1]);
-    // rgbabuf[i + 2] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[2]);
-    // rgbabuf[i + 3] = 255;
-
-    // solid white
-    // rgbabuf[i] = 255;
-
-    // white flashing
-    // rgbabuf[i] = (0 == i ? (u8)Math__urandom(0, 255) : rgbabuf[0]);
-    // rgbabuf[i + 1] = rgbabuf[i];
-    // rgbabuf[i + 2] = rgbabuf[i];
-    // rgbabuf[i + 3] = 255;
   }
   state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
 }
