@@ -13,6 +13,7 @@
 #include "Gamepad.h"
 #include "HotReload.h"
 #include "Keyboard.h"
+#include "Math.h"
 #include "SDL.h"
 #include "Timer.h"
 #include "Vulkan.h"
@@ -27,12 +28,30 @@ static void keyboardCallback();
 static void fingerCallback();
 
 static int check_load_logic() {
-  if (2 == File__CheckMonitor(fm)) {
-    int r = load_logic();
+  char path[120] = "src/game/";
+  char file[120];
+  if (2 == File__CheckMonitor(fm, file)) {
+    LOG_DEBUGF("saw file %s", file);
+    strcat(path, file);
+    LOG_DEBUGF("path %s", path);
+    int r = load_logic(path);
     logic_onload(state);
+    logic_onreload();
     return r;
   }
   return 0;
+}
+
+static u32 Timer__Now() {
+  return Timer__NowMilliseconds();
+}
+
+static u32 M__urandom() {
+  return Math__urandom();
+}
+
+static u32 M__urandom2(u32 a, u32 b) {
+  return Math__urandom2(a, b);
 }
 
 int Engine__Loop() {
@@ -41,7 +60,7 @@ int Engine__Loop() {
 
   File__StartMonitor(fm);
 
-  if (!load_logic()) {
+  if (!load_logic("src/game/Logic.c.dll")) {
     return 1;
   }
   logic_onload(state);
@@ -62,6 +81,9 @@ int Engine__Loop() {
   state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
   state->Timer__NowSeconds = &Timer__NowSeconds;
   state->Timer__NowMilliseconds = &Timer__NowMilliseconds;
+  state->Timer__Now = &Timer__Now;
+  state->M__urandom = &M__urandom;
+  state->M__urandom2 = &M__urandom2;
 
   Window__New(
       &state->s_Window,
@@ -191,8 +213,20 @@ static void fingerCallback() {
   logic_onfinger();
 }
 
+static f64 accumulator1 = 0.0f;
+static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
+
 static void physicsCallback(const f64 deltaTime) {
-  logic_onfixedupdate(deltaTime);
+  accumulator1 += deltaTime;
+  if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
+    check_load_logic();
+
+    while (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
+      accumulator1 -= FILE_CHECK_MONITOR_TIME_STEP;
+    }
+  }
+
+  // logic_onfixedupdate(deltaTime);
 }
 
 static void renderCallback(const f64 deltaTime) {

@@ -12,7 +12,7 @@ extern logic_onfinger_t logic_onfinger;
 extern logic_onfixedupdate_t logic_onfixedupdate;
 extern logic_onupdate_t logic_onupdate;
 
-int load_logic(void);
+int load_logic(const char* file);
 int unload_logic(void);
 
 #endif  // HOT_RELOAD_H

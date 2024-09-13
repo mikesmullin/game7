@@ -25,7 +25,10 @@ void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dX, u32 dY) {
         continue;
       }
 
-      ((u32*)dst->buf)[xp + yp * dst->w + 1] = ((u32*)src->buf)[x + y * src->w];
+      u32 o = ((u32*)src->buf)[x + y * src->w];
+      if (o > 0) {
+        ((u32*)dst->buf)[xp + yp * dst->w + 1] = o;
+      }
     }
   }
 }

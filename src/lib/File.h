@@ -12,5 +12,5 @@ typedef struct {
 } FileMonitor_t;
 
 int File__StartMonitor(FileMonitor_t* fm);
-int File__CheckMonitor(FileMonitor_t* fm);
+int File__CheckMonitor(FileMonitor_t* fm, char* file);
 int File__EndMonitor(const FileMonitor_t* fm);

@@ -86,26 +86,6 @@ __declspec(dllexport) void logic_oninit_data() {
 
 __declspec(dllexport) void logic_oninit_compute() {
   state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
-}
-
-__declspec(dllexport) void logic_onreload() {
-  LOG_DEBUGF("Logic dll loaded.");
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
-
-  // compose brush
-  Bitmap__Construct(&brush, 64, 64, 4 /*RGBA*/, brushBuf);
-  for (u64 i = 0; i < brush.len; i += brush.chan) {
-    brush.buf[i] = Math__urandom(0, 255);
-    brush.buf[i + 1] = Math__urandom(0, 255);
-    brush.buf[i + 2] = Math__urandom(0, 255);
-    brush.buf[i + 3] = Math__urandom(0, 255);
-  }
-
-  // update rgba image texture
-  // Bitmap_t atlas;
-  // state->Vulkan__FReadImage(&atlas, state->textureFiles[0]);
-  // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &atlas);
-  // state->Vulkan__FCloseImage(&atlas);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
@@ -121,6 +101,27 @@ __declspec(dllexport) void logic_onreload() {
 
   state->isUBODirty[0] = true;
   state->isUBODirty[1] = true;
+}
+
+__declspec(dllexport) void logic_onreload() {
+  LOG_DEBUGF("Logic dll loaded.");
+  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+
+  // compose brush
+  Bitmap__Construct(&brush, 64, 64, 4 /*RGBA*/, brushBuf);
+  srand(state->Timer__Now());
+  for (u64 i = 0; i < brush.w * brush.h; i++) {
+    ((u32*)brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
+  }
+  for (u64 i = 0; i < state->screen.w * state->screen.h; i++) {
+    ((u32*)state->screen.buf)[i] = 0;
+  }
+
+  // update rgba image texture
+  // Bitmap_t atlas;
+  // state->Vulkan__FReadImage(&atlas, state->textureFiles[0]);
+  // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &atlas);
+  // state->Vulkan__FCloseImage(&atlas);
 }
 
 __declspec(dllexport) void logic_onkey() {
@@ -178,23 +179,9 @@ __declspec(dllexport) void logic_onfinger() {
   }
 }
 
-static f64 accumulator1 = 0.0f;
-static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
-
 // on physics
 __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
-
-  accumulator1 += deltaTime;
-  if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
-    if (state->check_load_logic()) {
-      logic_onreload();
-    }
-
-    while (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
-      accumulator1 -= FILE_CHECK_MONITOR_TIME_STEP;
-    }
-  }
 
   // state->isVBODirty = true;
   // state->isUBODirty[0] = true;
@@ -263,8 +250,8 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // blit brush to screen
   u32 xo, yo;
   for (int i = 0; i < 100; i++) {
-    xo = (Math__sin((state->Timer__NowMilliseconds() + 0) % 2000 / 2000.0 * Math__PI * 2) * 120);
-    yo = (Math__cos((state->Timer__NowMilliseconds() + 0) % 2000 / 2000.0 * Math__PI * 2) * 120);
+    xo = (Math__sin((state->Timer__Now() + 0) % 9000 / 9000.0 * Math__PI * 2) * 120);
+    yo = (Math__cos((state->Timer__Now() + 0) % 9000 / 9000.0 * Math__PI * 2) * 120);
     Bitmap__Draw(
         &brush,
         &state->screen,

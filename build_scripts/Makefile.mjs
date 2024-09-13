@@ -181,7 +181,7 @@ const all = async () => {
   await shaders();
   await protobuf();
   await compile('main');
-  await compile_reload();
+  await compile_reload("src/game/Logic.c.dll");
   await run('main');
 };
 
@@ -322,7 +322,7 @@ function generateRandomString(length) {
   return result;
 }
 
-const compile_reload = async () => {
+const compile_reload = async (outname) => {
   console.log(`recompiling...`);
 
   await fs.mkdir(path.join(workspaceFolder, BUILD_PATH, 'tmp'), { recursive: true });
@@ -343,7 +343,8 @@ const compile_reload = async () => {
   await fs.mkdir(dir, { recursive: true });
 
   const src = rel(workspaceFolder, unit);
-  const dst = rel(workspaceFolder, BUILD_PATH, `${unit}.dll.tmp`);
+  const target = outname;
+  const dst = rel(workspaceFolder, BUILD_PATH, target);
 
   const started = performance.now();
   await child_spawn(C_COMPILER_PATH, [
@@ -361,17 +362,19 @@ const compile_reload = async () => {
 
   // swap lib
   try {
-    await fs.stat(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'));
-    try {
-      await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'), path.join(workspaceFolder, BUILD_PATH, 'tmp', generateRandomString(16)));
-    } catch (e) {
-    }
-    await fs.rename(path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll.tmp'), path.join(workspaceFolder, BUILD_PATH, 'src', 'game', 'Logic.c.dll'));
-    console.log(`recompiled. elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
+    await fs.stat(path.join(workspaceFolder, BUILD_PATH, target));
+    const target2 = target.replace('.tmp', '');
+    // try {
+    //   await fs.rename(path.join(workspaceFolder, BUILD_PATH, target), path.join(workspaceFolder, BUILD_PATH, 'tmp', target2));
+    // } catch (e) {
+    // }
+    await fs.cp(path.join(workspaceFolder, BUILD_PATH, target), path.join(workspaceFolder, BUILD_PATH, target2));
+    console.log(`recompiled. file: ${target2}, elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
     return dst;
   } catch (e) {
-    console.log('recompilation failed.'/*, e*/);
+    console.log('recompilation failed.', e);
   }
+
 };
 
 const watch = async () => {
@@ -384,7 +387,7 @@ const watch = async () => {
     if (!wait) {
       timer = setTimeout(async () => {
         wait = true;
-        await compile_reload();
+        await compile_reload(`src/game/${generateRandomString(16)}.dll.tmp`);
         wait = false;
       }, 250);
     }
@@ -436,7 +439,7 @@ const run = async (basename) => {
         await compile(cmd);
         break;
       case 'reload':
-        await compile_reload();
+        await compile_reload("src/game/Logic.c.dll");
         break;
       case 'watch':
         await watch();

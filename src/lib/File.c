@@ -53,7 +53,7 @@ int File__StartMonitor(FileMonitor_t* fm) {
   return 0;
 }
 
-int File__CheckMonitor(FileMonitor_t* fm) {
+int File__CheckMonitor(FileMonitor_t* fm, char* file) {
   // Wait for the event to be signaled
   DWORD waitStatus = WaitForSingleObject(fm->hEvent, 0);
 
@@ -80,8 +80,12 @@ int File__CheckMonitor(FileMonitor_t* fm) {
       changedFileName[len] = '\0';  // Null terminate
 
       // Check if the changed file is the one we are monitoring
-      if (strcmp(changedFileName, fm->fileName) == 0) {
+      // if (strcmp(changedFileName, fm->fileName) == 0) {
+      const char* suffix = changedFileName + strlen(changedFileName) - 4;
+      // LOG_DEBUGF("changed: %s", changedFileName);
+      if (strcmp(suffix, ".dll") == 0) {
         // fm->cb();
+        strcpy(file, changedFileName);
         r = 2;
       }
 

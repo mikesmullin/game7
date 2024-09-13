@@ -126,6 +126,9 @@ typedef struct {
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
   f32 (*Timer__NowSeconds)();
   u32 (*Timer__NowMilliseconds)();
+  u32 (*Timer__Now)();
+  u32 (*M__urandom)();
+  u32 (*M__urandom2)(u32 a, u32 b);
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
