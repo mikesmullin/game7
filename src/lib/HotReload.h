@@ -3,7 +3,7 @@
 
 #include "Engine.h"
 
-extern logic_boot_t logic_boot;
+extern logic_onload_t logic_onload;
 extern logic_oninit_data_t logic_oninit_data;
 extern logic_oninit_compute_t logic_oninit_compute;
 extern logic_onreload_t logic_onreload;

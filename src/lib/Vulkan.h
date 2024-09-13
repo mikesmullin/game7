@@ -5,6 +5,7 @@
 #include <volk.h>
 
 #include "Base.h"
+#include "Bitmap.h"
 
 #define DEBUG_VULKAN
 
@@ -21,14 +22,6 @@
 #define VULKAN_SWAPCHAIN_IMAGES_CAP 3
 #define VULKAN_SHADER_FILE_BUFFER_BYTES_CAP 50 * 1024  // KB
 #define VULKAN_VERTEX_BUFFERS_CAP 2
-
-typedef struct {
-  int texWidth;
-  int texHeight;
-  int texChannels;
-  void* pixels;
-  u64 imageSize;
-} Vulkan__FImage_t;
 
 typedef struct {
   bool same;
@@ -164,10 +157,10 @@ void Vulkan__CreateBuffer(
     VkMemoryPropertyFlags properties,
     VkBuffer* buffer,
     VkDeviceMemory* bufferMemory);
-void Vulkan__FReadImage(Vulkan__FImage_t* fhandle, const char* filePath);
-void Vulkan__FCloseImage(const Vulkan__FImage_t* fhandle);
-void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle);
-void Vulkan__UpdateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle);
+void Vulkan__FReadImage(Bitmap_t* bmp, const char* filePath);
+void Vulkan__FCloseImage(const Bitmap_t* bmp);
+void Vulkan__CreateTextureImage(Vulkan_t* self, const Bitmap_t* bmp);
+void Vulkan__UpdateTextureImage(Vulkan_t* self, const Bitmap_t* bmp);
 u32 Vulkan__FindMemoryType(Vulkan_t* self, u32 typeFilter, VkMemoryPropertyFlags properties);
 void Vulkan__BeginSingleTimeCommands(Vulkan_t* self, VkCommandBuffer* commandBuffer);
 void Vulkan__EndSingleTimeCommands(Vulkan_t* self, VkCommandBuffer* commandBuffer);

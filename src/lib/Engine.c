@@ -29,7 +29,7 @@ static void fingerCallback();
 static int check_load_logic() {
   if (2 == File__CheckMonitor(fm)) {
     int r = load_logic();
-    logic_boot(state);
+    logic_onload(state);
     return r;
   }
   return 0;
@@ -44,7 +44,7 @@ int Engine__Loop() {
   if (!load_logic()) {
     return 1;
   }
-  logic_boot(state);
+  logic_onload(state);
 
   Timer__MeasureCycles();
 
@@ -60,6 +60,8 @@ int Engine__Loop() {
   state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
   state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
   state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
+  state->Timer__NowSeconds = &Timer__NowSeconds;
+  state->Timer__NowMilliseconds = &Timer__NowMilliseconds;
 
   Window__New(
       &state->s_Window,
@@ -140,10 +142,10 @@ int Engine__Loop() {
           offsetof(Instance_t, texId)});
   Vulkan__CreateFrameBuffers(&state->s_Vulkan);
   Vulkan__CreateCommandPool(&state->s_Vulkan);
-  Vulkan__FImage_t fhandle;
-  Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
-  Vulkan__CreateTextureImage(&state->s_Vulkan, &fhandle);
-  Vulkan__FCloseImage(&fhandle);
+  Bitmap_t bmp;
+  Vulkan__FReadImage(&bmp, state->textureFiles[0]);
+  Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
+  Vulkan__FCloseImage(&bmp);
   Vulkan__CreateTextureImageView(&state->s_Vulkan);
   Vulkan__CreateTextureSampler(&state->s_Vulkan);
   Vulkan__CreateVertexBuffer(&state->s_Vulkan, 0, sizeof(state->vertices), state->vertices);

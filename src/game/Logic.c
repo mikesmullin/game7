@@ -1,8 +1,15 @@
+#include "Logic.h"
+
+#include "../lib/Bitmap.h"
+#include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
+#include "ui/Screen.h"
 
 static Engine__State_t* state;
+static Bitmap_t brush;
+static u8 brushBuf[64 * 64 * 4];
 
 static f32 PixelsToUnits(u32 pixels) {
   return (f32)pixels / state->PIXELS_PER_UNIT;
@@ -17,7 +24,7 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
 }
 
 // on process start
-__declspec(dllexport) void logic_boot(Engine__State_t* _state) {
+__declspec(dllexport) void logic_onload(Engine__State_t* _state) {
   state = _state;
 }
 
@@ -26,8 +33,15 @@ __declspec(dllexport) void logic_boot(Engine__State_t* _state) {
 __declspec(dllexport) void logic_oninit_data() {
   state->WINDOW_TITLE = "Retro";
   state->ENGINE_NAME = "MS2024";
-  state->WINDOW_WIDTH = 800;
-  state->WINDOW_HEIGHT = 800;
+  state->WINDOW_WIDTH = 320;
+  state->WINDOW_HEIGHT = 320;
+
+  Bitmap__Construct(
+      &state->screen,
+      state->WINDOW_WIDTH,
+      state->WINDOW_HEIGHT,
+      4 /*RGBA*/,
+      state->screenBuf);
 
   state->PHYSICS_FPS = 50;
   state->RENDER_FPS = 60;
@@ -63,7 +77,7 @@ __declspec(dllexport) void logic_oninit_data() {
   state->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
   state->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  state->textureFiles[0] = "../assets/textures/font.bmp";
+  state->textureFiles[0] = "../assets/textures/atlas.png";
 
   state->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
@@ -78,11 +92,20 @@ __declspec(dllexport) void logic_onreload() {
   LOG_DEBUGF("Logic dll loaded.");
   state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
+  // compose brush
+  Bitmap__Construct(&brush, 64, 64, 4 /*RGBA*/, brushBuf);
+  for (u64 i = 0; i < brush.len; i += brush.chan) {
+    brush.buf[i] = Math__urandom(0, 255);
+    brush.buf[i + 1] = Math__urandom(0, 255);
+    brush.buf[i + 2] = Math__urandom(0, 255);
+    brush.buf[i + 3] = Math__urandom(0, 255);
+  }
+
   // update rgba image texture
-  // Vulkan__FImage_t fhandle;
-  // state->Vulkan__FReadImage(&fhandle, state->textureFiles[0]);
-  // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
-  // state->Vulkan__FCloseImage(&fhandle);
+  // Bitmap_t atlas;
+  // state->Vulkan__FReadImage(&atlas, state->textureFiles[0]);
+  // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &atlas);
+  // state->Vulkan__FCloseImage(&atlas);
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
@@ -178,8 +201,6 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
   // state->isUBODirty[1] = true;
 }
 
-static Vulkan__FImage_t fhandle;
-static u8 rgbabuf[40000];
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
 static u16 frames = 0;
@@ -239,17 +260,16 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
         &state->ubo1);
   }
 
-  // spam RGBA pixel updates to texture buffer
-  fhandle.texWidth = 100;
-  fhandle.texHeight = 100;
-  fhandle.imageSize = 100 * 100 * 4;  // RGBA
-  fhandle.pixels = rgbabuf;
-  for (u64 i = 0; i < fhandle.imageSize; i += 4) {
-    // grayscale static
-    rgbabuf[i] = (u8)Math__urandom(0, 255);
-    rgbabuf[i + 1] = rgbabuf[i];
-    rgbabuf[i + 2] = rgbabuf[i];
-    rgbabuf[i + 3] = 255;
+  // blit brush to screen
+  u32 xo, yo;
+  for (int i = 0; i < 100; i++) {
+    xo = (Math__sin((state->Timer__NowMilliseconds() + 0) % 2000 / 2000.0 * Math__PI * 2) * 120);
+    yo = (Math__cos((state->Timer__NowMilliseconds() + 0) % 2000 / 2000.0 * Math__PI * 2) * 120);
+    Bitmap__Draw(
+        &brush,
+        &state->screen,
+        (state->WINDOW_WIDTH - 64) / 2 + xo,
+        (state->WINDOW_HEIGHT - 64) / 2 + yo);
   }
-  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &fhandle);
+  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &state->screen);
 }

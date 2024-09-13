@@ -1246,45 +1246,44 @@ void Vulkan__CopyBufferToImage(
   Vulkan__EndSingleTimeCommands(self, &commandBuffer);
 }
 
-void Vulkan__FReadImage(Vulkan__FImage_t* fhandle, const char* filePath) {
-  fhandle->pixels = stbi_load(
-      filePath,
-      &fhandle->texWidth,
-      &fhandle->texHeight,
-      &fhandle->texChannels,
-      STBI_rgb_alpha);
-  fhandle->imageSize = fhandle->texWidth * fhandle->texHeight * 4;  // RGBA
+void Vulkan__FReadImage(Bitmap_t* bmp, const char* filePath) {
+  int w, h, chan;
+  bmp->buf = stbi_load(filePath, &w, &h, &chan, STBI_rgb_alpha);
+  bmp->w = w;
+  bmp->h = h;
+  bmp->chan = chan;
+  bmp->len = bmp->w * bmp->h * bmp->chan;
 
-  ASSERT_CONTEXT(fhandle->pixels, "failed to load texture image!")
+  ASSERT_CONTEXT(bmp->buf, "failed to load texture image!")
 }
 
-void Vulkan__FCloseImage(const Vulkan__FImage_t* fhandle) {
-  stbi_image_free((stbi_uc*)fhandle->pixels);
+void Vulkan__FCloseImage(const Bitmap_t* bmp) {
+  stbi_image_free((stbi_uc*)bmp->buf);
 }
 
 /**
  * Load an image from disk. Queue it to Vulkan -> Buffer -> Image.
  */
-void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle) {
+void Vulkan__CreateTextureImage(Vulkan_t* self, const Bitmap_t* bmp) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   Vulkan__CreateBuffer(
       self,
-      fhandle->imageSize,
+      bmp->len,
       VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &stagingBuffer,
       &stagingBufferMemory);
 
   void* data;
-  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, fhandle->imageSize, 0, &data);
-  memcpy(data, fhandle->pixels, (size_t)(fhandle->imageSize));
+  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, bmp->len, 0, &data);
+  memcpy(data, bmp->buf, (size_t)(bmp->len));
   vkUnmapMemory(self->m_logicalDevice, stagingBufferMemory);
 
   Vulkan__CreateImage(
       self,
-      fhandle->texWidth,
-      fhandle->texHeight,
+      bmp->w,
+      bmp->h,
       VK_FORMAT_R8G8B8A8_SRGB,
       VK_IMAGE_TILING_OPTIMAL,
       VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -1298,12 +1297,7 @@ void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle)
       VK_FORMAT_R8G8B8A8_SRGB,
       VK_IMAGE_LAYOUT_UNDEFINED,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  Vulkan__CopyBufferToImage(
-      self,
-      &stagingBuffer,
-      &self->m_textureImage,
-      (u32)(fhandle->texWidth),
-      (u32)(fhandle->texHeight));
+  Vulkan__CopyBufferToImage(self, &stagingBuffer, &self->m_textureImage, bmp->w, bmp->h);
   Vulkan__TransitionImageLayout(
       self,
       &self->m_textureImage,
@@ -1315,20 +1309,20 @@ void Vulkan__CreateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle)
   vkFreeMemory(self->m_logicalDevice, stagingBufferMemory, NULL);
 }
 
-void Vulkan__UpdateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle) {
+void Vulkan__UpdateTextureImage(Vulkan_t* self, const Bitmap_t* bmp) {
   VkBuffer stagingBuffer;
   VkDeviceMemory stagingBufferMemory;
   Vulkan__CreateBuffer(
       self,
-      fhandle->imageSize,
+      bmp->len,
       VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
       &stagingBuffer,
       &stagingBufferMemory);
 
   void* data;
-  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, fhandle->imageSize, 0, &data);
-  memcpy(data, fhandle->pixels, (size_t)(fhandle->imageSize));
+  vkMapMemory(self->m_logicalDevice, stagingBufferMemory, 0, bmp->len, 0, &data);
+  memcpy(data, bmp->buf, (size_t)(bmp->len));
   vkUnmapMemory(self->m_logicalDevice, stagingBufferMemory);
 
   // TODO: support image source resize?
@@ -1352,12 +1346,7 @@ void Vulkan__UpdateTextureImage(Vulkan_t* self, const Vulkan__FImage_t* fhandle)
       VK_FORMAT_R8G8B8A8_SRGB,
       VK_IMAGE_LAYOUT_UNDEFINED,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  Vulkan__CopyBufferToImage(
-      self,
-      &stagingBuffer,
-      &self->m_textureImage,
-      (u32)(fhandle->texWidth),
-      (u32)(fhandle->texHeight));
+  Vulkan__CopyBufferToImage(self, &stagingBuffer, &self->m_textureImage, bmp->w, bmp->h);
   Vulkan__TransitionImageLayout(
       self,
       &self->m_textureImage,

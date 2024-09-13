@@ -6,6 +6,7 @@
 #include <windows.h>
 
 #include "Base.h"
+#include "Bitmap.h"
 #include "Finger.h"
 #include "Keyboard.h"
 #include "Window.h"
@@ -118,11 +119,13 @@ typedef struct {
 
   int (*check_load_logic)();
 
-  void (*Vulkan__FReadImage)(Vulkan__FImage_t* fhandle, const char* filePath);
-  void (*Vulkan__FCloseImage)(const Vulkan__FImage_t* fhandle);
-  void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Vulkan__FImage_t* fhandle);
+  void (*Vulkan__FReadImage)(Bitmap_t* bmp, const char* filePath);
+  void (*Vulkan__FCloseImage)(const Bitmap_t* bmp);
+  void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Bitmap_t* bmp);
   void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
+  f32 (*Timer__NowSeconds)();
+  u32 (*Timer__NowMilliseconds)();
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
@@ -132,10 +135,12 @@ typedef struct {
   KeyboardState_t* g_Keyboard__state;
   FingerState_t* g_Finger__state;
   u8 newTexId;
+  Bitmap_t screen;
+  u8 screenBuf[320 * 320 * 4];
 
 } Engine__State_t;
 
-typedef void (*logic_boot_t)(Engine__State_t*);
+typedef void (*logic_onload_t)(Engine__State_t*);
 typedef void (*logic_oninit_data_t)();
 typedef void (*logic_oninit_compute_t)();
 typedef void (*logic_onreload_t)();

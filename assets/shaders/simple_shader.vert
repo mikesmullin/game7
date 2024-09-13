@@ -65,8 +65,8 @@ mat4 generateModelMatrix(vec3 position, vec3 rotation, vec3 scale) {
     return modelMatrix;
 }
 
-uint ATLAS_W = 100;
-uint ATLAS_H = 100;
+uint ATLAS_W = 320;
+uint ATLAS_H = 320;
 
 vec2 TEXTURE_WH = vec2(ATLAS_W,ATLAS_H);
 float pixelsToUnitsX(uint pixels) {
@@ -76,14 +76,14 @@ float pixelsToUnitsY(uint pixels) {
     return pixels / TEXTURE_WH.y;
 }
 
-uint SPRITE_X = 0;
-uint SPRITE_Y = 0;
-uint SPRITE_W = 48;
-uint SPRITE_H = 48;
-uint SPRITE_IDX_OFFSET = 3;
-uint SPRITE_ROW_LEN = 8;
-uint WOOD_WALL_W = 48;
-uint WOOD_WALL_H = 48;
+// uint SPRITE_X = 0;
+// uint SPRITE_Y = 0;
+// uint SPRITE_W = 48;
+// uint SPRITE_H = 48;
+// uint SPRITE_IDX_OFFSET = 3;
+// uint SPRITE_ROW_LEN = 8;
+// uint WOOD_WALL_W = 48;
+// uint WOOD_WALL_H = 48;
 
 void main() {
     mat4 model = generateModelMatrix(pos, rot, scale);
@@ -91,27 +91,27 @@ void main() {
 
     // hard-coded map of texId to uvwh coords in texture atlas
     vec4 uvwh;
-    if (0 == texId) { // background 0x0 1574x684
-        uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(100),pixelsToUnitsY(100));
+    if (0 == texId) { // background 0x0 320x320
+        uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(ATLAS_W),pixelsToUnitsY(ATLAS_H));
     }
-    else if (1 == texId) { // wood-wall 1 1580x0 350x420
-        uvwh = vec4(pixelsToUnitsX(1580),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
-    }
-    else if (2 == texId) { // wood-wall 1 1580x0 350x420
-        uvwh = vec4(pixelsToUnitsX(1580 + WOOD_WALL_W),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
-    }
+    // else if (1 == texId) { // wood-wall 1 1580x0 350x420
+    //     uvwh = vec4(pixelsToUnitsX(1580),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
+    // }
+    // else if (2 == texId) { // wood-wall 1 1580x0 350x420
+    //     uvwh = vec4(pixelsToUnitsX(1580 + WOOD_WALL_W),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
+    // }
 
     // sprites
-    else if (texId >= SPRITE_IDX_OFFSET) {
-        uint x = (texId - SPRITE_IDX_OFFSET);
-        uint y = (x / SPRITE_ROW_LEN);
-        x = x % SPRITE_ROW_LEN;
-        uvwh = vec4(
-            pixelsToUnitsX(SPRITE_X + (SPRITE_W * x)),
-            pixelsToUnitsY(SPRITE_Y + (SPRITE_H * y)),
-            pixelsToUnitsX(SPRITE_W),
-            pixelsToUnitsY(SPRITE_H));
-    }
+    // else if (texId >= SPRITE_IDX_OFFSET) {
+    //     uint x = (texId - SPRITE_IDX_OFFSET);
+    //     uint y = (x / SPRITE_ROW_LEN);
+    //     x = x % SPRITE_ROW_LEN;
+    //     uvwh = vec4(
+    //         pixelsToUnitsX(SPRITE_X + (SPRITE_W * x)),
+    //         pixelsToUnitsY(SPRITE_Y + (SPRITE_H * y)),
+    //         pixelsToUnitsX(SPRITE_W),
+    //         pixelsToUnitsY(SPRITE_H));
+    // }
 
     if (xy.x == 0.5 && xy.y == -0.5) {
         fragTexCoord = vec2(uvwh.x, uvwh.y); // top-left
