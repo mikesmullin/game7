@@ -113,9 +113,6 @@ __declspec(dllexport) void logic_onreload() {
   for (u64 i = 0; i < brush.w * brush.h; i++) {
     ((u32*)brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
   }
-  for (u64 i = 0; i < state->screen.w * state->screen.h; i++) {
-    ((u32*)state->screen.buf)[i] = 0;
-  }
 
   // update rgba image texture
   // Bitmap_t atlas;
@@ -247,11 +244,17 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
         &state->ubo1);
   }
 
-  // blit brush to screen
+  // clear frame
+
+  for (u64 i = 0; i < state->screen.w * state->screen.h; i++) {
+    ((u32*)state->screen.buf)[i] = 0;
+  }
+
+  // blit brush to frame
   u32 xo, yo;
   for (int i = 0; i < 100; i++) {
-    xo = (Math__sin((state->Timer__Now() + 0) % 9000 / 9000.0 * Math__PI * 2) * 120);
-    yo = (Math__cos((state->Timer__Now() + 0) % 9000 / 9000.0 * Math__PI * 2) * 120);
+    xo = (Math__sin((state->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
+    yo = (Math__cos((state->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
     Bitmap__Draw(
         &brush,
         &state->screen,
