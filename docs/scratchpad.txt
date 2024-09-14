@@ -1,0 +1,161 @@
+// assets/config.hxs
+// {
+//   "11 DLL_PATH
+//     "20 src/game/Logic.c.dll
+
+// assets/config.ini
+// DLL_PATH=src/game/Logic.c.dll
+
+// config/DLLFilename.h
+typedef struct {
+  char* path;
+  char* basename;
+  char* dirname;
+} DLLFilename_t;
+
+void DLLFilename__Construct(const char* path, DLLFilename_t* r);
+void DLLFilename__Destruct(DLLFilename_t* self);
+
+// config/DLLFilename.c
+#include "DLLFilename.h"
+
+void DLLFilename__Construct(const char* path, DLLFilename_t* r) {
+  r->path = path;
+  r->basename = strrchar(path, "/");
+  u32 len = r->basename - path;
+  r->dirname = malloc(len);
+  ASSERT_CONTEXT(NULL == r->dirname, "malloc failed.");
+  strcpy_s(r->dirname, len, path);
+}
+
+void DLLFilename__Destruct(DLLFilename_t* self) {
+  free(self->dirname);
+}
+
+// config/Config.h
+typedef struct {
+  DLLFilename_t dll;
+} Config_t;
+
+void Config__ReadIni(const char* path, Config_t** cfg);
+
+// config/Config.c
+
+void Config__ReadIni(const char* path, Config_t** cfg) {
+  FILE f = fopen(path, "r");
+  //...
+  if (0 == strcmp("DLL_PATH", key)) {
+    char* value;
+    DLLFilename__Construct(value, &cfg.dll);
+  }
+}
+
+// lib/Engine.c
+#include "../config/Config.h"
+#include "../config/DLLFilename.h"
+
+Config_t g_cfg;
+Config__ReadIni("../assets/config.ini", &g_cfg);
+g_cfg.path;
+g_cfg.basename;
+g_cfg.dirname;
+DLLFilename__Destruct(&g_cfg.dll);
+
+// ---
+// # Strings & Arenas
+
+// lib/String.h
+
+typedef struct {
+  char* buf;
+} VString_t;
+
+char* VString__GetCStr(Arena* a, VString_t* vs) {
+  char* c_str = a.alloc(vs.len);
+  strcpy_s(c_str, vs.len, vs.buf);
+  return c_str;
+}
+
+// lib/String.c
+
+VString_t substr(char* str, u32 start, u32 len);
+
+// lib/Arena.h
+// lib/Arena.c
+
+// ---
+// # Metaprogramming via Inline Markdown Comments
+// this combines ideas from:
+// - c preprocessor macros
+// - yaml multi-line strings
+// - markdown tables
+// - handlebars templates
+// - docco + literate coffeescript
+// - managed files w/ generated code
+// - protobuf
+// - gulpjs
+// - lua
+// - clang format-on-save
+
+// #metacode
+// #table GLOBAL_TABLE1
+//   type |
+//   u8   |
+//   u32  |
+//
+// #macro GLOBAL_MACRO(t) |
+//   abc;
+//   {{#for _i,r of t}}
+//     {{r.type}} a;
+//   {{/for}}
+//
+// GLOBAL_MACRO(GLOBAL_TABLE1)
+// #metagen
+abc;
+u8 a;
+u32 a;
+// #metaend
+
+// #metacode
+// #macro ENUM(name,t) |
+//   // {{name}}.h
+//   typedef enum
+//   {
+//     {{#for _i,r of t}}
+//     {{name}}_{{r.k}},
+//     {{/for}}
+//     {{name}}_COUNT
+//   } {{name}};
+//
+//   extern char* {{name}}_string_table[{{#t}}];
+//
+//   // {{name}}.c
+//   char* {{name}}_string_table[{{#t}}] =
+//   {
+//     {{#for r of t}}
+//     "{{r.k}}",
+//     {{/for}}
+//   };
+//
+// #table T_CAT_BREEDS
+//   k          |
+//   Persian    |
+//   Maine Coon |
+//   Siamese    |
+//   Bengal     |
+//
+// ENUM(CatBreed, T_CAT_BREEDS)
+// #metagen
+// CatBreed.h
+typedef enum { CatBreed_A, CatBreed_B, CatBreed_C, CatBreed_COUNT } CatBreed;
+
+extern char* CatBreed_string_table[4];
+
+// CatBreed.c
+char* CatBreed_string_table[4] = {
+    "Persian",
+    "Maine Coon",
+    "Siamese",
+    "Bengal",
+};
+// #metaend

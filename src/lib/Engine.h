@@ -75,6 +75,7 @@ typedef struct {
 
 typedef struct {
   World_t world;
+  // TODO: move everything that is only referenced by inner -- into an arena!
 
   bool isVBODirty;
   bool isUBODirty[2];
