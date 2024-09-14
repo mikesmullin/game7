@@ -368,7 +368,10 @@ const compile_reload = async (outname) => {
     //   await fs.rename(path.join(workspaceFolder, BUILD_PATH, target), path.join(workspaceFolder, BUILD_PATH, 'tmp', target2));
     // } catch (e) {
     // }
-    await fs.cp(path.join(workspaceFolder, BUILD_PATH, target), path.join(workspaceFolder, BUILD_PATH, target2));
+
+    if (target != target2) {
+      await fs.cp(path.join(workspaceFolder, BUILD_PATH, target), path.join(workspaceFolder, BUILD_PATH, target2));
+    }
     console.log(`recompiled. file: ${target2}, elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
     return dst;
   } catch (e) {
