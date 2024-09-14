@@ -85,7 +85,7 @@ int File__CheckMonitor(FileMonitor_t* fm, char* file) {
       // LOG_DEBUGF("changed: %s", changedFileName);
       if (strcmp(suffix, ".dll") == 0) {
         // fm->cb();
-        strcpy(file, changedFileName);
+        strcpy_s(file, (pNotify->FileNameLength / sizeof(WCHAR)) + 1, changedFileName);
         r = 2;
       }
 

@@ -28,8 +28,8 @@ static void keyboardCallback();
 static void fingerCallback();
 
 static int check_load_logic() {
-  char path[120] = "src/game/";
-  char file[120];
+  char path[32] = "src/game/";
+  char file[31];
   if (2 == File__CheckMonitor(fm, file)) {
     LOG_DEBUGF("saw file %s", file);
     strcat(path, file);
