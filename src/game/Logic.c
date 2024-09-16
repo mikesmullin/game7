@@ -99,7 +99,7 @@ __declspec(dllexport) void logic_oninit_compute() {
   glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].pos);
   glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].rot);
   glm_vec3_copy(
-      (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},
+      (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},  // AGBR
       _G->instances[INSTANCE_FLOOR_0].scale);
   _G->instances[INSTANCE_FLOOR_0].texId = 0;
   _G->instanceCount = 1;
