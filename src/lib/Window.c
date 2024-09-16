@@ -8,7 +8,7 @@
 #include "Finger.h"
 #include "Gamepad.h"
 #include "Keyboard.h"
-#include "Timer.h"
+#include "Time.h"
 #include "Vulkan.h"
 
 void Window__New(Window_t* self, char* title, u16 width, u16 height, Vulkan_t* vulkan) {
@@ -108,7 +108,7 @@ void Window__RenderLoop(
     void (*renderCallback)(const f64)) {
   const u8 physicsInterval = 1000 / physicsFps;
   const u8 renderInterval = 1000 / renderFps;
-  u64 currentTime = Timer__NowMilliseconds();
+  u64 currentTime = Time__Now();
   u64 lastPhysics = currentTime - physicsInterval;
   u64 lastRender = currentTime - renderInterval;
   u16 elapsedPhysics = 0;
@@ -159,7 +159,7 @@ void Window__RenderLoop(
 
     if (!self->vulkan->m_minimized) {
       // Physics update
-      currentTime = Timer__NowMilliseconds();
+      currentTime = Time__Now();
       elapsedPhysics = currentTime - lastPhysics;
       if (elapsedPhysics > physicsInterval) {
         deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastPhysics));
@@ -169,12 +169,12 @@ void Window__RenderLoop(
       }
 
       // Render update
-      currentTime = Timer__NowMilliseconds();
+      currentTime = Time__Now();
       elapsedRender = currentTime - lastRender;
       if (elapsedRender > renderInterval) {
         Vulkan__AwaitNextFrame(self->vulkan);
 
-        currentTime = Timer__NowMilliseconds();
+        currentTime = Time__Now();
         deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastRender));
         lastRender = currentTime;
 

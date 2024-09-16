@@ -66,9 +66,7 @@ typedef struct {
   void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Bitmap_t* bmp);
   void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
-  f32 (*Timer__NowSeconds)();
-  u32 (*Timer__NowMilliseconds)();
-  u32 (*Timer__Now)();
+  u32 (*Time__Now)();
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);

@@ -13,9 +13,8 @@
 
 #include "Base.h"
 
-void Timer__MeasureCycles();
-f32 Timer__NowSeconds();
-u32 Timer__NowMilliseconds();
+void Time__MeasureCycles();
+u32 Time__Now();
 
 #if OS_MAC == 1
 #include <mach/mach_time.h>

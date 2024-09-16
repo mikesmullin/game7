@@ -114,7 +114,7 @@ __declspec(dllexport) void logic_onreload() {
 
   // compose brush
   Bitmap__Construct(&local->brush, 64, 64, 4 /*RGBA*/, local->brushBuf);
-  srand(_G->Timer__Now());
+  srand(_G->Time__Now());
   for (u64 i = 0; i < local->brush.w * local->brush.h; i++) {
     ((u32*)local->brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
   }
@@ -250,8 +250,8 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // blit brush to frame
   u32 xo, yo;
   for (int i = 0; i < 100; i++) {
-    xo = (Math__sin((_G->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
-    yo = (Math__cos((_G->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
+    xo = (Math__sin((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
+    yo = (Math__cos((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
     Bitmap__Draw(
         &local->brush,
         &local->screen,

@@ -14,10 +14,9 @@
 #include "Gamepad.h"
 #include "HotReload.h"
 #include "Keyboard.h"
-#include "Math.h"
 #include "SDL.h"
 #include "String.h"
-#include "Timer.h"
+#include "Time.h"
 #include "Vulkan.h"
 #include "Window.h"
 
@@ -45,23 +44,19 @@ static int check_load_logic() {
   return 0;
 }
 
-static u32 Timer__Now() {
-  return Timer__NowMilliseconds();
-}
-
 int Engine__Loop() {
   LOG_INFOF("begin engine.");
 
   arena = Arena__Alloc(1024 * 1024 * 50);  // MB
   state = Arena__Push(&arena, sizeof(Engine__State_t));
   fm = Arena__Push(&arena, sizeof(FileMonitor_t));
-  Timer__MeasureCycles();
+  Time__MeasureCycles();
   char* DLL_PATH = "src/game/Logic.c.dll";
   fm->directory = str8_alloc(&arena, "src/game")->str;
   fm->fileName = str8_alloc(&arena, "Logic.c.dll")->str;
 
   // initialize random seed using current time
-  srand(Timer__NowMilliseconds());
+  srand(Time__Now());
 
   state->check_load_logic = &check_load_logic;
 
@@ -80,9 +75,7 @@ int Engine__Loop() {
   state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
   state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
   state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
-  state->Timer__NowSeconds = &Timer__NowSeconds;
-  state->Timer__NowMilliseconds = &Timer__NowMilliseconds;
-  state->Timer__Now = &Timer__Now;
+  state->Time__Now = &Time__Now;
 
   Window__New(
       &state->s_Window,
