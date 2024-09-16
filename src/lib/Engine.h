@@ -42,7 +42,6 @@ typedef struct {
 
 typedef struct {
   void* localState;
-
   Vulkan_t s_Vulkan;
   Window_t s_Window;
   char* WINDOW_TITLE;
@@ -78,7 +77,6 @@ typedef struct {
 
   KeyboardState_t* g_Keyboard__state;
   FingerState_t* g_Finger__state;
-
 } Engine__State_t;
 
 typedef void (*logic_onload_t)(Arena_t*, Engine__State_t*);

@@ -13,9 +13,6 @@
 
 #include "Base.h"
 
-extern u64 CYCLES_PER_SECOND;
-extern u64 CYCLES_PER_MILLISECOND;
-
 void Timer__MeasureCycles();
 f32 Timer__NowSeconds();
 u32 Timer__NowMilliseconds();

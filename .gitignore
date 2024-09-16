@@ -8,3 +8,4 @@
 /vendor/protobuf-25.2/nix
 /src/proto/*.pb.*
 /docs/examples/
+/cpu_cycles_per_sec

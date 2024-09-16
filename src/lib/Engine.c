@@ -55,11 +55,11 @@ int Engine__Loop() {
   arena = Arena__Alloc(1024 * 1024 * 50);  // MB
   state = Arena__Push(&arena, sizeof(Engine__State_t));
   fm = Arena__Push(&arena, sizeof(FileMonitor_t));
+  Timer__MeasureCycles();
   char* DLL_PATH = "src/game/Logic.c.dll";
   fm->directory = str8_alloc(&arena, "src/game")->str;
   fm->fileName = str8_alloc(&arena, "Logic.c.dll")->str;
 
-  Timer__MeasureCycles();
   // initialize random seed using current time
   srand(Timer__NowMilliseconds());
 
