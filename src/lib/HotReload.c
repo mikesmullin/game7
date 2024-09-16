@@ -59,21 +59,15 @@ int unload_logic(void) {
 #include <windows.h>
 
 int load_logic(const char* file) {
-  DEBUG_TRACE;
   if (logic != NULL) {
-    DEBUG_TRACE;
     if (!unload_logic()) {
-      DEBUG_TRACE;
       return 0;
     }
   }
-  DEBUG_TRACE;
   LOG_DEBUGF("load lib %s", file);
   logic = LoadLibrary(file);
-  DEBUG_TRACE;
   if (!logic) {
     // Retrieve the error code
-    DEBUG_TRACE;
     DWORD errorCode = GetLastError();
 
     // Print the error code
@@ -90,42 +84,28 @@ int load_logic(const char* file) {
         0,
         NULL);
 
-    DEBUG_TRACE;
     // Print the formatted error message
     printf("ERROR loading %s: %s\n", LOGIC_FILENAME, (char*)errorMessage);
 
-    DEBUG_TRACE;
     // Free the buffer allocated by FormatMessage
     LocalFree(errorMessage);
 
-    DEBUG_TRACE;
     return 0;
   }
 
-  DEBUG_TRACE;
   logic_onload = (logic_onload_t)GetProcAddress(logic, "logic_onload");
-  DEBUG_TRACE;
   logic_oninit_data = (logic_oninit_data_t)GetProcAddress(logic, "logic_oninit_data");
-  DEBUG_TRACE;
   logic_oninit_compute = (logic_oninit_compute_t)GetProcAddress(logic, "logic_oninit_compute");
-  DEBUG_TRACE;
   logic_onreload = (logic_onreload_t)GetProcAddress(logic, "logic_onreload");
-  DEBUG_TRACE;
   logic_onkey = (logic_onkey_t)GetProcAddress(logic, "logic_onkey");
-  DEBUG_TRACE;
   logic_onfinger = (logic_onfinger_t)GetProcAddress(logic, "logic_onfinger");
-  DEBUG_TRACE;
   logic_onfixedupdate = (logic_onfixedupdate_t)GetProcAddress(logic, "logic_onfixedupdate");
-  DEBUG_TRACE;
   logic_onupdate = (logic_onupdate_t)GetProcAddress(logic, "logic_onupdate");
-  DEBUG_TRACE;
   return 1;
 }
 
 int unload_logic(void) {
-  DEBUG_TRACE;
   if (FreeLibrary(logic) == 0) {
-    DEBUG_TRACE;
     // Retrieve the error code
     DWORD errorCode = GetLastError();
 
@@ -152,10 +132,8 @@ int unload_logic(void) {
     return 0;
   }
 
-  DEBUG_TRACE;
   logic = NULL;
 
-  DEBUG_TRACE;
   return 1;
 }
 
