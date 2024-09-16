@@ -377,7 +377,6 @@ const compile_reload = async (outname) => {
   } catch (e) {
     console.log('recompilation failed.', e);
   }
-
 };
 
 const watch = async () => {
@@ -398,11 +397,19 @@ const watch = async () => {
 };
 
 const run = async (basename) => {
-  const executable = `${basename}${isWin ? '.exe' : ''} `;
+  const executable = `${basename}${isWin ? '.exe' : ''}`;
+  const exePath = path.join(workspaceFolder, BUILD_PATH, executable);
+
+  try {
+    await fs.stat(exePath);
+  } catch (e) {
+    console.log(".exe is missing. probably failed to compile.", e);
+    return;
+  }
 
   if (isNix || isMac) {
     // chmod +x
-    await fs.chmod(path.join(workspaceFolder, BUILD_PATH, executable), 0o755);
+    await fs.chmod(exePath, 0o755);
   }
   if (isMac) {
     await child_spawn('install_name_tool', [
@@ -412,7 +419,8 @@ const run = async (basename) => {
     // or
     // export DYLD_LIBRARY_PATH=$HOME/VulkanSDK/1.3.236.0/macOS/lib:$DYLD_LIBRARY_PATH
   }
-  await child_spawn(path.join(workspaceFolder, BUILD_PATH, executable));
+
+  await child_spawn(exePath);
 }
 
 (async () => {
