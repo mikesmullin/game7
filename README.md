@@ -16,13 +16,20 @@ C:\> node build_scripts/Makefile.mjs watch
 
 ## Inspirations
 
-- Markus Persson ([@notch](https://x.com/notch))
-   - **(Persson 2021)** *Prelude of the Chambered* - LD48:
-      [playthrough](https://www.youtube.com/watch?v=RE3dRh4wMc8) |
-      [timelapse](https://www.youtube.com/watch?v=IoR-G8Ud0JM) | 
-      [livestream](https://www.youtube.com/watch?v=GQO3SSlsgJM) |
-      [code](https://github.com/skeeto/Prelude-of-the-Chambered) |
-      [host](https://s3.amazonaws.com/ld48/index.html)
+- Markus Persson 🇸🇪 ([@notch](https://x.com/notch))
+   - **(Persson 2021)** *Prelude of the Chambered* - LD48
+     [playthrough](https://www.youtube.com/watch?v=RE3dRh4wMc8) |
+     [timelapse](https://www.youtube.com/watch?v=IoR-G8Ud0JM) | 
+     [livestream](https://www.youtube.com/watch?v=GQO3SSlsgJM) |
+     [code](https://github.com/skeeto/Prelude-of-the-Chambered) |
+     [host](https://s3.amazonaws.com/ld48/index.html)
+- Fyodor Agafonov 🇷🇺 ([Agafonoff](https://store.steampowered.com/pub/agafonoff_dev) | [@agafonoff_tw](https://x.com/agafonoff_tw))
+  - **(Agafonov 2023)** DR LIVESEY ROM AND DEATH EDITION
+    [steam game](https://store.steampowered.com/app/2181930/DR_LIVESEY_ROM_AND_DEATH_EDITION/) |
+    [playthrough](https://www.youtube.com/watch?v=70OfnvGp1MU) |
+    [original music](https://soundcloud.com/ghostfaceplaya/why-not)
+    - "aggressive phonk" genre
+    - 3d and many quads but all bitmap sprite textures [cross-plane billboarding](https://www.reddit.com/r/gamedev/comments/q2qbp2/what_is_it_called_when_two_billboarded_sprites/)
 
 ## References
 
@@ -36,3 +43,4 @@ C:\> node build_scripts/Makefile.mjs watch
    - https://www.youtube.com/watch?v=TZ5a3gCCZYo
    - https://www.youtube.com/watch?v=3IAlJSIjvH0
    - https://www.youtube.com/watch?v=Tc763vPm4Ws
+
