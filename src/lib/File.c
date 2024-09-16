@@ -7,6 +7,7 @@
 
 int File__StartMonitor(FileMonitor_t* fm) {
   // Open a handle to the directory
+  // LOG_DEBUGF("watching dir: %s, file: %s", fm->directory, fm->fileName);
   fm->hDir = CreateFile(
       fm->directory,
       FILE_LIST_DIRECTORY,
@@ -103,13 +104,13 @@ int File__CheckMonitor(FileMonitor_t* fm, char* file) {
             &fm->bytesReturned,
             &fm->overlapped,
             NULL)) {
-      LOG_DEBUGF("Failed to continue monitoring. Error: %lu\n", GetLastError());
+      LOG_DEBUGF("Failed to continue watching file. Error: %lu\n", GetLastError());
       return 1;
     }
   } else if (waitStatus == WAIT_TIMEOUT) {
     // this is expected most times
   } else {
-    LOG_DEBUGF("Wait failed. Error: %lu\n", GetLastError());
+    LOG_DEBUGF("Error: File watcher wait. Status: %X, Error: %lu\n", waitStatus, GetLastError());
     return 1;
   }
 

@@ -24,4 +24,6 @@ typedef struct {
   u64 total_size;
 } String8List;
 
+String8* str8_alloc(Arena_t* a, const char* str);
+
 #endif  // STRING_H

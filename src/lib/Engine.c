@@ -7,6 +7,7 @@
 #include <cglm/cglm.h>
 #include <windows.h>
 
+#include "Arena.h"
 #include "Audio.h"
 #include "File.h"
 #include "Finger.h"
@@ -15,12 +16,14 @@
 #include "Keyboard.h"
 #include "Math.h"
 #include "SDL.h"
+#include "String.h"
 #include "Timer.h"
 #include "Vulkan.h"
 #include "Window.h"
 
-static Engine__State_t* state = &(Engine__State_t){};
-static FileMonitor_t* fm = &(FileMonitor_t){.directory = "src/game", .fileName = "Logic.c.dll"};
+static Engine__State_t* state;
+static FileMonitor_t* fm;
+static Arena_t arena;
 
 static void physicsCallback(const f64 deltaTime);
 static void renderCallback(const f64 deltaTime);
@@ -35,7 +38,7 @@ static int check_load_logic() {
     strcat(path, file);
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
-    logic_onload(state);
+    logic_onload(&arena, state);
     logic_onreload();
     return r;
   }
@@ -46,30 +49,28 @@ static u32 Timer__Now() {
   return Timer__NowMilliseconds();
 }
 
-static u32 M__urandom() {
-  return Math__urandom();
-}
-
-static u32 M__urandom2(u32 a, u32 b) {
-  return Math__urandom2(a, b);
-}
-
 int Engine__Loop() {
   LOG_INFOF("begin engine.");
+
+  arena = Arena__Alloc(1024 * 1024 * 50);  // MB
+  state = Arena__Push(&arena, sizeof(Engine__State_t));
+  fm = Arena__Push(&arena, sizeof(FileMonitor_t));
+  char* DLL_PATH = "src/game/Logic.c.dll";
+  fm->directory = str8_alloc(&arena, "src/game")->str;
+  fm->fileName = str8_alloc(&arena, "Logic.c.dll")->str;
+
+  Timer__MeasureCycles();
+  // initialize random seed using current time
+  srand(Timer__NowMilliseconds());
+
   state->check_load_logic = &check_load_logic;
 
   File__StartMonitor(fm);
 
-  if (!load_logic("src/game/Logic.c.dll")) {
+  if (!load_logic(DLL_PATH)) {
     return 1;
   }
-  logic_onload(state);
-
-  Timer__MeasureCycles();
-
-  // initialize random seed using current time
-  srand(Timer__NowMilliseconds());
-
+  logic_onload(&arena, state);
   logic_oninit_data();
 
   Vulkan__InitDriver1(&state->s_Vulkan);
@@ -82,8 +83,6 @@ int Engine__Loop() {
   state->Timer__NowSeconds = &Timer__NowSeconds;
   state->Timer__NowMilliseconds = &Timer__NowMilliseconds;
   state->Timer__Now = &Timer__Now;
-  state->M__urandom = &M__urandom;
-  state->M__urandom2 = &M__urandom2;
 
   Window__New(
       &state->s_Window,
@@ -201,6 +200,7 @@ int Engine__Loop() {
   Vulkan__Cleanup(&state->s_Vulkan);
   Audio__Shutdown();
   Window__Shutdown(&state->s_Window);
+  Arena__Free(&arena);
   LOG_INFOF("end engine.");
   return 0;
 }

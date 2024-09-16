@@ -1,5 +1,6 @@
 #include "Logic.h"
 
+#include "../lib/Arena.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
@@ -7,12 +8,12 @@
 #include "../lib/Math.h"
 #include "ui/Screen.h"
 
-static Engine__State_t* state;
-static Bitmap_t brush;
-static u8 brushBuf[64 * 64 * 4];
+static Arena_t* arena;
+static Engine__State_t* _G;
+static Logic__State_t* local;
 
 static f32 PixelsToUnits(u32 pixels) {
-  return (f32)pixels / state->PIXELS_PER_UNIT;
+  return (f32)pixels / local->PIXELS_PER_UNIT;
 }
 
 static u8 Animate(AnimationState_t* state, f64 deltaTime) {
@@ -24,94 +25,98 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
 }
 
 // on process start
-__declspec(dllexport) void logic_onload(Engine__State_t* _state) {
-  state = _state;
+__declspec(dllexport) void logic_onload(Arena_t* a, Engine__State_t* _state) {
+  arena = a;
+  _G = _state;
+  local = _G->localState;
 }
 
 // on init (data only)
-// TODO: move to external data file
 __declspec(dllexport) void logic_oninit_data() {
-  state->WINDOW_TITLE = "Retro";
-  state->ENGINE_NAME = "MS2024";
-  state->WINDOW_WIDTH = 320;
-  state->WINDOW_HEIGHT = 320;
+  local = Arena__Push(arena, sizeof(Logic__State_t));
+  _G->localState = local;
+
+  _G->WINDOW_TITLE = "Retro";
+  _G->ENGINE_NAME = "MS2024";
+  _G->WINDOW_WIDTH = 320;
+  _G->WINDOW_HEIGHT = 320;
 
   Bitmap__Construct(
-      &state->screen,
-      state->WINDOW_WIDTH,
-      state->WINDOW_HEIGHT,
+      &local->screen,
+      _G->WINDOW_WIDTH,
+      _G->WINDOW_HEIGHT,
       4 /*RGBA*/,
-      state->screenBuf);
+      local->screenBuf);
 
-  state->PHYSICS_FPS = 50;
-  state->RENDER_FPS = 60;
-  state->PLAYER_WALK_SPEED = 1.0f / 3;  // per-second
-  state->PLAYER_ZOOM_SPEED = 1.0f / 8;  // per-second
+  _G->PHYSICS_FPS = 50;
+  _G->RENDER_FPS = 60;
+  local->PLAYER_WALK_SPEED = 1.0f / 3;  // per-second
+  local->PLAYER_ZOOM_SPEED = 1.0f / 8;  // per-second
 
-  state->isVBODirty = true;
-  state->isUBODirty[0] = true;
-  state->isUBODirty[1] = true;
-  state->VEC3_Y_UP[0] = 0;
-  state->VEC3_Y_UP[1] = 1;
-  state->VEC3_Y_UP[2] = 0;
-  state->CANVAS_WH = 100;
-  state->PIXELS_PER_UNIT = state->CANVAS_WH;
-  state->instanceCount = 1;
+  local->isVBODirty = true;
+  local->isUBODirty[0] = true;
+  local->isUBODirty[1] = true;
+  local->VEC3_Y_UP[0] = 0;
+  local->VEC3_Y_UP[1] = 1;
+  local->VEC3_Y_UP[2] = 0;
+  local->CANVAS_WH = 100;
+  local->PIXELS_PER_UNIT = local->CANVAS_WH;
+  _G->instanceCount = 1;
 
-  state->indices[0] = 0;
-  state->indices[1] = 1;
-  state->indices[2] = 2;
-  state->indices[3] = 2;
-  state->indices[4] = 3;
-  state->indices[5] = 0;
+  _G->indices[0] = 0;
+  _G->indices[1] = 1;
+  _G->indices[2] = 2;
+  _G->indices[3] = 2;
+  _G->indices[4] = 3;
+  _G->indices[5] = 0;
 
-  state->vertices[0].vertex[0] = -0.5f;
-  state->vertices[0].vertex[1] = -0.5f;
-  state->vertices[1].vertex[0] = 0.5f;
-  state->vertices[1].vertex[1] = -0.5f;
-  state->vertices[2].vertex[0] = 0.5f;
-  state->vertices[2].vertex[1] = 0.5f;
-  state->vertices[3].vertex[0] = -0.5f;
-  state->vertices[3].vertex[1] = 0.5f;
+  _G->vertices[0].vertex[0] = -0.5f;
+  _G->vertices[0].vertex[1] = -0.5f;
+  _G->vertices[1].vertex[0] = 0.5f;
+  _G->vertices[1].vertex[1] = -0.5f;
+  _G->vertices[2].vertex[0] = 0.5f;
+  _G->vertices[2].vertex[1] = 0.5f;
+  _G->vertices[3].vertex[0] = -0.5f;
+  _G->vertices[3].vertex[1] = 0.5f;
 
-  state->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
-  state->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
+  _G->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
+  _G->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  state->textureFiles[0] = "../assets/textures/atlas.png";
+  _G->textureFiles[0] = "../assets/textures/atlas.png";
 
-  state->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
+  local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
-  state->newTexId = 0;
+  local->newTexId = 0;
 }
 
 __declspec(dllexport) void logic_oninit_compute() {
-  state->Audio__LoadAudioFile(state->audioFiles[AUDIO_PICKUP_COIN]);
+  _G->Audio__LoadAudioFile(local->audioFiles[AUDIO_PICKUP_COIN]);
 
   // setup scene
-  glm_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
-  glm_vec3_copy((vec3){0, 0, 0}, state->world.look);
+  glm_vec3_copy((vec3){0, 0, 1.5}, _G->world.cam);
+  glm_vec3_copy((vec3){0, 0, 0}, _G->world.look);
 
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].rot);
+  glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].pos);
+  glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].rot);
   glm_vec3_copy(
       (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},
-      state->instances[INSTANCE_FLOOR_0].scale);
-  state->instances[INSTANCE_FLOOR_0].texId = 0;
-  state->instanceCount = 1;
+      _G->instances[INSTANCE_FLOOR_0].scale);
+  _G->instances[INSTANCE_FLOOR_0].texId = 0;
+  _G->instanceCount = 1;
 
-  state->isUBODirty[0] = true;
-  state->isUBODirty[1] = true;
+  local->isUBODirty[0] = true;
+  local->isUBODirty[1] = true;
 }
 
 __declspec(dllexport) void logic_onreload() {
   LOG_DEBUGF("Logic dll loaded.");
-  state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  _G->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
   // compose brush
-  Bitmap__Construct(&brush, 64, 64, 4 /*RGBA*/, brushBuf);
-  srand(state->Timer__Now());
-  for (u64 i = 0; i < brush.w * brush.h; i++) {
-    ((u32*)brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
+  Bitmap__Construct(&local->brush, 64, 64, 4 /*RGBA*/, local->brushBuf);
+  srand(_G->Timer__Now());
+  for (u64 i = 0; i < local->brush.w * local->brush.h; i++) {
+    ((u32*)local->brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
   }
 
   // update rgba image texture
@@ -134,8 +139,8 @@ __declspec(dllexport) void logic_onkey() {
   //     state->g_Keyboard__state->shiftKey,
   //     state->g_Keyboard__state->metaKey);
 
-  if (41 == state->g_Keyboard__state->code) {  // ESC
-    state->s_Window.quit = true;
+  if (41 == _G->g_Keyboard__state->code) {  // ESC
+    _G->s_Window.quit = true;
   }
 }
 
@@ -166,13 +171,12 @@ __declspec(dllexport) void logic_onfinger() {
   //     state->g_Finger__state->button_x1,
   //     state->g_Finger__state->button_x2);
 
-  if (FINGER_SCROLL == state->g_Finger__state->event) {
+  if (FINGER_SCROLL == _G->g_Finger__state->event) {
     // TODO: how to animate camera zoom with spring damping/smoothing?
     // TODO: how to move this into physics callback? or is it better not to?
-    state->world.cam[2] +=
-        -state->g_Finger__state->wheel_y * state->PLAYER_ZOOM_SPEED /* deltaTime*/;
-    state->isUBODirty[0] = true;
-    state->isUBODirty[1] = true;
+    _G->world.cam[2] += -_G->g_Finger__state->wheel_y * local->PLAYER_ZOOM_SPEED /* deltaTime*/;
+    local->isUBODirty[0] = true;
+    local->isUBODirty[1] = true;
   }
 }
 
@@ -204,62 +208,55 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
     }
   }
 
-  if (state->isVBODirty) {
-    state->isVBODirty = false;
+  if (local->isVBODirty) {
+    local->isVBODirty = false;
 
-    state->s_Vulkan.m_instanceCount = state->instanceCount;
-    state->Vulkan__UpdateVertexBuffer(
-        &state->s_Vulkan,
-        1,
-        sizeof(state->instances),
-        state->instances);
+    _G->s_Vulkan.m_instanceCount = _G->instanceCount;
+    _G->Vulkan__UpdateVertexBuffer(&_G->s_Vulkan, 1, sizeof(_G->instances), _G->instances);
   }
 
-  if (state->isUBODirty[state->s_Vulkan.m_currentFrame]) {
-    state->isUBODirty[state->s_Vulkan.m_currentFrame] = false;
+  if (local->isUBODirty[_G->s_Vulkan.m_currentFrame]) {
+    local->isUBODirty[_G->s_Vulkan.m_currentFrame] = false;
 
     glm_lookat(
-        state->world.cam,
-        state->world.look,
-        state->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
-        state->ubo1.view);
+        _G->world.cam,
+        _G->world.look,
+        local->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
+        _G->ubo1.view);
 
-    state->s_Vulkan.m_aspectRatio = state->world.aspect;  // sync viewport
+    _G->s_Vulkan.m_aspectRatio = _G->world.aspect;  // sync viewport
 
     glm_perspective(
         glm_rad(45.0f),  // half the actual 90deg fov
-        state->world.aspect,
+        _G->world.aspect,
         0.1f,  // TODO: adjust clipping range for z depth?
         10.0f,
-        state->ubo1.proj);
+        _G->ubo1.proj);
 
     // glm_ortho(-0.5f, +0.5f, -0.5f, +0.5f, 0.1f, 10.0f, ubo1.proj);
-    glm_vec2_copy(state->world.user1, state->ubo1.user1);
-    glm_vec2_copy(state->world.user2, state->ubo1.user2);
+    glm_vec2_copy(_G->world.user1, _G->ubo1.user1);
+    glm_vec2_copy(_G->world.user2, _G->ubo1.user2);
 
     // TODO: not sure i make use of one UBO per frame, really
-    state->Vulkan__UpdateUniformBuffer(
-        &state->s_Vulkan,
-        state->s_Vulkan.m_currentFrame,
-        &state->ubo1);
+    _G->Vulkan__UpdateUniformBuffer(&_G->s_Vulkan, _G->s_Vulkan.m_currentFrame, &_G->ubo1);
   }
 
   // clear frame
 
-  for (u64 i = 0; i < state->screen.w * state->screen.h; i++) {
-    ((u32*)state->screen.buf)[i] = 0;
+  for (u64 i = 0; i < local->screen.w * local->screen.h; i++) {
+    ((u32*)local->screen.buf)[i] = 0;
   }
 
   // blit brush to frame
   u32 xo, yo;
   for (int i = 0; i < 100; i++) {
-    xo = (Math__sin((state->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
-    yo = (Math__cos((state->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
+    xo = (Math__sin((_G->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
+    yo = (Math__cos((_G->Timer__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
     Bitmap__Draw(
-        &brush,
-        &state->screen,
-        (state->WINDOW_WIDTH - 64) / 2 + xo,
-        (state->WINDOW_HEIGHT - 64) / 2 + yo);
+        &local->brush,
+        &local->screen,
+        (_G->WINDOW_WIDTH - 64) / 2 + xo,
+        (_G->WINDOW_HEIGHT - 64) / 2 + yo);
   }
-  state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &state->screen);
+  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
 }
