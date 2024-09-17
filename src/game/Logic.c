@@ -99,7 +99,7 @@ __declspec(dllexport) void logic_oninit_compute() {
   glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].pos);
   glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].rot);
   glm_vec3_copy(
-      (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},  // AGBR
+      (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},  // ABGR
       _G->instances[INSTANCE_FLOOR_0].scale);
   _G->instances[INSTANCE_FLOOR_0].texId = 0;
   _G->instanceCount = 1;
@@ -193,6 +193,11 @@ static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
 static u16 frames = 0;
 
+s32 invert_endianness(s32 value) {
+  return ((value >> 24) & 0x000000FF) | ((value >> 8) & 0x0000FF00) | ((value << 8) & 0x00FF0000) |
+         ((value << 24) & 0xFF000000);
+}
+
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
@@ -200,7 +205,7 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   accumulator2 += deltaTime;
   frames++;
   if (accumulator2 >= FPS_LOG_TIME_STEP) {
-    LOG_DEBUGF("%dfps", frames);
+    // LOG_DEBUGF("%dfps", frames);
     frames = 0;
 
     while (accumulator2 >= FPS_LOG_TIME_STEP) {
@@ -248,15 +253,83 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   }
 
   // blit brush to frame
-  u32 xo, yo;
-  for (int i = 0; i < 100; i++) {
-    xo = (Math__sin((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
-    yo = (Math__cos((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
-    Bitmap__Draw(
-        &local->brush,
-        &local->screen,
-        (_G->WINDOW_WIDTH - 64) / 2 + xo,
-        (_G->WINDOW_HEIGHT - 64) / 2 + yo);
+  // u32 xo, yo;
+  // for (int i = 0; i < 100; i++) {
+  //   xo = (Math__sin((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
+  //   yo = (Math__cos((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
+  //   Bitmap__Draw(
+  //       &local->brush,
+  //       &local->screen,
+  //       (_G->WINDOW_WIDTH - 64) / 2 + xo,
+  //       (_G->WINDOW_HEIGHT - 64) / 2 + yo);
+  // }
+
+  // try to draw 3d scene
+  s32 height = 320;
+  s32 width = 320;
+  s32 color = 0;
+
+  // checkerboard horizon
+  for (u32 y = 0; y < height; y++) {
+    s32 yd = y - height / 2;
+
+    s32 z = height / (yd == 0 ? 1 : yd);
+
+    for (u32 x = 0; x < width; x++) {
+      s32 xd = x - width / 2;
+      xd += z;
+      s32 xx = xd & 0xf;
+      s32 zz = z & 0xf;
+      color = xx << 7;  // *128 = <<7 bits (!hex) makes bands/checkers
+
+      color = invert_endianness(color);
+      // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
+      color ^= 0x00cc0000;  // ABGR
+      ((u32*)local->screen.buf)[x + y * width] = color;
+    }
   }
+
+  // notch's actual formula depends on java's BigDecimal accuracy in decimal division
+  // for (u32 y = 0; y < height; y++) {
+  //   s32 yd = (y - height / 2) / height;
+  //   // if (yd == 0) continue;
+
+  //   s32 z = 6 / (yd == 0 ? 1 : yd);
+
+  //   for (u32 x = 0; x < width; x++) {
+  //     s32 xd = (x - width / 2) / height;
+  //     xd += z;
+  //     s32 xx = (xd) & 0xf;  // keep lower 1111 bits
+  //     s32 zz = (z) & 0xf;   // keep lower 1111 bits
+  //     // color = xx * 128 + zz * 128 * 256;  // *128 = <<7 bits (!hex) makes bands/checkers
+  //     // color = xx * 16 + zz * 16 * 256;  // *128 = <<7 bits (!hex) makes bands/checkers
+  //     color = (xx * 16) | (zz * 16) << 8;  // *128 = <<7 bits (!hex) makes bands/checkers
+
+  //     color = invert_endianness(color);
+  //     // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
+  //     color ^= 0x00ff0000;  // ABGR
+  //     ((u32*)local->screen.buf)[x + y * width] = color;
+  //   }
+  // }
+
+  // horizontal line horizon
+  // for (u32 y = 0; y < height; y++) {
+  //   s32 yd = y - height / 2;
+
+  //   s32 z = 64 * height / (yd == 0 ? 1 : yd);
+
+  //   for (u32 x = 9; x < width; x++) {
+  //     s32 xd = (x - width / 2) / height * 64;
+  //     xd += z;
+  //     s32 xx = xd & 15;
+  //     s32 zz = z & 15;
+  //     color = (xx * 16) | (zz * 16) << 8;
+  //     color = invert_endianness(color);
+  //     // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
+  //     color ^= 0x00cc0000;  // ABGR
+  //     ((u32*)local->screen.buf)[x + y * width] = color;
+  //   }
+  // }
+
   _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
 }
