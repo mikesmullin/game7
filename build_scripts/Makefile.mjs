@@ -333,7 +333,7 @@ const compile_reload = async (outname) => {
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
-      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c') && !file.includes('Bitmap.c') && !file.includes('Bitmap3D.c') && !file.includes('Screen.c') && !file.includes('Arena.c')) { continue; }
+      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c') && !file.includes('Bitmap.c') && !file.includes('Bitmap3D.c') && !file.includes('Screen.c') && !file.includes('Arena.c') && !file.includes('String.c')) { continue; }
       dsts.push(rel(workspaceFolder, file));
     }
   }

@@ -1,6 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <stdio.h>
+
 #include "Arena.h"
 #include "Base.h"
 
@@ -25,5 +27,7 @@ typedef struct {
 } String8List;
 
 String8* str8_alloc(Arena_t* a, const char* str);
+void str8__fputs(String8Node* s, FILE* stream);
+String8Node* str8n__allocf(Arena_t* a, String8Node* first, const char* format, u32 len, ...);
 
 #endif  // STRING_H

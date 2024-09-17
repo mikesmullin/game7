@@ -4,6 +4,7 @@
 #define CGLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <cglm/cglm.h>
 
+#include "../lib/Arena.h"
 #include "../lib/Base.h"
 #include "../lib/Bitmap.h"
 
@@ -67,6 +68,8 @@ typedef struct {
   f32 PLAYER_ZOOM_SPEED;
 
   u8 newTexId;
+
+  Arena_t* debugArena;
 } Logic__State_t;
 
 #endif  // LOGIC_H

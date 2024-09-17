@@ -6,6 +6,7 @@
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
+#include "../lib/String.h"
 #include "ui/Screen.h"
 
 static Arena_t* arena;
@@ -87,6 +88,7 @@ __declspec(dllexport) void logic_oninit_data() {
   local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
   local->newTexId = 0;
+  local->debugArena = Arena__SubAlloc(arena, 1024 * 50);  // MB
 }
 
 __declspec(dllexport) void logic_oninit_compute() {
@@ -191,6 +193,8 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
 
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
+static f64 accumulator3 = 0.0f;
+static const f32 DEBUG_LOG_TIME_STEP = 5.0f;  // every 5sec
 static u16 frames = 0;
 
 s32 invert_endianness(s32 value) {
@@ -202,14 +206,26 @@ s32 invert_endianness(s32 value) {
 __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
 
+  bool onsecond = false;
   accumulator2 += deltaTime;
   frames++;
   if (accumulator2 >= FPS_LOG_TIME_STEP) {
+    onsecond = true;
     // LOG_DEBUGF("%dfps", frames);
     frames = 0;
 
     while (accumulator2 >= FPS_LOG_TIME_STEP) {
       accumulator2 -= FPS_LOG_TIME_STEP;
+    }
+  }
+
+  bool on5sec = false;
+  accumulator3 += deltaTime;
+  if (accumulator3 >= DEBUG_LOG_TIME_STEP) {
+    on5sec = true;
+
+    while (accumulator3 >= DEBUG_LOG_TIME_STEP) {
+      accumulator3 -= DEBUG_LOG_TIME_STEP;
     }
   }
 
@@ -270,23 +286,29 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   s32 color = 0;
   s32 g = 16;  // grid size
   s32 y = 0, yd = 0, z = 0, x = 0, xd = 0;
+  Arena__Reset(local->debugArena);
+  String8Node* sn = NULL;
+  sn = str8n__allocf(local->debugArena, sn, "%s", 5, "====");
 
   // grid horizon
   for (y = 0; y < height; y++) {
-    yd = y - height / 2;
-
+    yd = y - height / 2;    // (0..320)-320/2 = (-160..160)
     if (yd == 0) continue;  // avoid divide by zero
-    z = (height * 2 * 10) / yd;
+    // z = (height * 2 * 10) / yd;  // 6400/ans = (-40..40)
+    z = 320 / yd;  // 320/ans = (-2..2)
 
     for (x = 0; x < width; x++) {
-      xd = x - width / 2;
-      xd += z;
+      xd = x - width / 2;  // (0..320)-320/2 = (-160..160)
+      // xd += z;             // (-160..160) + (-40..40) = (-200..200)
+      xd += z;  // (-160..160) + (-2..2) = (-162..162)
+      if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xd);
 
-      color = !(xd % g) || !(z % g);
+      color = !(xd % g) || !(yd % g);
       color *= 0xff00ff00;  // AGBR
 
       ((u32*)local->screen.buf)[x + y * width] = color;
     }
+    if (on5sec && y == 1) str8__fputs(sn, stdout);
   }
 
   _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
