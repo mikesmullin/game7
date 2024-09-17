@@ -268,68 +268,26 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   s32 height = 320;
   s32 width = 320;
   s32 color = 0;
+  s32 g = 16;  // grid size
+  s32 y = 0, yd = 0, z = 0, x = 0, xd = 0;
 
-  // checkerboard horizon
-  for (u32 y = 0; y < height; y++) {
-    s32 yd = y - height / 2;
+  // grid horizon
+  for (y = 0; y < height; y++) {
+    yd = y - height / 2;
 
-    s32 z = height / (yd == 0 ? 1 : yd);
+    if (yd == 0) continue;  // avoid divide by zero
+    z = (height * 2 * 10) / yd;
 
-    for (u32 x = 0; x < width; x++) {
-      s32 xd = x - width / 2;
+    for (x = 0; x < width; x++) {
+      xd = x - width / 2;
       xd += z;
-      s32 xx = xd & 0xf;
-      s32 zz = z & 0xf;
-      color = xx << 7;  // *128 = <<7 bits (!hex) makes bands/checkers
 
-      color = invert_endianness(color);
-      // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
-      color ^= 0x00cc0000;  // ABGR
+      color = !(xd % g) || !(z % g);
+      color *= 0xff00ff00;  // AGBR
+
       ((u32*)local->screen.buf)[x + y * width] = color;
     }
   }
-
-  // notch's actual formula depends on java's BigDecimal accuracy in decimal division
-  // for (u32 y = 0; y < height; y++) {
-  //   s32 yd = (y - height / 2) / height;
-  //   // if (yd == 0) continue;
-
-  //   s32 z = 6 / (yd == 0 ? 1 : yd);
-
-  //   for (u32 x = 0; x < width; x++) {
-  //     s32 xd = (x - width / 2) / height;
-  //     xd += z;
-  //     s32 xx = (xd) & 0xf;  // keep lower 1111 bits
-  //     s32 zz = (z) & 0xf;   // keep lower 1111 bits
-  //     // color = xx * 128 + zz * 128 * 256;  // *128 = <<7 bits (!hex) makes bands/checkers
-  //     // color = xx * 16 + zz * 16 * 256;  // *128 = <<7 bits (!hex) makes bands/checkers
-  //     color = (xx * 16) | (zz * 16) << 8;  // *128 = <<7 bits (!hex) makes bands/checkers
-
-  //     color = invert_endianness(color);
-  //     // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
-  //     color ^= 0x00ff0000;  // ABGR
-  //     ((u32*)local->screen.buf)[x + y * width] = color;
-  //   }
-  // }
-
-  // horizontal line horizon
-  // for (u32 y = 0; y < height; y++) {
-  //   s32 yd = y - height / 2;
-
-  //   s32 z = 64 * height / (yd == 0 ? 1 : yd);
-
-  //   for (u32 x = 9; x < width; x++) {
-  //     s32 xd = (x - width / 2) / height * 64;
-  //     xd += z;
-  //     s32 xx = xd & 15;
-  //     s32 zz = z & 15;
-  //     color = (xx * 16) | (zz * 16) << 8;
-  //     color = invert_endianness(color);
-  //     // if (y == 319 && x == 319) LOG_DEBUGF("u32 %u hex %08X", color, color);
-  //     color ^= 0x00cc0000;  // ABGR
-  //     ((u32*)local->screen.buf)[x + y * width] = color;
-  //   }
-  // }
 
   _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
 }
