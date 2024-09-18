@@ -291,12 +291,15 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   Arena__Reset(local->debugArena);
   String8Node* sn = NULL;
   sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
+
+  d = Math__map(accumulator3, 0, 5.0f, 0, 100) * SCALE;
+
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
-    yd = (y - H / 2) * H;
+    yd = (y - H / 2) * H;   // -51200...51200
     if (yd == 0) continue;  // skip row to avoid divide by zero
-    z = d / yd;
-    if (z == 0) continue;  // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
+    z = d / yd;             // (100*1024) / (-51200)
+    if (z == 0) continue;   // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
 
     for (x = 0; x < W; x++) {
       xd = ((x - W / 2) * H);
