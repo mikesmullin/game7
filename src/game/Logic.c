@@ -286,7 +286,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   s32 x, y;
   f32 yd = 0, z = 0, xd = 0;
   u32 color = 0;
-  f32 eye = Math__sin((currentTime / 20) / 10.0f) * 2;
+  f32 eye = Math__sin((currentTime / 20) / 500) * 2;
   f32 d = 4.0f;  // tile size
 
   // tiled gradient horizon
@@ -306,8 +306,8 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
       xd = (x - W / 2.0f) / H;
       xd *= z;
 
-      u32 xx = (u32)(xd + (currentTime / 20) * 0.1f) & 7;
-      u32 yy = (u32)(z + (currentTime / 20) * 0.1f) & 7;
+      u32 xx = (u32)(xd + (currentTime / 20) / 100) & 7;
+      u32 yy = (u32)(z + (currentTime / 20) / 100) & 7;
       color = ((u32*)local->atlas.buf)[(xx + yy * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
 
