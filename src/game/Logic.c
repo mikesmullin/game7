@@ -281,34 +281,34 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   // }
 
   // try to draw 3d scene
-  s32 height = 320;
-  s32 width = 320;
+  u32 SCALE = 1024;  // factor for fixed-point arithmetic (avoids f32 decimals)
+  s32 H = 320;
+  s32 W = 320;
+  s32 G = 16;  // grid size
   s32 color = 0;
-  s32 g = 16;  // grid size
   s32 y = 0, yd = 0, z = 0, x = 0, xd = 0;
+  s32 d = 100 * SCALE;  // distance
   Arena__Reset(local->debugArena);
   String8Node* sn = NULL;
-  sn = str8n__allocf(local->debugArena, sn, "%s", 5, "====");
+  sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
+  // tiled gradient horizon
+  for (y = 0; y < H; y++) {
+    yd = (y - H / 2) * H;
+    if (yd == 0) continue;  // skip row to avoid divide by zero
+    z = d / yd;
+    if (z == 0) continue;  // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
 
-  // grid horizon
-  for (y = 0; y < height; y++) {
-    yd = y - height / 2;    // (0..320)-320/2 = (-160..160)
-    if (yd == 0) continue;  // avoid divide by zero
-    // z = (height * 2 * 10) / yd;  // 6400/ans = (-40..40)
-    z = 320 / yd;  // 320/ans = (-2..2)
-
-    for (x = 0; x < width; x++) {
-      xd = x - width / 2;  // (0..320)-320/2 = (-160..160)
-      // xd += z;             // (-160..160) + (-40..40) = (-200..200)
-      xd += z;  // (-160..160) + (-2..2) = (-162..162)
-      if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xd);
-
-      color = !(xd % g) || !(yd % g);
+    for (x = 0; x < W; x++) {
+      xd = ((x - W / 2) * H);
+      xd *= z;
+      xd /= SCALE;
+      yd /= SCALE;
+      // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
+      color = (xd * G) | (yd * G);
       color *= 0xff00ff00;  // AGBR
-
-      ((u32*)local->screen.buf)[x + y * width] = color;
+      ((u32*)local->screen.buf)[x + y * W] = color;
     }
-    if (on5sec && y == 1) str8__fputs(sn, stdout);
+    // if (on5sec && y == 1) str8__fputs(sn, stdout);
   }
 
   _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
