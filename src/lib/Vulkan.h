@@ -158,7 +158,6 @@ void Vulkan__CreateBuffer(
     VkBuffer* buffer,
     VkDeviceMemory* bufferMemory);
 void Vulkan__FReadImage(Bitmap_t* bmp, const char* filePath);
-void Vulkan__FCloseImage(const Bitmap_t* bmp);
 void Vulkan__CreateTextureImage(Vulkan_t* self, const Bitmap_t* bmp);
 void Vulkan__UpdateTextureImage(Vulkan_t* self, const Bitmap_t* bmp);
 u32 Vulkan__FindMemoryType(Vulkan_t* self, u32 typeFilter, VkMemoryPropertyFlags properties);

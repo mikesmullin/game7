@@ -35,11 +35,6 @@ __declspec(dllexport) void logic_oninit_data() {
   local = Arena__Push(arena, sizeof(Logic__State_t));
   _G->localState = local;
 
-  // Bitmap_t bmp;
-  // Vulkan__FReadImage(&bmp, state->textureFiles[0]);
-  // Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
-  // Vulkan__FCloseImage(&bmp);
-
   _G->WINDOW_TITLE = "Retro";
   _G->ENGINE_NAME = "MS2024";
   u32 dim = 320;
@@ -84,11 +79,11 @@ __declspec(dllexport) void logic_oninit_data() {
   _G->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
   _G->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  _G->textureFiles[0] = "../assets/textures/atlas.png";
-
   local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
   local->newTexId = 0;
+  _G->Vulkan__FReadImage(&local->atlas, "../assets/textures/atlas.png");
+
   local->debugArena = Arena__SubAlloc(arena, 1024 * 50);  // MB
 }
 
@@ -116,17 +111,16 @@ __declspec(dllexport) void logic_onreload() {
   _G->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
   // compose brush
-  Bitmap__Alloc(arena, &local->brush, 64, 64, 4 /*RGBA*/);
-  srand(_G->Time__Now());
-  for (u64 i = 0; i < local->brush->w * local->brush->h; i++) {
-    ((u32*)local->brush->buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
-  }
+  // Bitmap__Alloc(&local->brush, 64, 64, 4 /*RGBA*/);
+  // srand(_G->Time__Now());
+  // for (u64 i = 0; i < local->brush.w * local->brush.h; i++) {
+  //   ((u32*)local->brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
+  // }
 
   // update rgba image texture
   // Bitmap_t atlas;
   // state->Vulkan__FReadImage(&atlas, state->textureFiles[0]);
   // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &atlas);
-  // state->Vulkan__FCloseImage(&atlas);
 }
 
 __declspec(dllexport) void logic_onkey() {
@@ -265,8 +259,8 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
 
   // clear frame
 
-  for (u64 i = 0; i < local->screen->w * local->screen->h; i++) {
-    ((u32*)local->screen->buf)[i] = 0;
+  for (u64 i = 0; i < local->screen.w * local->screen.h; i++) {
+    ((u32*)local->screen.buf)[i] = 0;
   }
 
   // blit brush to frame
@@ -286,7 +280,7 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   s32 H = 320;
   s32 W = 320;
   s32 G = 16;  // grid size
-  s32 color = 0;
+  u32 color = 0;
   s32 y = 0, yd = 0, z = 0, x = 0, xd = 0;
   s32 d = 100 * SCALE;  // distance
   Arena__Reset(local->debugArena);
@@ -303,17 +297,18 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
     if (z == 0) continue;   // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
 
     for (x = 0; x < W; x++) {
-      xd = ((x - W / 2) /* *H*/);
+      xd = ((x - W / 2) * H);
       xd *= z;
       xd /= SCALE;
       yd /= SCALE;
       // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
       color = (xd * G) | (yd * G);
       color *= 0xff00ff00;  // ABGR
-      ((u32*)local->screen->buf)[x + y * W] = color;
+      color = ((u32*)local->atlas.buf)[(xd + yd * 64) % local->atlas.len];
+      ((u32*)local->screen.buf)[x + y * W] = color;
     }
     // if (on5sec && y == 1) str8__fputs(sn, stdout);
   }
 
-  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, local->screen);
+  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
 }

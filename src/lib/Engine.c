@@ -59,6 +59,11 @@ int Engine__Loop() {
   srand(Time__Now());
 
   state->check_load_logic = &check_load_logic;
+  state->Vulkan__FReadImage = &Vulkan__FReadImage;
+  state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
+  state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
+  state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
+  state->Time__Now = &Time__Now;
 
   File__StartMonitor(fm);
 
@@ -69,13 +74,6 @@ int Engine__Loop() {
   logic_oninit_data();
 
   Vulkan__InitDriver1(&state->s_Vulkan);
-
-  state->Vulkan__FReadImage = &Vulkan__FReadImage;
-  state->Vulkan__FCloseImage = &Vulkan__FCloseImage;
-  state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
-  state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
-  state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
-  state->Time__Now = &Time__Now;
 
   Window__New(
       &state->s_Window,
@@ -157,13 +155,13 @@ int Engine__Loop() {
   Vulkan__CreateFrameBuffers(&state->s_Vulkan);
   Vulkan__CreateCommandPool(&state->s_Vulkan);
   // create temporary base texture matching canvas dimensions
-  Bitmap_t* bmp;
-  Bitmap__Init(bmp, state->CANVAS_WIDTH, state->CANVAS_WIDTH, 4);
-  u8 bmpbuf[bmp->len];
+  Bitmap_t bmp;
+  Bitmap__Init(&bmp, state->CANVAS_WIDTH, state->CANVAS_WIDTH, 4);
+  u8 bmpbuf[bmp.len];
   // fill with black
-  memset(bmpbuf, 0, bmp->len);
-  bmp->buf = bmpbuf;
-  Vulkan__CreateTextureImage(&state->s_Vulkan, bmp);
+  memset(bmpbuf, 0, bmp.len);
+  bmp.buf = bmpbuf;
+  Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
   Vulkan__CreateTextureImageView(&state->s_Vulkan);
   Vulkan__CreateTextureSampler(&state->s_Vulkan);
   Vulkan__CreateVertexBuffer(&state->s_Vulkan, 0, sizeof(state->vertices), state->vertices);
@@ -177,6 +175,7 @@ int Engine__Loop() {
   state->s_Vulkan.m_drawIndexCount = ARRAY_COUNT(state->indices);
 
   // setup scene
+
   logic_oninit_compute();
   logic_onreload();
 

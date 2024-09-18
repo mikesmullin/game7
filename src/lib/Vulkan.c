@@ -1255,10 +1255,7 @@ void Vulkan__FReadImage(Bitmap_t* bmp, const char* filePath) {
   bmp->len = bmp->w * bmp->h * bmp->chan;
 
   ASSERT_CONTEXT(bmp->buf, "failed to load texture image!")
-}
-
-void Vulkan__FCloseImage(const Bitmap_t* bmp) {
-  stbi_image_free((stbi_uc*)bmp->buf);
+  // stbi_image_free((stbi_uc*)bmp->buf);
 }
 
 /**

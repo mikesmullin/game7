@@ -53,7 +53,6 @@ typedef struct {
   u8 PHYSICS_FPS;
   u8 RENDER_FPS;
   char* shaderFiles[2];
-  char* textureFiles[1];
   World_t world;
   u16 instanceCount;
   Instance_t instances[MAX_INSTANCES];
@@ -64,7 +63,6 @@ typedef struct {
   int (*check_load_logic)();
 
   void (*Vulkan__FReadImage)(Bitmap_t* bmp, const char* filePath);
-  void (*Vulkan__FCloseImage)(const Bitmap_t* bmp);
   void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Bitmap_t* bmp);
   void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);

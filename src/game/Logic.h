@@ -43,8 +43,9 @@ typedef struct {
 } AnimationState_t;
 
 typedef struct {
-  Bitmap_t* screen;
-  Bitmap_t* brush;
+  Bitmap_t screen;
+  Bitmap_t brush;
+  Bitmap_t atlas;
 
   bool isVBODirty;
   bool isUBODirty[2];
