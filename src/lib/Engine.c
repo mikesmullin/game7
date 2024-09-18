@@ -24,8 +24,8 @@ static Engine__State_t* state;
 static FileMonitor_t* fm;
 static Arena_t arena;
 
-static void physicsCallback(const f64 deltaTime);
-static void renderCallback(const f64 deltaTime);
+static void physicsCallback(const f64 currentTime, const f64 deltaTime);
+static void renderCallback(const f64 currentTime, const f64 deltaTime);
 static void keyboardCallback();
 static void fingerCallback();
 
@@ -63,7 +63,6 @@ int Engine__Loop() {
   state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
   state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
   state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
-  state->Time__Now = &Time__Now;
 
   File__StartMonitor(fm);
 
@@ -212,7 +211,7 @@ static void fingerCallback() {
 static f64 accumulator1 = 0.0f;
 static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
 
-static void physicsCallback(const f64 deltaTime) {
+static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
   accumulator1 += deltaTime;
   if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
     check_load_logic();
@@ -222,9 +221,9 @@ static void physicsCallback(const f64 deltaTime) {
     }
   }
 
-  // logic_onfixedupdate(deltaTime);
+  logic_onfixedupdate(currentTime, deltaTime);
 }
 
-static void renderCallback(const f64 deltaTime) {
-  logic_onupdate(deltaTime);
+static void renderCallback(const f64 currentTime, const f64 deltaTime) {
+  logic_onupdate(currentTime, deltaTime);
 }

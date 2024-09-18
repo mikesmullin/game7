@@ -14,7 +14,7 @@
 #include "Base.h"
 
 void Time__MeasureCycles();
-u32 Time__Now();
+u64 Time__Now();
 
 #if OS_MAC == 1
 #include <mach/mach_time.h>

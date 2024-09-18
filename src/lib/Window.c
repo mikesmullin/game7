@@ -104,8 +104,8 @@ void Window__RenderLoop(
     Window_t* self,
     const int physicsFps,
     const int renderFps,
-    void (*physicsCallback)(const f64),
-    void (*renderCallback)(const f64)) {
+    void (*physicsCallback)(const f64, const f64),
+    void (*renderCallback)(const f64, const f64)) {
   const u8 physicsInterval = 1000 / physicsFps;
   const u8 renderInterval = 1000 / renderFps;
   u64 currentTime = Time__Now();
@@ -165,7 +165,7 @@ void Window__RenderLoop(
         deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastPhysics));
         lastPhysics = currentTime;
 
-        physicsCallback(deltaTime);
+        physicsCallback(currentTime, deltaTime);
       }
 
       // Render update
@@ -178,7 +178,7 @@ void Window__RenderLoop(
         deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastRender));
         lastRender = currentTime;
 
-        renderCallback(deltaTime);
+        renderCallback(currentTime, deltaTime);
         Vulkan__DrawFrame(self->vulkan);
 
         frameCount++;

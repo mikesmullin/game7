@@ -66,7 +66,6 @@ typedef struct {
   void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Bitmap_t* bmp);
   void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
   void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
-  u32 (*Time__Now)();
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
@@ -83,8 +82,8 @@ typedef void (*logic_oninit_compute_t)();
 typedef void (*logic_onreload_t)();
 typedef void (*logic_onkey_t)();
 typedef void (*logic_onfinger_t)();
-typedef void (*logic_onfixedupdate_t)(const f64 deltaTime);
-typedef void (*logic_onupdate_t)(const f64 deltaTime);
+typedef void (*logic_onfixedupdate_t)(const f64 currentTime, const f64 deltaTime);
+typedef void (*logic_onupdate_t)(const f64 currentTime, const f64 deltaTime);
 
 int Engine__Loop();
 

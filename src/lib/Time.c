@@ -27,6 +27,6 @@ void Time__MeasureCycles() {
   CYCLES_PER_MILLISECOND = CYCLES_PER_SECOND / 1000;
 }
 
-u32 Time__Now() {
+u64 Time__Now() {
   return Now() / CYCLES_PER_MILLISECOND;
 }

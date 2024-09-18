@@ -178,7 +178,7 @@ __declspec(dllexport) void logic_onfinger() {
 }
 
 // on physics
-__declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
+__declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
 
   // state->isVBODirty = true;
@@ -198,7 +198,7 @@ s32 invert_endianness(s32 value) {
 }
 
 // on draw
-__declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
+__declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
 
   bool onsecond = false;
@@ -304,7 +304,9 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
       // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
       color = (xd * G) | (yd * G);
       color *= 0xff00ff00;  // ABGR
-      color = ((u32*)local->atlas.buf)[(xd + yd * 64) % local->atlas.len];
+      // color = ((u32*)local->atlas.buf)[(xd + yd * 64) % local->atlas.len];
+      u32 xx = x + (u32)(Math__sin(currentTime / 2000 /*sec*/) * 100 /*delta*/);  //
+      color = ((u32*)local->atlas.buf)[(xx + y * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
     }
     // if (on5sec && y == 1) str8__fputs(sn, stdout);
