@@ -275,34 +275,38 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   //       (_G->CANVAS_HEIGHT - 64) / 2 + yo);
   // }
 
+  // Arena__Reset(local->debugArena);
+  // String8Node* sn = NULL;
+  // sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
+
   // try to draw 3d scene
-  u32 SCALE = 1024;  // factor for fixed-point arithmetic (avoids f32 decimals)
   s32 H = 320;
   s32 W = 320;
   s32 x, y;
   f32 yd = 0, z = 0, xd = 0;
-  f32 d = 8.0f;  // distance
   u32 color = 0;
-  Arena__Reset(local->debugArena);
-  String8Node* sn = NULL;
-  sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
+  f32 eye = Math__sin((currentTime / 20) / 10.0f) * 2;
+  f32 d = 4.0f;  // tile size
 
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
-    yd = ((y + 0.5f) - H / 2.0f) / H;
+    yd = ((y + 0.8f) - H / 2.0f) / H;
 
-    if (yd < 0) {
-      yd = -yd;
+    // if (yd < 0) {
+    //   yd = -yd;  // mirror floor so ceiling is not inverted
+    // }
+
+    z = (d + eye) / yd;     // size of tiles
+    if (yd < 0) {           // ensures ceiling is mirrored not inverted
+      z = (d - eye) / -yd;  // ceiling height
     }
-
-    z = d / yd;
 
     for (x = 0; x < W; x++) {
       xd = (x - W / 2.0f) / H;
       xd *= z;
 
-      u32 xx = (u32)(xd + currentTime * 0.002) & 7;
-      u32 zz = (u32)(z + currentTime * 0.002) & 7;
+      u32 xx = (u32)(xd + (currentTime / 20) * 0.1f) & 7;
+      u32 zz = (u32)(z + (currentTime / 20) * 0.1f) & 7;
       color = ((u32*)local->atlas.buf)[(xx + zz * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
 
