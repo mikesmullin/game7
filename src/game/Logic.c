@@ -292,7 +292,7 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   String8Node* sn = NULL;
   sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
 
-  d = Math__map(accumulator3, 0, 5.0f, 0, 100) * SCALE;
+  d = Math__map(accumulator3, 0, 5.0f, 0, 10000) * SCALE;
 
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
