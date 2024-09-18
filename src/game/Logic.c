@@ -44,6 +44,7 @@ __declspec(dllexport) void logic_oninit_data() {
   _G->WINDOW_HEIGHT = dim * 3;
 
   Bitmap__Alloc(arena, &local->screen, _G->CANVAS_WIDTH, _G->CANVAS_HEIGHT, 4 /*RGBA*/);
+  local->zbuf = Arena__Push(arena, _G->CANVAS_WIDTH * _G->CANVAS_HEIGHT);
 
   _G->PHYSICS_FPS = 50;
   _G->RENDER_FPS = 60;
@@ -306,13 +307,33 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
       xd *= z;
 
       u32 xx = (u32)(xd + (currentTime / 20) * 0.1f) & 7;
-      u32 zz = (u32)(z + (currentTime / 20) * 0.1f) & 7;
-      color = ((u32*)local->atlas.buf)[(xx + zz * 64) % local->atlas.len];
+      u32 yy = (u32)(z + (currentTime / 20) * 0.1f) & 7;
+      color = ((u32*)local->atlas.buf)[(xx + yy * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
+
+      local->zbuf[x + y * W] = z;
 
       // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
     }
     // if (on5sec && y == 1) str8__fputs(sn, stdout);
+  }
+
+  // post-processing
+
+  // tiled gradient horizon
+  for (u32 i = 0; i < W * H; i++) {
+    u8 brightness = 255 / (local->zbuf[i]);
+
+    u32 col = ((u32*)local->screen.buf)[i];
+    u8 b = (col >> 16) & 0xff;
+    u8 g = (col >> 8) & 0xff;
+    u8 r = (col) & 0xff;
+
+    r = r * brightness / 255;
+    g = g * brightness / 255;
+    b = b * brightness / 255;
+
+    ((u32*)local->screen.buf)[i] = 0xff000000 | b << 16 | g << 8 | r;
   }
 
   _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
