@@ -279,35 +279,34 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   u32 SCALE = 1024;  // factor for fixed-point arithmetic (avoids f32 decimals)
   s32 H = 320;
   s32 W = 320;
-  s32 G = 16;  // grid size
+  s32 x, y;
+  f32 yd = 0, z = 0, xd = 0;
+  f32 d = 8.0f;  // distance
   u32 color = 0;
-  s32 y = 0, yd = 0, z = 0, x = 0, xd = 0;
-  s32 d = 100 * SCALE;  // distance
   Arena__Reset(local->debugArena);
   String8Node* sn = NULL;
   sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
 
-  d = Math__map(accumulator3, 0, DEBUG_LOG_TIME_STEP, 0, 10000) * SCALE;
-
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
-    yd = (y - H / 2) * H;   // -51200...51200
-    if (yd == 0) continue;  // skip row to avoid divide by zero
-    z = d / yd;             // (100*1024) / (-51200)
-    if (z == 0) continue;   // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
+    yd = ((y + 0.5f) - H / 2.0f) / H;
+
+    if (yd < 0) {
+      yd = -yd;
+    }
+
+    z = d / yd;
 
     for (x = 0; x < W; x++) {
-      xd = ((x - W / 2) * H);
+      xd = (x - W / 2.0f) / H;
       xd *= z;
-      xd /= SCALE;
-      yd /= SCALE;
-      // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
-      color = (xd * G) | (yd * G);
-      color *= 0xff00ff00;  // ABGR
-      // color = ((u32*)local->atlas.buf)[(xd + yd * 64) % local->atlas.len];
-      u32 xx = x + (u32)(Math__sin(currentTime / 2000 /*sec*/) * 100 /*delta*/);  //
-      color = ((u32*)local->atlas.buf)[(xx + y * 64) % local->atlas.len];
+
+      u32 xx = (u32)(xd + currentTime * 0.002) & 7;
+      u32 zz = (u32)(z + currentTime * 0.002) & 7;
+      color = ((u32*)local->atlas.buf)[(xx + zz * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
+
+      // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
     }
     // if (on5sec && y == 1) str8__fputs(sn, stdout);
   }
