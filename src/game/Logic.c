@@ -194,7 +194,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
 static f64 accumulator3 = 0.0f;
-static const f32 DEBUG_LOG_TIME_STEP = 5.0f;  // every 5sec
+static const f32 DEBUG_LOG_TIME_STEP = 60.0f;  // every 5sec
 static u16 frames = 0;
 
 s32 invert_endianness(s32 value) {
@@ -292,7 +292,7 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   String8Node* sn = NULL;
   sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
 
-  d = Math__map(accumulator3, 0, 5.0f, 0, 10000) * SCALE;
+  d = Math__map(accumulator3, 0, DEBUG_LOG_TIME_STEP, 0, 10000) * SCALE;
 
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
