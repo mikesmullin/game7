@@ -197,7 +197,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
 static f64 accumulator3 = 0.0f;
-static const f32 DEBUG_LOG_TIME_STEP = 10 * 60.0f;  // every 5sec
+static const f32 DEBUG_LOG_TIME_STEP = 1 * 60.0f;  // every 5sec
 static u16 frames = 0;
 
 s32 invert_endianness(s32 value) {
@@ -305,7 +305,7 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
     if (z == 0) continue;   // skip row to avoid divide by zero (won't happen if SCALE > max(W,H))
 
     for (x = 0; x < W; x++) {
-      xd = ((x - W / 2) * H);
+      xd = ((x - W / 2) /* *H*/);
       xd *= z;
       xd /= SCALE;
       yd /= SCALE;
