@@ -39,13 +39,16 @@ __declspec(dllexport) void logic_oninit_data() {
 
   _G->WINDOW_TITLE = "Retro";
   _G->ENGINE_NAME = "MS2024";
-  _G->WINDOW_WIDTH = 320;
-  _G->WINDOW_HEIGHT = 320;
+  u32 dim = 320;
+  _G->CANVAS_WIDTH = dim;
+  _G->CANVAS_HEIGHT = dim;
+  _G->WINDOW_WIDTH = dim * 3;
+  _G->WINDOW_HEIGHT = dim * 3;
 
   Bitmap__Construct(
       &local->screen,
-      _G->WINDOW_WIDTH,
-      _G->WINDOW_HEIGHT,
+      _G->CANVAS_WIDTH,
+      _G->CANVAS_HEIGHT,
       4 /*RGBA*/,
       local->screenBuf);
 
@@ -194,7 +197,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 deltaTime) {
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
 static f64 accumulator3 = 0.0f;
-static const f32 DEBUG_LOG_TIME_STEP = 60.0f;  // every 5sec
+static const f32 DEBUG_LOG_TIME_STEP = 10 * 60.0f;  // every 5sec
 static u16 frames = 0;
 
 s32 invert_endianness(s32 value) {
@@ -276,8 +279,8 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
   //   Bitmap__Draw(
   //       &local->brush,
   //       &local->screen,
-  //       (_G->WINDOW_WIDTH - 64) / 2 + xo,
-  //       (_G->WINDOW_HEIGHT - 64) / 2 + yo);
+  //       (_G->CANVAS_WIDTH - 64) / 2 + xo,
+  //       (_G->CANVAS_HEIGHT - 64) / 2 + yo);
   // }
 
   // try to draw 3d scene
