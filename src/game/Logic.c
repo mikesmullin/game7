@@ -2,12 +2,10 @@
 
 #include "../lib/Arena.h"
 #include "../lib/Bitmap.h"
-#include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
 #include "../lib/String.h"
-#include "ui/Screen.h"
 
 static Arena_t* arena;
 static Engine__State_t* _G;
@@ -37,6 +35,11 @@ __declspec(dllexport) void logic_oninit_data() {
   local = Arena__Push(arena, sizeof(Logic__State_t));
   _G->localState = local;
 
+  // Bitmap_t bmp;
+  // Vulkan__FReadImage(&bmp, state->textureFiles[0]);
+  // Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
+  // Vulkan__FCloseImage(&bmp);
+
   _G->WINDOW_TITLE = "Retro";
   _G->ENGINE_NAME = "MS2024";
   u32 dim = 320;
@@ -45,12 +48,7 @@ __declspec(dllexport) void logic_oninit_data() {
   _G->WINDOW_WIDTH = dim * 3;
   _G->WINDOW_HEIGHT = dim * 3;
 
-  Bitmap__Construct(
-      &local->screen,
-      _G->CANVAS_WIDTH,
-      _G->CANVAS_HEIGHT,
-      4 /*RGBA*/,
-      local->screenBuf);
+  Bitmap__Alloc(arena, &local->screen, _G->CANVAS_WIDTH, _G->CANVAS_HEIGHT, 4 /*RGBA*/);
 
   _G->PHYSICS_FPS = 50;
   _G->RENDER_FPS = 60;
@@ -118,10 +116,10 @@ __declspec(dllexport) void logic_onreload() {
   _G->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
   // compose brush
-  Bitmap__Construct(&local->brush, 64, 64, 4 /*RGBA*/, local->brushBuf);
+  Bitmap__Alloc(arena, &local->brush, 64, 64, 4 /*RGBA*/);
   srand(_G->Time__Now());
-  for (u64 i = 0; i < local->brush.w * local->brush.h; i++) {
-    ((u32*)local->brush.buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
+  for (u64 i = 0; i < local->brush->w * local->brush->h; i++) {
+    ((u32*)local->brush->buf)[i] = Math__urandom() * (Math__urandom2(0, 5) / 4);
   }
 
   // update rgba image texture
@@ -267,8 +265,8 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
 
   // clear frame
 
-  for (u64 i = 0; i < local->screen.w * local->screen.h; i++) {
-    ((u32*)local->screen.buf)[i] = 0;
+  for (u64 i = 0; i < local->screen->w * local->screen->h; i++) {
+    ((u32*)local->screen->buf)[i] = 0;
   }
 
   // blit brush to frame
@@ -311,11 +309,11 @@ __declspec(dllexport) void logic_onupdate(const f64 deltaTime) {
       yd /= SCALE;
       // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
       color = (xd * G) | (yd * G);
-      color *= 0xff00ff00;  // AGBR
-      ((u32*)local->screen.buf)[x + y * W] = color;
+      color *= 0xff00ff00;  // ABGR
+      ((u32*)local->screen->buf)[x + y * W] = color;
     }
     // if (on5sec && y == 1) str8__fputs(sn, stdout);
   }
 
-  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
+  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, local->screen);
 }

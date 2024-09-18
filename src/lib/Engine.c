@@ -47,7 +47,7 @@ static int check_load_logic() {
 int Engine__Loop() {
   LOG_INFOF("begin engine.");
 
-  arena = Arena__Alloc(1024 * 1024 * 50);  // MB
+  Arena__Alloc(&arena, 1024 * 1024 * 50);  // MB
   state = Arena__Push(&arena, sizeof(Engine__State_t));
   fm = Arena__Push(&arena, sizeof(FileMonitor_t));
   Time__MeasureCycles();
@@ -156,10 +156,14 @@ int Engine__Loop() {
           offsetof(Instance_t, texId)});
   Vulkan__CreateFrameBuffers(&state->s_Vulkan);
   Vulkan__CreateCommandPool(&state->s_Vulkan);
-  Bitmap_t bmp;
-  Vulkan__FReadImage(&bmp, state->textureFiles[0]);
-  Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
-  Vulkan__FCloseImage(&bmp);
+  // create temporary base texture matching canvas dimensions
+  Bitmap_t* bmp;
+  Bitmap__Init(bmp, state->CANVAS_WIDTH, state->CANVAS_WIDTH, 4);
+  u8 bmpbuf[bmp->len];
+  // fill with black
+  memset(bmpbuf, 0, bmp->len);
+  bmp->buf = bmpbuf;
+  Vulkan__CreateTextureImage(&state->s_Vulkan, bmp);
   Vulkan__CreateTextureImageView(&state->s_Vulkan);
   Vulkan__CreateTextureSampler(&state->s_Vulkan);
   Vulkan__CreateVertexBuffer(&state->s_Vulkan, 0, sizeof(state->vertices), state->vertices);

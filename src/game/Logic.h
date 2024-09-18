@@ -43,10 +43,8 @@ typedef struct {
 } AnimationState_t;
 
 typedef struct {
-  Bitmap_t screen;
-  u8 screenBuf[320 * 320 * 4];
-  Bitmap_t brush;
-  u8 brushBuf[64 * 64 * 4];
+  Bitmap_t* screen;
+  Bitmap_t* brush;
 
   bool isVBODirty;
   bool isUBODirty[2];
