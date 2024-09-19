@@ -27,9 +27,11 @@ C:\> node build_scripts/Makefile.mjs watch
   - **(Agafonov 2023)** DR LIVESEY ROM AND DEATH EDITION
     [steam game](https://store.steampowered.com/app/2181930/DR_LIVESEY_ROM_AND_DEATH_EDITION/) |
     [playthrough](https://www.youtube.com/watch?v=70OfnvGp1MU) |
-    [original music](https://soundcloud.com/ghostfaceplaya/why-not)
-    - "aggressive phonk" genre
+    [original music](https://soundcloud.com/ghostfaceplaya/why-not)    
+    - aggressive "phonk" genre
     - 3d and many quads but all bitmap sprite textures [cross-plane billboarding](https://www.reddit.com/r/gamedev/comments/q2qbp2/what_is_it_called_when_two_billboarded_sprites/)
+    - [memes](https://www.youtube.com/watch?v=lrTcb3Kx1zM)!
+    
 
 ## References
 
