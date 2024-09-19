@@ -30,6 +30,10 @@ __declspec(dllexport) void logic_onload(Arena_t* a, Engine__State_t* _state) {
   local = _G->localState;
 }
 
+void LoadTextures() {
+  _G->Vulkan__FReadImage(&local->atlas, "../assets/textures/atlas.png");
+}
+
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
   local = Arena__Push(arena, sizeof(Logic__State_t));
@@ -83,7 +87,7 @@ __declspec(dllexport) void logic_oninit_data() {
   local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
   local->newTexId = 0;
-  _G->Vulkan__FReadImage(&local->atlas, "../assets/textures/atlas.png");
+  LoadTextures();
 
   local->debugArena = Arena__SubAlloc(arena, 1024 * 50);  // MB
 }
@@ -129,16 +133,20 @@ __declspec(dllexport) void logic_onkey() {
   //     "SDL_KEY{UP,DOWN} state "
   //     "code %u location %u pressed %u alt %u "
   //     "ctrl %u shift %u meta %u",
-  //     state->g_Keyboard__state->code,
-  //     state->g_Keyboard__state->location,
-  //     state->g_Keyboard__state->pressed,
-  //     state->g_Keyboard__state->altKey,
-  //     state->g_Keyboard__state->ctrlKey,
-  //     state->g_Keyboard__state->shiftKey,
-  //     state->g_Keyboard__state->metaKey);
+  //     _G->g_Keyboard__state->code,
+  //     _G->g_Keyboard__state->location,
+  //     _G->g_Keyboard__state->pressed,
+  //     _G->g_Keyboard__state->altKey,
+  //     _G->g_Keyboard__state->ctrlKey,
+  //     _G->g_Keyboard__state->shiftKey,
+  //     _G->g_Keyboard__state->metaKey);
 
   if (41 == _G->g_Keyboard__state->code) {  // ESC
     _G->s_Window.quit = true;
+  }
+
+  if (21 == _G->g_Keyboard__state->code) {  // R
+    LoadTextures();
   }
 }
 
