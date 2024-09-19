@@ -293,10 +293,6 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   for (y = 0; y < H; y++) {
     yd = ((y + 0.8f) - H / 2.0f) / H;
 
-    // if (yd < 0) {
-    //   yd = -yd;  // mirror floor so ceiling is not inverted
-    // }
-
     z = (d + eye) / yd;     // size of tiles
     if (yd < 0) {           // ensures ceiling is mirrored not inverted
       z = (d - eye) / -yd;  // ceiling height
@@ -319,10 +315,8 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   }
 
   // post-processing
-
-  // tiled gradient horizon
   for (u32 i = 0; i < W * H; i++) {
-    u8 brightness = 255 / (local->zbuf[i]);
+    u8 brightness = (u16)(800 / (local->zbuf[i] * 2));
 
     u32 col = ((u32*)local->screen.buf)[i];
     u8 b = (col >> 16) & 0xff;
