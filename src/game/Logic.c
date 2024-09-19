@@ -324,7 +324,8 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
 
   // post-processing
   for (u32 i = 0; i < W * H; i++) {
-    u8 brightness = (u16)(800 / (local->zbuf[i] * 2));
+    u16 d = Math__map(Math__sin(currentTime / 250), -1, 1, 800, 5000);
+    u8 brightness = (u16)(d /*800*/ / (local->zbuf[i] * 4));
 
     u32 col = ((u32*)local->screen.buf)[i];
     u8 b = (col >> 16) & 0xff;
