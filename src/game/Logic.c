@@ -6,6 +6,7 @@
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
+#include "Player.h"
 
 static Engine__State_t* game;
 
@@ -33,6 +34,7 @@ __declspec(dllexport) void logic_onload(Engine__State_t* _state) {
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
   game->local = Arena__Push(game->arena, sizeof(Logic__State_t));
+  Player__Init(game->arena, game->local);
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";

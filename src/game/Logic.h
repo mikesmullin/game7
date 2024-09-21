@@ -73,6 +73,7 @@ typedef struct {
   u8 newTexId;
 
   Arena_t* debugArena;
+  void* player;
 } Logic__State_t;
 
 #endif  // LOGIC_H
