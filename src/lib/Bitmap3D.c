@@ -31,7 +31,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   fov = H;
 
   for (y = 0; y < H; y++) {
-    yd = ((y / (f32)H) * 2) - 1;
+    yd = ((y / (f32)H) * 2) - 1;  // -1 .. 1
     f32 ydd = yd;
     if (ydd < 0) {  // ceiling is mirrored, not flipped
       ydd = -ydd;
@@ -44,7 +44,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
 
     for (x = 0; x < W; x++) {
-      xd = ((x / (f32)W) * 2) - 1;
+      xd = ((x / (f32)W) * 2) - 1;  // -1 .. 1
       xd *= zd;
 
       u32 xx = (u32)(((xd * rSin) + (zd * rCos)) + camX) & atlas_tile_size;
@@ -52,9 +52,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       color = ((u32*)game->local->atlas.buf)[(xx + yy * atlas_dim) % game->local->atlas.len];
       buf[(x + y * W) % len] = color;
 
-      game->local->zbuf[(x + y * W) % len] = ydd;
-      // uncomment to render zbuf
-      // buf[(x + y * W) % len] = (f32)((zd + 1.0f) * 0.5f * 0xffffffff);
+      game->local->zbuf[(x + y * W) % len] = ydd;  // 1 .. 0 .. 1
+      // uncomment to render blank white canvas,
+      // which will later only show zbuf on top of it
+      // buf[(x + y * W) % len] = 0xffffffff;
     }
   }
 
@@ -116,10 +117,30 @@ void Bitmap3D__RenderFloor(Engine__State_t* game) {
   }
 }
 
+f64 easeInQuart(f64 t) {
+  return t * t * t * t;
+}
+
+f64 easeOutQuart(f64 t) {
+  return 1 - Math__pow(1 - t, 4);
+}
+
+f64 easeInOutQuart(f64 t) {
+  return t < 0.5 ? 8 * t * t * t * t : 1 - Math__pow(-2 * t + 2, 4) / 2;
+}
+
+f64 easeMike(f32 t, f32 s) {
+  return Math__pow(t, 1 + s);
+}
+
 void Bitmap3D__PostProcessing(Engine__State_t* game) {
   u32* buf = (u32*)game->local->screen.buf;
   f32* zbuf = game->local->zbuf;
   for (u32 i = 0; i < W * H; i++) {
-    buf[i] = ((u32)(buf[i] * zbuf[i]) & 0xff000000) | (buf[i] & 0x00ffffff);
+    f32 brightness = zbuf[i];
+    f32 s = Math__map(Math__sin((game->local->currentTime / 1000)), -1, 1, 0, 1);
+    // brightness *= easeInQuart(s);
+    brightness = easeMike(brightness, 10 * easeInQuart(s));
+    buf[i] = ((u32)(buf[i] * brightness) & 0xff000000) | (buf[i] & 0x00ffffff);
   }
 }
