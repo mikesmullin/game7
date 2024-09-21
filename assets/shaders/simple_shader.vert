@@ -65,8 +65,8 @@ mat4 generateModelMatrix(vec3 position, vec3 rotation, vec3 scale) {
     return modelMatrix;
 }
 
-uint ATLAS_W = 320;
-uint ATLAS_H = 320;
+uint ATLAS_W = 180;
+uint ATLAS_H = 180;
 
 vec2 TEXTURE_WH = vec2(ATLAS_W,ATLAS_H);
 float pixelsToUnitsX(uint pixels) {
@@ -91,7 +91,7 @@ void main() {
 
     // hard-coded map of texId to uvwh coords in texture atlas
     vec4 uvwh;
-    if (0 == texId) { // background 0x0 320x320
+    if (0 == texId) { // background 0x0 180x180
         uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(ATLAS_W),pixelsToUnitsY(ATLAS_H));
     }
     // else if (1 == texId) { // wood-wall 1 1580x0 350x420

@@ -36,11 +36,11 @@ __declspec(dllexport) void logic_oninit_data() {
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";
-  u32 dim = 320;
+  u32 dim = 180;
   game->CANVAS_WIDTH = dim;
   game->CANVAS_HEIGHT = dim;
-  game->WINDOW_WIDTH = dim * 3;
-  game->WINDOW_HEIGHT = dim * 3;
+  game->WINDOW_WIDTH = dim * 4;
+  game->WINDOW_HEIGHT = dim * 4;
 
   Bitmap__Alloc(
       game->arena,
