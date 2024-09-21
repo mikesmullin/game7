@@ -34,7 +34,7 @@ __declspec(dllexport) void logic_onload(Engine__State_t* _state) {
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
   game->local = Arena__Push(game->arena, sizeof(Logic__State_t));
-  Player__Init(game->arena, game->local);
+  Player__Init(game->arena, &game->local->player);
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";
@@ -54,7 +54,8 @@ __declspec(dllexport) void logic_oninit_data() {
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 1.0f / 3;  // per-second
+  game->local->PLAYER_WALK_SPEED = 10.0f;     // per-second
+  game->local->PLAYER_TURN_SPEED = 1.0f / 2;  // per-second
   game->local->PLAYER_ZOOM_SPEED = 1.0f / 8;  // per-second
 
   game->local->isVBODirty = true;
@@ -135,13 +136,13 @@ __declspec(dllexport) void logic_onkey() {
   //     "SDL_KEY{UP,DOWN} state "
   //     "code %u location %u pressed %u alt %u "
   //     "ctrl %u shift %u meta %u",
-  //     _G->g_Keyboard__state->code,
-  //     _G->g_Keyboard__state->location,
-  //     _G->g_Keyboard__state->pressed,
-  //     _G->g_Keyboard__state->altKey,
-  //     _G->g_Keyboard__state->ctrlKey,
-  //     _G->g_Keyboard__state->shiftKey,
-  //     _G->g_Keyboard__state->metaKey);
+  //     game->g_Keyboard__state->code,
+  //     game->g_Keyboard__state->location,
+  //     game->g_Keyboard__state->pressed,
+  //     game->g_Keyboard__state->altKey,
+  //     game->g_Keyboard__state->ctrlKey,
+  //     game->g_Keyboard__state->shiftKey,
+  //     game->g_Keyboard__state->metaKey);
 
   if (41 == game->g_Keyboard__state->code) {  // ESC
     game->s_Window.quit = true;
@@ -193,6 +194,21 @@ __declspec(dllexport) void logic_onfinger() {
 __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
   game->local->currentTime = currentTime;
+
+  if (game->g_Keyboard__state->pressed) {
+    if (4 == game->g_Keyboard__state->code) {  // A
+      game->local->player->rot -= game->local->PLAYER_TURN_SPEED * deltaTime;
+    }
+    if (7 == game->g_Keyboard__state->code) {  // D
+      game->local->player->rot += game->local->PLAYER_TURN_SPEED * deltaTime;
+    }
+    if (26 == game->g_Keyboard__state->code) {  // W
+      game->local->player->y += game->local->PLAYER_WALK_SPEED * deltaTime;
+    }
+    if (22 == game->g_Keyboard__state->code) {  // D
+      game->local->player->y -= game->local->PLAYER_WALK_SPEED * deltaTime;
+    }
+  }
 
   // state->isVBODirty = true;
   // state->isUBODirty[0] = true;

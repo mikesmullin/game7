@@ -30,8 +30,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   f32 eye = Math__sin((game->local->currentTime / 20 / 100) / 500) * 2;
   f32 d = 4.0f;  // tile size
 
-  f32 camX = 0, camY = 0, camZ = 0;
-  f32 rot = game->local->currentTime / 100000;
+  f32 camX = game->local->player->x;
+  f32 camY = game->local->player->y;
+  f32 camZ = game->local->player->z;
+  f32 rot = game->local->player->rot;
   f32 rCos = Math__cos(rot);
   f32 rSin = Math__sin(rot);
 

@@ -7,6 +7,7 @@
 #include "../lib/Arena.h"
 #include "../lib/Base.h"
 #include "../lib/Bitmap.h"
+#include "Player.h"
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
@@ -67,13 +68,14 @@ typedef struct {
   Animation_t ANIM_VIKING_WALK_FRONT;
   AnimationState_t playerAnimationState;
 
+  f32 PLAYER_TURN_SPEED;
   f32 PLAYER_WALK_SPEED;
   f32 PLAYER_ZOOM_SPEED;
 
   u8 newTexId;
 
   Arena_t* debugArena;
-  void* player;
+  Player_t* player;
 } Logic__State_t;
 
 #endif  // LOGIC_H

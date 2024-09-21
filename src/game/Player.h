@@ -1,14 +1,16 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include "../lib/Arena.h"
 #include "../lib/Base.h"
-#include "Logic.h"
 
 typedef struct {
   f32 x;
   f32 y;
+  f32 z;
   f32 rot;
 } Player_t;
 
-void Player__Init(Arena_t* arena, Logic__State_t* local);
+void Player__Init(Arena_t* arena, Player_t** player);
+
 #endif  // PLAYER_H
