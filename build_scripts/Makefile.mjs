@@ -130,7 +130,7 @@ const generate_clangd_compile_commands = async () => {
 const child_spawn = async (cmd, args = [], opts = {}) => {
   const cwd = path.relative(process.cwd(), path.join(workspaceFolder, BUILD_PATH));
   // console.log(`cd ${cwd}`);
-  console.log(`${opts.stdin ? `type ${opts.stdin} | ` : ''}${cmd} ${args.join(' ')}${opts.stdout ? ` > ${opts.stdout}` : ''}`);
+  // console.log(`${opts.stdin ? `type ${opts.stdin} | ` : ''}${cmd} ${args.join(' ')}${opts.stdout ? ` > ${opts.stdout}` : ''}`);
   let stdin, stdout;
   const stdio = ['inherit', 'inherit', 'inherit'];
   if (opts.stdin) {

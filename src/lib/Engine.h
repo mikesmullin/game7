@@ -5,6 +5,7 @@
 #include <cglm/cglm.h>
 #include <windows.h>
 
+#include "../game/Logic.h"
 #include "Arena.h"
 #include "Base.h"
 #include "Bitmap.h"
@@ -41,7 +42,8 @@ typedef struct {
 } ubo_ProjView_t;
 
 typedef struct {
-  void* localState;
+  Arena_t* arena;
+  Logic__State_t* local;
   Vulkan_t s_Vulkan;
   Window_t s_Window;
   char* WINDOW_TITLE;
@@ -76,7 +78,7 @@ typedef struct {
   FingerState_t* g_Finger__state;
 } Engine__State_t;
 
-typedef void (*logic_onload_t)(Arena_t*, Engine__State_t*);
+typedef void (*logic_onload_t)(Engine__State_t*);
 typedef void (*logic_oninit_data_t)();
 typedef void (*logic_oninit_compute_t)();
 typedef void (*logic_onreload_t)();

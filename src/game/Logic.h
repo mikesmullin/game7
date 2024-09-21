@@ -43,6 +43,9 @@ typedef struct {
 } AnimationState_t;
 
 typedef struct {
+  Arena_t* arena;
+  f64 currentTime;
+
   Bitmap_t screen;
   f32* zbuf;
   Bitmap_t brush;

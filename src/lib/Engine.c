@@ -37,7 +37,7 @@ static int check_load_logic() {
     strcat(path, file);
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
-    logic_onload(&arena, state);
+    logic_onload(state);
     logic_onreload();
     return r;
   }
@@ -69,7 +69,8 @@ int Engine__Loop() {
   if (!load_logic(DLL_PATH)) {
     return 1;
   }
-  logic_onload(&arena, state);
+  state->arena = &arena;
+  logic_onload(state);
   logic_oninit_data();
 
   Vulkan__InitDriver1(&state->s_Vulkan);

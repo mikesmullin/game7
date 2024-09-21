@@ -2,17 +2,15 @@
 
 #include "../lib/Arena.h"
 #include "../lib/Bitmap.h"
+#include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
-#include "../lib/String.h"
 
-static Arena_t* arena;
-static Engine__State_t* _G;
-static Logic__State_t* local;
+static Engine__State_t* game;
 
 static f32 PixelsToUnits(u32 pixels) {
-  return (f32)pixels / local->PIXELS_PER_UNIT;
+  return (f32)pixels / game->local->PIXELS_PER_UNIT;
 }
 
 static u8 Animate(AnimationState_t* state, f64 deltaTime) {
@@ -23,97 +21,99 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
   return texId;
 }
 
-// on process start
-__declspec(dllexport) void logic_onload(Arena_t* a, Engine__State_t* _state) {
-  arena = a;
-  _G = _state;
-  local = _G->localState;
+void LoadTextures() {
+  game->Vulkan__FReadImage(&game->local->atlas, "../assets/textures/atlas.png");
 }
 
-void LoadTextures() {
-  _G->Vulkan__FReadImage(&local->atlas, "../assets/textures/atlas.png");
+// on process start
+__declspec(dllexport) void logic_onload(Engine__State_t* _state) {
+  game = _state;
 }
 
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
-  local = Arena__Push(arena, sizeof(Logic__State_t));
-  _G->localState = local;
+  game->local = Arena__Push(game->arena, sizeof(Logic__State_t));
 
-  _G->WINDOW_TITLE = "Retro";
-  _G->ENGINE_NAME = "MS2024";
+  game->WINDOW_TITLE = "Retro";
+  game->ENGINE_NAME = "MS2024";
   u32 dim = 320;
-  _G->CANVAS_WIDTH = dim;
-  _G->CANVAS_HEIGHT = dim;
-  _G->WINDOW_WIDTH = dim * 3;
-  _G->WINDOW_HEIGHT = dim * 3;
+  game->CANVAS_WIDTH = dim;
+  game->CANVAS_HEIGHT = dim;
+  game->WINDOW_WIDTH = dim * 3;
+  game->WINDOW_HEIGHT = dim * 3;
 
-  Bitmap__Alloc(arena, &local->screen, _G->CANVAS_WIDTH, _G->CANVAS_HEIGHT, 4 /*RGBA*/);
-  local->zbuf = Arena__Push(arena, _G->CANVAS_WIDTH * _G->CANVAS_HEIGHT);
+  Bitmap__Alloc(
+      game->arena,
+      &game->local->screen,
+      game->CANVAS_WIDTH,
+      game->CANVAS_HEIGHT,
+      4 /*RGBA*/);
+  game->local->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT);
 
-  _G->PHYSICS_FPS = 50;
-  _G->RENDER_FPS = 60;
-  local->PLAYER_WALK_SPEED = 1.0f / 3;  // per-second
-  local->PLAYER_ZOOM_SPEED = 1.0f / 8;  // per-second
+  game->PHYSICS_FPS = 50;
+  game->RENDER_FPS = 60;
+  game->local->PLAYER_WALK_SPEED = 1.0f / 3;  // per-second
+  game->local->PLAYER_ZOOM_SPEED = 1.0f / 8;  // per-second
 
-  local->isVBODirty = true;
-  local->isUBODirty[0] = true;
-  local->isUBODirty[1] = true;
-  local->VEC3_Y_UP[0] = 0;
-  local->VEC3_Y_UP[1] = 1;
-  local->VEC3_Y_UP[2] = 0;
-  local->CANVAS_WH = 100;
-  local->PIXELS_PER_UNIT = local->CANVAS_WH;
-  _G->instanceCount = 1;
+  game->local->isVBODirty = true;
+  game->local->isUBODirty[0] = true;
+  game->local->isUBODirty[1] = true;
+  game->local->VEC3_Y_UP[0] = 0;
+  game->local->VEC3_Y_UP[1] = 1;
+  game->local->VEC3_Y_UP[2] = 0;
+  game->local->CANVAS_WH = 100;
+  game->local->PIXELS_PER_UNIT = game->local->CANVAS_WH;
+  game->instanceCount = 1;
 
-  _G->indices[0] = 0;
-  _G->indices[1] = 1;
-  _G->indices[2] = 2;
-  _G->indices[3] = 2;
-  _G->indices[4] = 3;
-  _G->indices[5] = 0;
+  game->indices[0] = 0;
+  game->indices[1] = 1;
+  game->indices[2] = 2;
+  game->indices[3] = 2;
+  game->indices[4] = 3;
+  game->indices[5] = 0;
 
-  _G->vertices[0].vertex[0] = -0.5f;
-  _G->vertices[0].vertex[1] = -0.5f;
-  _G->vertices[1].vertex[0] = 0.5f;
-  _G->vertices[1].vertex[1] = -0.5f;
-  _G->vertices[2].vertex[0] = 0.5f;
-  _G->vertices[2].vertex[1] = 0.5f;
-  _G->vertices[3].vertex[0] = -0.5f;
-  _G->vertices[3].vertex[1] = 0.5f;
+  game->vertices[0].vertex[0] = -0.5f;
+  game->vertices[0].vertex[1] = -0.5f;
+  game->vertices[1].vertex[0] = 0.5f;
+  game->vertices[1].vertex[1] = -0.5f;
+  game->vertices[2].vertex[0] = 0.5f;
+  game->vertices[2].vertex[1] = 0.5f;
+  game->vertices[3].vertex[0] = -0.5f;
+  game->vertices[3].vertex[1] = 0.5f;
 
-  _G->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
-  _G->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
+  game->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
+  game->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
+  game->local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
-  local->newTexId = 0;
+  game->local->newTexId = 0;
   LoadTextures();
 
-  local->debugArena = Arena__SubAlloc(arena, 1024 * 50);  // MB
+  game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 }
 
 __declspec(dllexport) void logic_oninit_compute() {
-  _G->Audio__LoadAudioFile(local->audioFiles[AUDIO_PICKUP_COIN]);
+  game->Audio__LoadAudioFile(game->local->audioFiles[AUDIO_PICKUP_COIN]);
 
   // setup scene
-  glm_vec3_copy((vec3){0, 0, 1.5}, _G->world.cam);
-  glm_vec3_copy((vec3){0, 0, 0}, _G->world.look);
+  glm_vec3_copy((vec3){0, 0, 1.5}, game->world.cam);
+  glm_vec3_copy((vec3){0, 0, 0}, game->world.look);
 
-  glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, _G->instances[INSTANCE_FLOOR_0].rot);
+  glm_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].pos);
+  glm_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].rot);
   glm_vec3_copy(
       (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},  // ABGR
-      _G->instances[INSTANCE_FLOOR_0].scale);
-  _G->instances[INSTANCE_FLOOR_0].texId = 0;
-  _G->instanceCount = 1;
+      game->instances[INSTANCE_FLOOR_0].scale);
+  game->instances[INSTANCE_FLOOR_0].texId = 0;
+  game->instanceCount = 1;
 
-  local->isUBODirty[0] = true;
-  local->isUBODirty[1] = true;
+  game->local->isUBODirty[0] = true;
+  game->local->isUBODirty[1] = true;
 }
 
 __declspec(dllexport) void logic_onreload() {
   LOG_DEBUGF("Logic dll loaded.");
-  _G->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  game->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
 
   // compose brush
   // Bitmap__Alloc(&local->brush, 64, 64, 4 /*RGBA*/);
@@ -141,11 +141,11 @@ __declspec(dllexport) void logic_onkey() {
   //     _G->g_Keyboard__state->shiftKey,
   //     _G->g_Keyboard__state->metaKey);
 
-  if (41 == _G->g_Keyboard__state->code) {  // ESC
-    _G->s_Window.quit = true;
+  if (41 == game->g_Keyboard__state->code) {  // ESC
+    game->s_Window.quit = true;
   }
 
-  if (21 == _G->g_Keyboard__state->code) {  // R
+  if (21 == game->g_Keyboard__state->code) {  // R
     LoadTextures();
   }
 }
@@ -177,18 +177,20 @@ __declspec(dllexport) void logic_onfinger() {
   //     state->g_Finger__state->button_x1,
   //     state->g_Finger__state->button_x2);
 
-  if (FINGER_SCROLL == _G->g_Finger__state->event) {
+  if (FINGER_SCROLL == game->g_Finger__state->event) {
     // TODO: how to animate camera zoom with spring damping/smoothing?
     // TODO: how to move this into physics callback? or is it better not to?
-    _G->world.cam[2] += -_G->g_Finger__state->wheel_y * local->PLAYER_ZOOM_SPEED /* deltaTime*/;
-    local->isUBODirty[0] = true;
-    local->isUBODirty[1] = true;
+    game->world.cam[2] +=
+        -game->g_Finger__state->wheel_y * game->local->PLAYER_ZOOM_SPEED /* deltaTime*/;
+    game->local->isUBODirty[0] = true;
+    game->local->isUBODirty[1] = true;
   }
 }
 
 // on physics
 __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
+  game->local->currentTime = currentTime;
 
   // state->isVBODirty = true;
   // state->isUBODirty[0] = true;
@@ -209,6 +211,7 @@ s32 invert_endianness(s32 value) {
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onupdate.");
+  game->local->currentTime = currentTime;
 
   bool onsecond = false;
   accumulator2 += deltaTime;
@@ -233,116 +236,41 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
     }
   }
 
-  if (local->isVBODirty) {
-    local->isVBODirty = false;
+  if (game->local->isVBODirty) {
+    game->local->isVBODirty = false;
 
-    _G->s_Vulkan.m_instanceCount = _G->instanceCount;
-    _G->Vulkan__UpdateVertexBuffer(&_G->s_Vulkan, 1, sizeof(_G->instances), _G->instances);
+    game->s_Vulkan.m_instanceCount = game->instanceCount;
+    game->Vulkan__UpdateVertexBuffer(&game->s_Vulkan, 1, sizeof(game->instances), game->instances);
   }
 
-  if (local->isUBODirty[_G->s_Vulkan.m_currentFrame]) {
-    local->isUBODirty[_G->s_Vulkan.m_currentFrame] = false;
+  if (game->local->isUBODirty[game->s_Vulkan.m_currentFrame]) {
+    game->local->isUBODirty[game->s_Vulkan.m_currentFrame] = false;
 
     glm_lookat(
-        _G->world.cam,
-        _G->world.look,
-        local->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
-        _G->ubo1.view);
+        game->world.cam,
+        game->world.look,
+        game->local->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
+        game->ubo1.view);
 
-    _G->s_Vulkan.m_aspectRatio = _G->world.aspect;  // sync viewport
+    game->s_Vulkan.m_aspectRatio = game->world.aspect;  // sync viewport
 
     glm_perspective(
         glm_rad(45.0f),  // half the actual 90deg fov
-        _G->world.aspect,
+        game->world.aspect,
         0.1f,  // TODO: adjust clipping range for z depth?
         10.0f,
-        _G->ubo1.proj);
+        game->ubo1.proj);
 
     // glm_ortho(-0.5f, +0.5f, -0.5f, +0.5f, 0.1f, 10.0f, ubo1.proj);
-    glm_vec2_copy(_G->world.user1, _G->ubo1.user1);
-    glm_vec2_copy(_G->world.user2, _G->ubo1.user2);
+    glm_vec2_copy(game->world.user1, game->ubo1.user1);
+    glm_vec2_copy(game->world.user2, game->ubo1.user2);
 
     // TODO: not sure i make use of one UBO per frame, really
-    _G->Vulkan__UpdateUniformBuffer(&_G->s_Vulkan, _G->s_Vulkan.m_currentFrame, &_G->ubo1);
+    game->Vulkan__UpdateUniformBuffer(&game->s_Vulkan, game->s_Vulkan.m_currentFrame, &game->ubo1);
   }
 
-  // clear frame
+  Bitmap3D__RenderHorizon(game);
+  Bitmap3D__PostProcessing(game);
 
-  for (u64 i = 0; i < local->screen.w * local->screen.h; i++) {
-    ((u32*)local->screen.buf)[i] = 0;
-  }
-
-  // blit brush to frame
-  // u32 xo, yo;
-  // for (int i = 0; i < 100; i++) {
-  //   xo = (Math__sin((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 100);
-  //   yo = (Math__cos((_G->Time__Now() + i * 12) % 2000 / 2000.0 * Math__PI * 2) * 70);
-  //   Bitmap__Draw(
-  //       &local->brush,
-  //       &local->screen,
-  //       (_G->CANVAS_WIDTH - 64) / 2 + xo,
-  //       (_G->CANVAS_HEIGHT - 64) / 2 + yo);
-  // }
-
-  // Arena__Reset(local->debugArena);
-  // String8Node* sn = NULL;
-  // sn = str8n__allocf(local->debugArena, sn, "%s", 5, "===\n");
-
-  // try to draw 3d scene
-  s32 H = 320;
-  s32 W = 320;
-  s32 x, y;
-  f32 yd = 0, zd = 0, xd = 0;
-  u32 color = 0;
-  f32 eye = Math__sin((currentTime / 20 / 100) / 500) * 2;
-  f32 d = 4.0f;  // tile size
-
-  f32 camX = 0, camY = 0, camZ = 0;
-  f32 rot = currentTime / 100000;
-  f32 rCos = Math__cos(rot);
-  f32 rSin = Math__sin(rot);
-
-  // tiled gradient horizon
-  for (y = 0; y < H; y++) {
-    yd = ((y + 0.5f) - H / 2.0f) / H;
-
-    zd = (d + camZ) / yd;     // size of tiles
-    if (yd < 0) {             // ensures ceiling is mirrored not inverted
-      zd = (d - camZ) / -yd;  // ceiling height
-    }
-
-    for (x = 0; x < W; x++) {
-      xd = (x - W / 2.0f) / H;
-      xd *= zd;
-
-      u32 xx = (u32)(xd * rCos + zd * rSin + camX) & 7;
-      u32 yy = (u32)(zd * rCos - xd * rSin + camY) & 7;
-      color = ((u32*)local->atlas.buf)[(xx + yy * 64) % local->atlas.len];
-      ((u32*)local->screen.buf)[x + y * W] = color;
-
-      local->zbuf[x + y * W] = zd;
-
-      // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
-    }
-    // if (on5sec && y == 1) str8__fputs(sn, stdout);
-  }
-
-  // post-processing
-  for (u32 i = 0; i < W * H; i++) {
-    u16 d = Math__map(Math__sin(currentTime / 60000), -1, 1, 800, 5000);
-    u8 brightness = (u16)(d /*800*/ / (local->zbuf[i] * 4));
-
-    u32 col = ((u32*)local->screen.buf)[i];
-    u8 b = (col >> 16) & 0xff;
-    u8 g = (col >> 8) & 0xff;
-    u8 r = (col) & 0xff;
-
-    r = r * brightness / 255;
-    g = g * brightness / 255;
-    b = b * brightness / 255;
-
-    ((u32*)local->screen.buf)[i] = 0xff000000 | b << 16 | g << 8 | r;
-  }
-
-  _G->Vulkan__UpdateTextureImage(&_G->s_Vulkan, &local->screen);
+  game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
 }
