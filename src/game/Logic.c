@@ -292,30 +292,35 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   s32 H = 320;
   s32 W = 320;
   s32 x, y;
-  f32 yd = 0, z = 0, xd = 0;
+  f32 yd = 0, zd = 0, xd = 0;
   u32 color = 0;
-  f32 eye = Math__sin((currentTime / 20) / 500) * 2;
+  f32 eye = Math__sin((currentTime / 20 / 100) / 500) * 2;
   f32 d = 4.0f;  // tile size
+
+  f32 camX = 0, camY = 0, camZ = 0;
+  f32 rot = currentTime / 100000;
+  f32 rCos = Math__cos(rot);
+  f32 rSin = Math__sin(rot);
 
   // tiled gradient horizon
   for (y = 0; y < H; y++) {
-    yd = ((y + 0.8f) - H / 2.0f) / H;
+    yd = ((y + 0.5f) - H / 2.0f) / H;
 
-    z = (d + eye) / yd;     // size of tiles
-    if (yd < 0) {           // ensures ceiling is mirrored not inverted
-      z = (d - eye) / -yd;  // ceiling height
+    zd = (d + camZ) / yd;     // size of tiles
+    if (yd < 0) {             // ensures ceiling is mirrored not inverted
+      zd = (d - camZ) / -yd;  // ceiling height
     }
 
     for (x = 0; x < W; x++) {
       xd = (x - W / 2.0f) / H;
-      xd *= z;
+      xd *= zd;
 
-      u32 xx = (u32)(xd + (currentTime / 20) / 100) & 7;
-      u32 yy = (u32)(z + (currentTime / 20) / 100) & 7;
+      u32 xx = (u32)(xd * rCos + zd * rSin + camX) & 7;
+      u32 yy = (u32)(zd * rCos - xd * rSin + camY) & 7;
       color = ((u32*)local->atlas.buf)[(xx + yy * 64) % local->atlas.len];
       ((u32*)local->screen.buf)[x + y * W] = color;
 
-      local->zbuf[x + y * W] = z;
+      local->zbuf[x + y * W] = zd;
 
       // if (y == 1) sn = str8n__allocf(local->debugArena, sn, "%+04d ", 6, xx);
     }
@@ -324,7 +329,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
 
   // post-processing
   for (u32 i = 0; i < W * H; i++) {
-    u16 d = Math__map(Math__sin(currentTime / 250), -1, 1, 800, 5000);
+    u16 d = Math__map(Math__sin(currentTime / 60000), -1, 1, 800, 5000);
     u8 brightness = (u16)(d /*800*/ / (local->zbuf[i] * 4));
 
     u32 col = ((u32*)local->screen.buf)[i];
