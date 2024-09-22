@@ -50,6 +50,7 @@ __declspec(dllexport) void logic_oninit_data() {
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
   game->local->PLAYER_WALK_SPEED = 8.0f;                                // per-second
+  game->local->PLAYER_FLY_SPEED = 16.0f;                                // per-second
   game->local->PLAYER_TURN_SPEED = 1.0f;                                // per-second
   game->local->PLAYER_ZOOM_SPEED = 2 * game->local->PLAYER_WALK_SPEED;  // per-second
   game->local->PLAYER_LOOK_SPEED = 0.003f;                              // per-second
@@ -282,10 +283,10 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   }
 
   if (20 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Q
-    game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
+    game->local->player.transform.position[1] += game->local->PLAYER_FLY_SPEED * deltaTime;
   }
   if (8 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // E
-    game->local->player.transform.position[1] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+    game->local->player.transform.position[1] -= game->local->PLAYER_FLY_SPEED * deltaTime;
   }
   if (224 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Ctl
   }

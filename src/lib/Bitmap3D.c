@@ -172,34 +172,34 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     f32 Syn = ((Sy / (f32)H) * 2) - 1;  // -1 .. 1
     f32 Syh = Syn;
     if (Syh < 0) {  // ceiling is mirrored, not flipped
-      Syh = -Syh;
+      Syh = -Syh;   // 1 .. 0 .. 1
     }
-    f32 Ty = Syn * PS;
 
-    f32 Wz = 0.0f;
+    f32 Tz;
     f32 Whn = 4.0f;     // arbitrary world size (art data)
     f32 Wh = Whn * PS;  // world height (tile units)
 
-    camZ = MATH_CLAMP(camZ, 0, Wh);
+    camZ = MATH_CLAMP(0, camZ, Wh);
     f32 Vhn = ((camZ / Wh) * 2.0f) - 1.0f;  // -1 = floor, 0 = middle, 1 = ceiling
-    // Vhn = Math__sin(game->local->currentTime / 1000); // debug animate player y
     f32 Vh = Vhn * Wh;
+    f32 Ty = 1.0f;
     if (Syn > 0) {
       // floor
     }
     if (Syn < 0) {
       // ceiling
       Vh *= -1.0f;  // determines eye position
-      Wz *= -1.0f;  // ensure ceiling is mirrored, not flipped
+      Ty *= -1.0f;  // ensure ceiling is mirrored, not flipped
     }
-    Wz = Wh + Vh;  // tile repeat count
-    Wz /= Ty;      // perspective projection (depth)
+    Ty *= Syn * PS;
+    Tz = Wh + Vh;  // tile repeat count
+    Tz /= Ty;      // perspective projection (depth)
                    //  near = few repeats, far = many repeats
 
     for (s32 Sx = 0; Sx < W; Sx++) {
       f32 Sxn = ((Sx / (f32)W) * 2) - 1;
 
-      f32 Wx = Sxn;
+      f32 Tx = Sxn;
       // repeat-x count, which is actually:
       //   by passing a decimal,
       //   we cause texture pixels to be skipped or repeated
@@ -208,15 +208,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       //   larger numbers = smaller textures
       // pinching at 0,0 origin
       //   inherited from `/= Ty` earlier
-      Wx *= Wz;
+      Tx *= Tz;
 
       // rotate on XZ plane along Z axis (Z-UP)
-      f32 Wr[2] = {Wx, Wz};
-      rot2d(Wx, Wz, rSin, rCos, Wr);
+      f32 Wr[2] = {Tx, Tz};
+      rot2d(Tx, Tz, rSin, rCos, Wr);
 
       // translation must happen after rotation
       // or the rotation origin seems detached from the player
-      f32 Wxo = Wr[0] + camX;
+      f32 Wxo = Wr[0] + -camX;
       f32 Wyo = Wr[1] + camY;
 
       color = Bitmap__Get2DTiledPixel(
@@ -230,8 +230,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
 
       game->local->zbuf[(Sx + Sy * W) % len] = Syh;
-      // uncomment to render zbuf
-      // buf[(x + y * W) % len] = (f32)((zd + 1.0f) * 0.5f * 0xffffffff);
+      // uncomment to render all white, revealing zbuf
+      // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, 0xffffffff);
     }
   }
 
@@ -251,6 +251,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     u32 yP = (u32)(zz * (H / 2.0f));
 
     // ((f32*)game->local->zbuf)[(u32)(xP + yP * W) % (W * H)] = 1.0f;
+    if (xP >= 0 && xP < W && yP >= 0 && yP < H) {
+      game->local->zbuf[xP + yP * W] = (f32)1.0f;
+    }
     Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0xffffffff);
   }
 
@@ -290,15 +293,50 @@ f64 easeMike(f32 t, f32 s) {
   return Math__pow(t, 1 + s);
 }
 
+u32 alpha_blend(u32 top, u32 bottom) {
+  // Extract RGBA components
+  u32 src_a = (top >> 24) & 0xff;
+  u32 src_r = (top >> 16) & 0xff;
+  u32 src_g = (top >> 8) & 0xff;
+  u32 src_b = top & 0xff;
+
+  u32 dst_a = (bottom >> 24) & 0xff;
+  u32 dst_r = (bottom >> 16) & 0xff;
+  u32 dst_g = (bottom >> 8) & 0xff;
+  u32 dst_b = bottom & 0xff;
+
+  // Normalize alpha values to [0, 1]
+  f32 alpha_src = src_a / 255.0f;
+  f32 alpha_dst = dst_a / 255.0f;
+
+  // Apply alpha blending formula
+  u32 out_r = (u32)((alpha_src * src_r) + ((1 - alpha_src) * dst_r));
+  u32 out_g = (u32)((alpha_src * src_g) + ((1 - alpha_src) * dst_g));
+  u32 out_b = (u32)((alpha_src * src_b) + ((1 - alpha_src) * dst_b));
+  u32 out_a = (u32)((alpha_src * 255.0f) + ((1 - alpha_src) * alpha_dst * 255.0f));
+
+  // Combine components back into a single u32
+  u32 result = (out_a << 24) | (out_r << 16) | (out_g << 8) | out_b;
+  return result;
+}
+
 void Bitmap3D__PostProcessing(Engine__State_t* game) {
-  return;
   u32* buf = (u32*)game->local->screen.buf;
   f32* zbuf = game->local->zbuf;
   for (u32 i = 0; i < W * H; i++) {
-    f32 brightness = zbuf[i];
+    f32 b1 = zbuf[i];
+    f32 b2 = 255.0f * b1;  // 0 .. 255
+    f32 b3 = 255.0 - b2;   // invert so that the horizon has most alpha
+                           // u32 fog = 0xff << 24 | (u32)b2 << 16 | (u32)b2 << 8 | (u32)b2;
+    u32 fog = (u32)b3 << 24 & 0xff000000;
+    // u32 fog = 0x33000000;
+    // u32 color = alpha_blend(buf[i], fog);
+    u32 color = alpha_blend(fog, buf[i]);
+
     // f32 s = Math__map(Math__sin((game->local->currentTime / 1000)), -1, 1, 0, 1);
     // brightness *= easeInQuart(s);
-    brightness = easeMike(brightness, 10 * easeInQuart(0.5f));
-    buf[i] = ((u32)(buf[i] * brightness) & 0xff000000) | (buf[i] & 0x00ffffff);
+    // brightness = easeMike(brightness, 10 * easeInQuart(0.5f));
+    // buf[i] = (((u32)((f32)(buf[i] >> 24) * brightness) & 0xff) << 24) | (buf[i] & 0x00ffffff);
+    buf[i] = color;
   }
 }
