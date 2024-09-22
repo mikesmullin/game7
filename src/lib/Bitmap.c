@@ -15,6 +15,13 @@ void Bitmap__Init(Bitmap_t* bmp, u32 w, u32 h, u32 chan) {
   bmp->len = w * h * chan;
 }
 
+// set 32-bit pixel color at given 2d coordinate
+void Bitmap__Set2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 color) {
+  if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+    ((u32*)bmp->buf)[x + y * bmp->w] = color;
+  }
+}
+
 // a.k.a. Blit/Copy
 void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dX, u32 dY) {
   u32 xp, yp;

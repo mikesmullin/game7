@@ -36,6 +36,27 @@ typedef struct {
 } Animation_t;
 
 typedef struct {
+  f32 fov;  // field of view
+  // TODO: remove all but my game logic .h from the dll, which is delaying compile times
+  // TODO: incl. the windows.h > minwindef.h which is overriding `near` keyword
+  // f32 near;
+  f32 nearZ;        // near plane
+  f32 farZ;         // far plane
+  mat4 projection;  // projection matrix
+  mat4 view;        // view (camera) matrix
+} Camera_t;
+
+typedef struct {
+  vec3 position;  // (x, y, z)
+  vec3 rotation;  // (yaw, pitch, roll)
+} Transform_t;
+
+typedef struct {
+  Transform_t transform;
+  Camera_t camera;
+} Player_t;
+
+typedef struct {
   PlayerFacing_t facing;
   PlayerAnimState_t state;
   u8 frame;
@@ -75,7 +96,9 @@ typedef struct {
   u8 newTexId;
 
   Arena_t* debugArena;
-  Player_t* player;
+  Player_t player;
 } Logic__State_t;
+
+void Player__Init(Logic__State_t* game);
 
 #endif  // LOGIC_H

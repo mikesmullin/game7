@@ -29,12 +29,15 @@ void LoadTextures() {
 // on process start
 __declspec(dllexport) void logic_onload(Engine__State_t* _state) {
   game = _state;
+  LOG_DEBUGF("onload projection %p", game->local->player.camera.projection);
 }
 
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
   game->local = Arena__Push(game->arena, sizeof(Logic__State_t));
-  Player__Init(game->arena, &game->local->player);
+  game->local->arena = game->arena;
+  Player__Init(game->local);
+  LOG_DEBUGF("oninit projection %p", game->local->player.camera.projection);
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";
@@ -44,17 +47,9 @@ __declspec(dllexport) void logic_oninit_data() {
   game->WINDOW_WIDTH = dim * 4;
   game->WINDOW_HEIGHT = dim * 4;
 
-  Bitmap__Alloc(
-      game->arena,
-      &game->local->screen,
-      game->CANVAS_WIDTH,
-      game->CANVAS_HEIGHT,
-      4 /*RGBA*/);
-  game->local->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT);
-
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 8.0f;                                // per-second
+  game->local->PLAYER_WALK_SPEED = 1.0f;                                // per-second
   game->local->PLAYER_TURN_SPEED = 1.0f;                                // per-second
   game->local->PLAYER_ZOOM_SPEED = 2 * game->local->PLAYER_WALK_SPEED;  // per-second
 
@@ -90,12 +85,21 @@ __declspec(dllexport) void logic_oninit_data() {
   game->local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
 
   game->local->newTexId = 0;
-  LoadTextures();
-
-  game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 }
 
 __declspec(dllexport) void logic_oninit_compute() {
+  Bitmap__Alloc(
+      game->arena,
+      &game->local->screen,
+      game->CANVAS_WIDTH,
+      game->CANVAS_HEIGHT,
+      4 /*RGBA*/);
+  game->local->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT);
+
+  game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
+
+  LoadTextures();
+
   game->Audio__LoadAudioFile(game->local->audioFiles[AUDIO_PICKUP_COIN]);
 
   // setup scene
@@ -197,29 +201,44 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
 
   if (game->g_Keyboard__state->pressed) {
     if (4 == game->g_Keyboard__state->code) {  // A
-      game->local->player->rot += game->local->PLAYER_TURN_SPEED * deltaTime;
+      game->local->player.transform.rotation[1] += game->local->PLAYER_TURN_SPEED * deltaTime;
     }
     if (7 == game->g_Keyboard__state->code) {  // D
-      game->local->player->rot -= game->local->PLAYER_TURN_SPEED * deltaTime;
+      game->local->player.transform.rotation[1] -= game->local->PLAYER_TURN_SPEED * deltaTime;
     }
     if (26 == game->g_Keyboard__state->code) {  // W
-      game->local->player->x += game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[0] += game->local->PLAYER_WALK_SPEED * deltaTime;
     }
-    if (22 == game->g_Keyboard__state->code) {  // D
-      game->local->player->x -= game->local->PLAYER_WALK_SPEED * deltaTime;
+    if (22 == game->g_Keyboard__state->code) {  // S
+      game->local->player.transform.position[0] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+      LOG_DEBUGF(
+          "player pos %3.3f %3.3f %3.3f",
+          game->local->player.transform.position[0],
+          game->local->player.transform.position[1],
+          game->local->player.transform.position[2]);
     }
 
     if (20 == game->g_Keyboard__state->code) {  // Q
-      game->local->player->z += game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[2] += game->local->PLAYER_WALK_SPEED * deltaTime;
+      LOG_DEBUGF(
+          "player pos %3.3f %3.3f %3.3f",
+          game->local->player.transform.position[0],
+          game->local->player.transform.position[1],
+          game->local->player.transform.position[2]);
     }
     if (8 == game->g_Keyboard__state->code) {  // E
-      game->local->player->z -= game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[2] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+      LOG_DEBUGF(
+          "player pos %3.3f %3.3f %3.3f",
+          game->local->player.transform.position[0],
+          game->local->player.transform.position[1],
+          game->local->player.transform.position[2]);
     }
     if (224 == game->g_Keyboard__state->code) {  // Ctl
-      game->local->player->y -= game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[1] -= game->local->PLAYER_WALK_SPEED * deltaTime;
     }
     if (226 == game->g_Keyboard__state->code) {  // Alt
-      game->local->player->y += game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
     }
   }
 
@@ -277,6 +296,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   if (game->local->isUBODirty[game->s_Vulkan.m_currentFrame]) {
     game->local->isUBODirty[game->s_Vulkan.m_currentFrame] = false;
 
+    // 3d cam
     glm_lookat(
         game->world.cam,
         game->world.look,
