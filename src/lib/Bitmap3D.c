@@ -138,6 +138,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // h   = homogeneous
   // t   = texture
 
+  // r   = rotated (camera rotation)
+  // o   = translated (camera position)
+  // g   = gridded / tiled / repeat-xy
+
   for (s32 y = 0; y < H; y++) {
     f32 yn = ((y / (f32)H) * 2) - 1;  // -1 .. 1
     f32 yh = yn;
@@ -155,10 +159,18 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       f32 xn = ((x / (f32)W) * 2) - 1;
       f32 xt = xn * zt;
 
-      u32 xx = (u32)(((xt * rSin) + (zt * rCos)) + camX) & atlas_tile_size;
-      u32 yy = (u32)(((xt * rCos) - (zt * rSin)) + camY) & atlas_tile_size;
-      color = ((u32*)game->local->atlas.buf)[(xx + yy * atlas_dim) % game->local->atlas.len];
-      buf[(x + y * W) % len] = color;
+      // rotate on XZ plane along Z axis (Z-UP)
+      f32 xr = (xt * rSin) + (zt * rCos);
+      f32 yr = (xt * rCos) - (zt * rSin);
+
+      u32 xo = xr + camX;
+      u32 yo = yr + camY;
+
+      u32 xg = xo & atlas_tile_size;
+      u32 yg = yo & atlas_tile_size;
+
+      color = Bitmap__Get2DPixel(&game->local->atlas, xg, yg, 0xffff00ff);
+      Bitmap__Set2DPixel(&game->local->screen, x, y, color);
 
       game->local->zbuf[(x + y * W) % len] = yh;
       // uncomment to render zbuf
