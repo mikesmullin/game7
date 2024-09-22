@@ -285,15 +285,11 @@ f64 easeOutQuart(f64 t) {
   return 1 - Math__pow(1 - t, 4);
 }
 
-f64 easeInOutQuart(f64 t) {
+f64 easeInOutQuart(f64 t) {  // in/out 0 .. 1
   return t < 0.5 ? 8 * t * t * t * t : 1 - Math__pow(-2 * t + 2, 4) / 2;
 }
 
-f64 easeMike(f32 t, f32 s) {
-  return Math__pow(t, 1 + s);
-}
-
-u32 alpha_blend(u32 top, u32 bottom) {
+u32 alpha_blend(u32 bottom, u32 top) {
   // Extract RGBA components
   u32 src_a = (top >> 24) & 0xff;
   u32 src_r = (top >> 16) & 0xff;
@@ -324,19 +320,14 @@ void Bitmap3D__PostProcessing(Engine__State_t* game) {
   u32* buf = (u32*)game->local->screen.buf;
   f32* zbuf = game->local->zbuf;
   for (u32 i = 0; i < W * H; i++) {
-    f32 b1 = zbuf[i];
-    f32 b2 = 255.0f * b1;  // 0 .. 255
-    f32 b3 = 255.0 - b2;   // invert so that the horizon has most alpha
-                           // u32 fog = 0xff << 24 | (u32)b2 << 16 | (u32)b2 << 8 | (u32)b2;
-    u32 fog = (u32)b3 << 24 & 0xff000000;
-    // u32 fog = 0x33000000;
-    // u32 color = alpha_blend(buf[i], fog);
-    u32 color = alpha_blend(fog, buf[i]);
+    f32 b1 = zbuf[i];  // 0 .. 1
+    b1 = 1.0f - b1;    // invert so that the horizon has most alpha
+    f32 cutoff = (Math__map(Math__sin(game->local->currentTime / 5000), -1, 1, 0.5, 1));  // 0 .. 1
+    b1 = Math__map(MATH_CLAMP(0, b1, cutoff), 0, cutoff, 0, 1);
+    b1 = 255.0f * b1;                      // 0 .. 255
+    u32 fog = (u32)b1 << 24 & 0xff000000;  // 0x00 .. 0xff alpha 000000 black
+    u32 color = alpha_blend(buf[i], fog);  // blackness of varying alpha overlaid on existing color
 
-    // f32 s = Math__map(Math__sin((game->local->currentTime / 1000)), -1, 1, 0, 1);
-    // brightness *= easeInQuart(s);
-    // brightness = easeMike(brightness, 10 * easeInQuart(0.5f));
-    // buf[i] = (((u32)((f32)(buf[i] >> 24) * brightness) & 0xff) << 24) | (buf[i] & 0x00ffffff);
     buf[i] = color;
   }
 }

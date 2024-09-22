@@ -49,3 +49,7 @@ u32 Math__urandom() {
 u32 Math__urandom2(u32 a, u32 b) {
   return a + (Math__urandom() % (b - a + 1));
 }
+
+f64 Math__triangleWave(f64 x, f64 period) {
+  return 2.0 * fabs(2.0 * (x / period - floor(x / period + 0.5))) - 1.0;
+}
