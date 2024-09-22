@@ -63,6 +63,13 @@ void Window__Bind(Window_t* self) {
       SDL_GetError())
 }
 
+void Window__CaptureMouse(const bool state) {
+  // Capture the mouse and get relative motion
+  SDL_SetRelativeMouseMode(state ? SDL_TRUE : SDL_FALSE);
+  // Confine the mouse to the window
+  SDL_CaptureMouse(state ? SDL_TRUE : SDL_FALSE);
+}
+
 /**
  * for use when telling Vulkan what its drawable area (extent bounds) are, according to SDL
  * window. this may differ from what we requested, and must be less than the physical device

@@ -74,6 +74,9 @@ typedef struct {
   void (*Audio__ResumeAudio)(const int id, const bool loop, const double gain);
   void (*Audio__StopAudio)(const int id);
 
+  void (*Window__CaptureMouse)(const bool state);
+  bool mouseCaptured;
+
   KeyboardState_t* g_Keyboard__state;
   FingerState_t* g_Finger__state;
 } Engine__State_t;

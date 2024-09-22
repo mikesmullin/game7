@@ -52,7 +52,7 @@ __declspec(dllexport) void logic_oninit_data() {
   game->local->PLAYER_WALK_SPEED = 3.0f;                                // per-second
   game->local->PLAYER_TURN_SPEED = 1.0f;                                // per-second
   game->local->PLAYER_ZOOM_SPEED = 2 * game->local->PLAYER_WALK_SPEED;  // per-second
-  game->local->PLAYER_LOOK_SPEED = 0.1f;                                // per-second
+  game->local->PLAYER_LOOK_SPEED = 0.3f;                                // per-second
 
   game->local->isVBODirty = true;
   game->local->isUBODirty[0] = true;
@@ -149,8 +149,10 @@ __declspec(dllexport) void logic_onkey() {
   //     game->g_Keyboard__state->shiftKey,
   //     game->g_Keyboard__state->metaKey);
 
-  if (41 == game->g_Keyboard__state->code) {  // ESC
-    game->s_Window.quit = true;
+  if (game->mouseCaptured && 41 == game->g_Keyboard__state->code) {  // ESC
+    game->Window__CaptureMouse(false);
+    game->mouseCaptured = false;
+    // game->s_Window.quit = true;
   }
 
   if (21 == game->g_Keyboard__state->code) {  // R
@@ -194,12 +196,20 @@ __declspec(dllexport) void logic_onfinger() {
     game->local->isUBODirty[1] = true;
   }
 
-  game->local->player.transform.rotation[0] =
-      game->local->player.transform.rotation[0] +
-      (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
-  game->local->player.transform.rotation[1] =
-      game->local->player.transform.rotation[1] +
-      (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
+  if (!game->mouseCaptured && FINGER_DOWN == game->g_Finger__state->event &&
+      game->g_Finger__state->button_l) {
+    game->Window__CaptureMouse(true);
+    game->mouseCaptured = true;
+  }
+
+  if (game->mouseCaptured) {
+    game->local->player.transform.rotation[0] =
+        game->local->player.transform.rotation[0] +
+        (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
+    game->local->player.transform.rotation[1] =
+        game->local->player.transform.rotation[1] +
+        (-game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
+  }
 }
 
 // on physics
@@ -230,6 +240,12 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
         game->local->player.transform.position,
         forward,
         game->local->player.transform.position);
+
+    LOG_DEBUGF(
+        "player pos %3.3f %3.3f %3.3f",
+        game->local->player.transform.position[0],
+        game->local->player.transform.position[1],
+        game->local->player.transform.position[2]);
   }
 
   // Move backward (S)

@@ -89,6 +89,8 @@ int Engine__Loop() {
   state->Audio__ResumeAudio = &Audio__ResumeAudio;
   state->Audio__StopAudio = &Audio__StopAudio;
 
+  state->Window__CaptureMouse = &Window__CaptureMouse;
+
   Keyboard__RegisterCallback(keyboardCallback);
   state->g_Keyboard__state = &g_Keyboard__state;
   Finger__RegisterCallback(fingerCallback);
