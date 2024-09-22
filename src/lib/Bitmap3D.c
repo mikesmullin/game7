@@ -4,142 +4,100 @@
 #include "Engine.h"
 #include "Math.h"
 
+static f32 camX, camY, camZ, rCos, rSin, rot, fov;
 static u8 atlas_tile_size = 8 - 1;
 static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
 static u32 PS = 8;  // pixel super sample factor
 
-void Bitmap3D__Perspective(f32 fov, f32 aspect, f32 nearZ, f32 farZ, mat4 result) {
-  // Calculate the perspective projection matrix
-  float tan_half_fov = Math__tan(fov / 2.0f);  // Calculate tan(fov/2)
-
-  // Set the matrix to zero
-  for (int i = 0; i < 4; i++)
-    for (int j = 0; j < 4; j++) result[i][j] = 0.0f;
-
-  // Set the relevant values for the projection matrix
-  result[0][0] = 1.0f / (aspect * tan_half_fov);
-  result[1][1] = 1.0f / tan_half_fov;
-  result[2][2] = -(farZ + nearZ) / (farZ - nearZ);
-  result[2][3] = -1.0f;
-  result[3][2] = -(2.0f * farZ * nearZ) / (farZ - nearZ);
-  result[3][3] = 0.0f;
-}
-
-// Function to multiply a 4x4 matrix by a 4D vector
-void mat4_mulv(const mat4 matrix, const vec4 vector, vec4 result) {
-  // Optimized loop for multiplying each row of the matrix by the vector
-  for (u32 i = 0; i < 4; i++) {
-    result[i] = matrix[i][0] * vector[0] + matrix[i][1] * vector[1] + matrix[i][2] * vector[2] +
-                matrix[i][3] * vector[3];
-  }
-}
-
-// Perspective projection and draw function with camera
-void Bitmap3D__Set3DPixel(
-    Bitmap_t* bmp, f32 x, f32 y, f32 z, u32 color, mat4 model, mat4 view, mat4 projection) {
-  // Create a vec4 for the point in model space (homogeneous coordinates)
-  vec4 model_point = {x, y, z, 1.0f};
-
-  // Transform the point by the model matrix (from model space to world space)
-  vec4 world_point;
-  glm_mat4_mulv(model, model_point, world_point);
-
-  // Transform the point by the view (camera) matrix (from world space to camera space)
-  vec4 camera_point;
-  glm_mat4_mulv(view, world_point, camera_point);
-
-  // Apply perspective projection (from camera space to clip space)
-  vec4 clip_point;
-  glm_mat4_mulv(projection, camera_point, clip_point);
-
-  // Perform perspective division (convert homogeneous to normalized device coordinates)
-  if (clip_point[3] != 0.0f) {
-    clip_point[0] /= clip_point[3];
-    clip_point[1] /= clip_point[3];
-    clip_point[2] /= clip_point[3];
-  }
-
-  // Convert normalized device coordinates to screen space
-  int screen_x = (int)((clip_point[0] + 1.0f) * 0.5f * W);
-  int screen_y = (int)((1.0f - clip_point[1]) * 0.5f * H);
-
-  // Draw the pixel in the RGBA buffer
-  Bitmap__Set2DPixel(bmp, screen_x, screen_y, color);
-}
-
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
+  s32 x, y;
+  u32 color = 0;
+  u32* buf = (u32*)game->local->screen.buf;
+  u32 len = game->local->screen.len;
 
-  // Model matrix: Identity at first
-  mat4 model;
-  glm_mat4_identity(model);
-  vec3 translation = {0.0f, 0.0f, -2.0f};
-  glm_translate(model, translation);
-  // glm_rotate(
-  //     model,
-  //     glm_rad(Math__sin(game->local->currentTime / 10000) * 90.0f),
-  //     (vec3){0.0f, 1.0f, 0.0f});
+  f32 yd = 0, zd = 0, xd = 0;
+  camX = game->local->player.transform.position[0];
+  camY = game->local->player.transform.position[1];
+  camZ = game->local->player.transform.position[2];
+  // camZ = -0.2 + Math__sin(game->local->player->bobPhase * 0.4) * 0.01 * game->local->player->bob
+  // - game->local->player->y;
+  rot = game->local->player.transform.rotation[0];
+  rCos = Math__cos(rot);
+  rSin = Math__sin(rot);
+  fov = H;
 
-  // View matrix (camera setup)
-  mat4 view;
-  glm_mat4_identity(view);
+  for (y = 0; y < H; y++) {
+    yd = ((y / (f32)H) * 2) - 1;
+    f32 ydd = yd;
+    if (ydd < 0) {  // ceiling is mirrored, not flipped
+      ydd = -ydd;
+    }
+    yd *= PS;
 
-  vec3 front;
+    zd = (camZ * PS) / yd;
+    if (yd < 0) {  // ceiling is mirrored, not flipped
+      zd = -zd;
+    }
 
-  // Convert yaw and pitch from degrees to radians
-  float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
-  float pitch_radians = glm_rad(game->local->player.transform.rotation[1]);
+    for (x = 0; x < W; x++) {
+      xd = ((x / (f32)W) * 2) - 1;
+      xd *= zd;
 
-  // Calculate the forward vector (camera direction)
-  front[0] = cosf(yaw_radians) * cosf(pitch_radians);
-  front[1] = sinf(pitch_radians);
-  front[2] = sinf(yaw_radians) * cosf(pitch_radians);
+      u32 xx = (u32)(((xd * rSin) + (zd * rCos)) + camX) & atlas_tile_size;
+      u32 yy = (u32)(((xd * rCos) - (zd * rSin)) + camY) & atlas_tile_size;
+      color = ((u32*)game->local->atlas.buf)[(xx + yy * atlas_dim) % game->local->atlas.len];
+      buf[(x + y * W) % len] = color;
 
-  // Normalize the direction vector
-  glm_vec3_normalize(front);
-
-  // Camera target = position + front
-  vec3 target;
-  glm_vec3_add(game->local->player.transform.position, front, target);
-
-  // Set up the camera's view matrix (lookAt)
-  vec3 up = {0.0f, 1.0f, 0.0f};  // World up vector
-  glm_lookat(game->local->player.transform.position, target, up, view);
-
-  // Projection matrix (Perspective projection)
-  mat4 projection;
-  float fovy = glm_rad(game->local->player.camera.fov);     // Field of view (Y-axis)
-  float aspect = game->CANVAS_WIDTH / game->CANVAS_HEIGHT;  // Aspect ratio (window width / height)
-  float nearZ = game->local->player.camera.nearZ;
-  float farZ = game->local->player.camera.farZ;
-  glm_perspective(fovy, aspect, nearZ, farZ, projection);
-
-  memset(game->local->screen.buf, 0, game->local->screen.len);
-
-  for (f32 z = -1.0f; z <= 1.0f; z += 0.1f) {
-    for (f32 y = -1.0f; y <= 1.0f; y += 0.1f) {
-      for (f32 x = -1.0f; x <= -0.91f; x += 0.1f) {
-        u32 r = ((u32)((x + 1.0f) * 255.0f) / 2.0f);
-        u32 g = ((u32)((y + 1.0f) * 255.0f) / 2.0f);
-        u32 b = ((u32)((z + 1.0f) * 255.0f) / 2.0f);
-        u32 color = (u32)0xff000000 | b << 16 | g << 8 | r;
-        u32 xx = ((u32)(x * (W / 4.0f)) % 8) + 0;
-        u32 yy = ((u32)(y * (H / 4.0f)) % 8) + 0;
-        color = Bitmap__Get2DPixel(&game->local->atlas, xx, yy, 0xffff00ff);
-        Bitmap3D__Set3DPixel(&game->local->screen, x, y, z, color, model, view, projection);
-      }
+      game->local->zbuf[(x + y * W) % len] = ydd;
+      // uncomment to render zbuf
+      // buf[(x + y * W) % len] = (f32)((zd + 1.0f) * 0.5f * 0xffffffff);
     }
   }
 
-  // Bitmap3D__RenderWall(game, 1, 1, 2, 2);
-
-  // Bitmap3D__RenderFloor(game);
+  Bitmap3D__RenderWall(game, 1, 1, 2, 2);
+  Bitmap3D__RenderFloor(game);
 }
 
 void Bitmap3D__RenderWall(Engine__State_t* game, s32 x0, s32 y0, s32 x1, s32 y1) {
+  s32 x, y;
+  u32 color = 0xffff00ff;
+  u32 ts = 8;    // tile size
+  f32 d = 4.0f;  // tile size
+  u32* buf = (u32*)game->local->screen.buf;
+  u32 len = game->local->screen.len;
+  f32 yd = 0, zd = 0, xd = 0;
+
+  for (y = 0; y < H; y++) {
+    yd = ((y / (f32)H) * 2) - 1;
+    f32 ydd = yd;
+    if (ydd < 0) {  // ceiling is mirrored, not flipped
+      ydd = -ydd;
+    }
+    yd *= PS;
+
+    zd = (camZ * PS) / yd;
+    if (yd < 0) {  // ceiling is mirrored, not flipped
+      zd = -zd;
+    }
+
+    for (x = 0; x < W; x++) {
+      xd = ((x / (f32)W) * 2) - 1;
+      xd *= zd;
+
+      u32 xx = (u32)(((xd * rSin) + (zd * rCos)) + camX) & atlas_tile_size;
+      u32 yy = (u32)(((xd * rCos) - (zd * rSin)) + camY) & atlas_tile_size;
+      if (xx >= x0 && xx <= x1 && yy >= y0 && yy <= y1) {
+        // color = ((u32*)game->local->atlas.buf)[(xx + yy * atlas_dim) % game->local->atlas.len];
+        // but i instead want to write to a projected coordinate
+        color = 0xffff00ff;  // pink
+        buf[(x + y * W) % len] = color;
+      }
+    }
+  }
 }
 
 void Bitmap3D__RenderFloor(Engine__State_t* game) {
