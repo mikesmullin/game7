@@ -126,8 +126,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
   f32 yd = 0, zd = 0, xd = 0;
   camX = game->local->player.transform.position[0];
-  camY = game->local->player.transform.position[1];
-  camZ = game->local->player.transform.position[2];
+  camY = game->local->player.transform.position[2];
+  camZ = game->local->player.transform.position[1];
   // camZ = -0.2 + Math__sin(game->local->player->bobPhase * 0.4) * 0.01 * game->local->player->bob
   // - game->local->player->y;
   rot = game->local->player.transform.rotation[0];
@@ -136,7 +136,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   fov = H;
 
   for (y = 0; y < H; y++) {
-    yd = ((y / (f32)H) * 2) - 1;
+    yd = ((y / (f32)H) * 2) - 1;  // -1 .. 1
     f32 ydd = yd;
     if (ydd < 0) {  // ceiling is mirrored, not flipped
       ydd = -ydd;
@@ -163,8 +163,29 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
   }
 
-  Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 0, 0);
-  Bitmap3D__RenderFloor(game);
+  for (u32 i = 0; i < 1000; i++) {
+    f32 x = Math__random(-1.0f, 1.0f);
+    f32 z = Math__random(-1.0f, 1.0f);
+    f32 y = 1 - camY;
+
+    f32 xx = (x * rCos) - (y * rSin) + camX;
+    f32 yy = z;
+    f32 zz = (y * rCos) - (x * rSin) + camZ;
+
+    if (zz > 0) {
+      u32 xP = (u32)(xx / zz * H + W / 2.0f);
+      u32 yP = (u32)(yy / zz * H + H / 2.0f);
+      // u32 xP = (u32)(((x * rSin) - (y * rCos) * (W / 2.0f)) /* + camX*/);
+      // u32 yP = (u32)(((y * rCos) + (x * rSin) * (H / 2.0f)) /* + camY */);
+
+      // LOG_DEBUGF("xx %3.3f, yy %3.3f", xx, yy);
+      // LOG_DEBUGF("xP %u, yP %u", xP, yP);
+      Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0x00000000);
+    }
+  }
+
+  // Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 0, 0);
+  // Bitmap3D__RenderFloor(game);
 }
 
 void Bitmap3D__RenderFloor(Engine__State_t* game) {
