@@ -143,46 +143,70 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   rSin = Math__sin(rot);
   fov = H;
 
+  // S = screen
+  // W = world
+  // T = texture (tile/block units, more accurately)
+
   // y/x = cartesian
   // n   = normalized
   // h   = homogeneous
-  // t   = texture
 
   // r   = rotated (camera rotation)
   // o   = translated (camera position)
   // g   = gridded / tiled / repeat-xy
 
-  for (s32 y = 0; y < H; y++) {
-    f32 yn = ((y / (f32)H) * 2) - 1;  // -1 .. 1
-    f32 yh = yn;
-    if (yh < 0) {  // ceiling is mirrored, not flipped
-      yh = -yh;
-    }
-    f32 yt = yn * PS;
+  // TODO: are we Y-UP or Z-UP rn? based on the draw-screen/read-texture loop
+  //   screens and textures are 2d so x,y only
+  //   the perception of depth becomes z by convenience
+  //   but it should be thought of differently
+  //   differentiate world v. screen/texture axes
 
-    f32 zt = (camZ * PS) / yt;
-    if (yn < 0) {  // ceiling is mirrored, not flipped
-      zt = -zt;
+  // x-axis = (-)left/right
+  // y-axis = forward/backward(-)
+  // z-axis = up/down
+
+  for (s32 Sy = 0; Sy < H; Sy++) {
+    f32 Syn = ((Sy / (f32)H) * 2) - 1;  // -1 .. 1
+    f32 Syh = Syn;
+    if (Syh < 0) {  // ceiling is mirrored, not flipped
+      Syh = -Syh;
+    }
+    f32 Ty = Syn * PS;
+
+    f32 Wz = (camZ * PS);  // tile repeat count
+    Wz /= Ty;              // perspective projection (depth)
+    //  near = few repeats, far = many repeats
+
+    if (Syn < 0) {  // ceiling is mirrored, not flipped
+      Wz = -Wz;
     }
 
-    for (s32 x = 0; x < W; x++) {
-      f32 xn = ((x / (f32)W) * 2) - 1;
-      f32 xt = xn * zt;
+    for (s32 Sx = 0; Sx < W; Sx++) {
+      f32 Sxn = ((Sx / (f32)W) * 2) - 1;
+
+      f32 Tx = Sxn;
+      // repeat-x count
+      // pinching at 0,0 origin
+      Tx *= Wz;
 
       // rotate on XZ plane along Z axis (Z-UP)
-      f32 r[2] = {xt, zt};
-      rot2d(xt, zt, rSin, rCos, r);
+      f32 Wr[2] = {Tx, Wz};
+      rot2d(Tx, Wz, rSin, rCos, Wr);
 
-      f32 xo = r[0] + camX;
-      f32 yo = r[1] + camY;
+      f32 s = Math__sin(game->local->currentTime / 500) * 10;
+      // if (s < -0.999 && x == 0) {
+      //   LOG_DEBUGF("s -");
+      // }
+      f32 Wxo = Wr[0] + camX;
+      f32 Wyo = Wr[1] + camY;
 
-      u32 xg = (u32)xo & atlas_tile_size;
-      u32 yg = (u32)yo & atlas_tile_size;
+      u32 Txg = (u32)Wxo & atlas_tile_size;
+      u32 Tyg = (u32)Wyo & atlas_tile_size;
 
-      color = Bitmap__Get2DPixel(&game->local->atlas, xg, yg, 0xffff00ff);
-      Bitmap__Set2DPixel(&game->local->screen, x, y, color);
+      color = Bitmap__Get2DPixel(&game->local->atlas, Txg, Tyg, 0xffff00ff);
+      Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
 
-      game->local->zbuf[(x + y * W) % len] = yh;
+      game->local->zbuf[(Sx + Sy * W) % len] = Syh;
       // uncomment to render zbuf
       // buf[(x + y * W) % len] = (f32)((zd + 1.0f) * 0.5f * 0xffffffff);
     }
