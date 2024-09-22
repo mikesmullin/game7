@@ -77,27 +77,29 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // Model matrix: Identity at first
   mat4 model;
   glm_mat4_identity(model);
-  vec3 translation = {0.0f, 0.0f, Math__sin(game->local->currentTime / 1000) * -5.0f};
+  vec3 translation = {0.0f, 0.0f, -2.0f};
   glm_translate(model, translation);
   glm_rotate(
       model,
-      glm_rad(Math__sin(game->local->currentTime / 1000) * 45.0f),
+      glm_rad(Math__sin(game->local->currentTime / 1000) * 90.0f),
       (vec3){0.0f, 1.0f, 0.0f});
 
   // View matrix (camera setup)
   mat4 view;
   glm_mat4_identity(view);
-  vec3 cameraPos = {0.0f, 0.0f, 3.0f};     // Camera position
+  vec3 cameraPos = {0.0f, 0.0f, 3.0f};  // Camera position
+  glm_vec3_add(cameraPos, game->local->player.transform.position, cameraPos);
   vec3 cameraTarget = {0.0f, 0.0f, 0.0f};  // Look at the origin
-  vec3 up = {0.0f, 1.0f, 0.0f};            // Up direction
+  glm_vec3_add(cameraTarget, game->local->player.transform.rotation, cameraTarget);
+  vec3 up = {0.0f, 1.0f, 0.0f};  // Up direction
   glm_lookat(cameraPos, cameraTarget, up, view);
 
   // Projection matrix (Perspective projection)
   mat4 projection;
-  float fovy = glm_rad(45.0f);     // Field of view (Y-axis)
-  float aspect = 800.0f / 600.0f;  // Aspect ratio (window width / height)
+  float fovy = glm_rad(45.0f);  // Field of view (Y-axis)
+  float aspect = 1.0f;          // Aspect ratio (window width / height)
   float nearZ = 0.1f;
-  float farZ = 100.0f;
+  float farZ = 1000.0f;
   glm_perspective(fovy, aspect, nearZ, farZ, projection);
 
   // glm_vec3_add(
@@ -121,9 +123,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
   memset(game->local->screen.buf, 0, game->local->screen.len);
 
-  for (f32 z = -1.0f; z <= 1.0f; z += 0.1f) {
-    for (f32 y = -1.0f; y <= 1.0f; y += 0.1f) {
-      for (f32 x = -1.0f; x <= 1.0f; x += 0.1f) {
+  for (f32 z = -1.0f; z <= 1.0f; z += 0.25f) {
+    for (f32 y = -1.0f; y <= 1.0f; y += 0.25f) {
+      for (f32 x = -1.0f; x <= 1.0f; x += 0.25f) {
         u32 color = (u32)0xff000000 | (((u32)((z + 1.0f) * 0.5f) << 16)) |
                     (((u32)((y + 1.0f) * 0.5f) << 8)) | ((u32)((x + 1.0f) * 0.5f));
         Bitmap3D__Set3DPixel(&game->local->screen, x, y, z, color, model, view, projection);

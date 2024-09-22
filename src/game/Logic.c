@@ -201,44 +201,29 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
 
   if (game->g_Keyboard__state->pressed) {
     if (4 == game->g_Keyboard__state->code) {  // A
-      game->local->player.transform.rotation[1] += game->local->PLAYER_TURN_SPEED * deltaTime;
+      game->local->player.transform.rotation[0] -= game->local->PLAYER_TURN_SPEED * deltaTime;
     }
     if (7 == game->g_Keyboard__state->code) {  // D
-      game->local->player.transform.rotation[1] -= game->local->PLAYER_TURN_SPEED * deltaTime;
+      game->local->player.transform.rotation[0] += game->local->PLAYER_TURN_SPEED * deltaTime;
     }
     if (26 == game->g_Keyboard__state->code) {  // W
       game->local->player.transform.position[0] += game->local->PLAYER_WALK_SPEED * deltaTime;
     }
     if (22 == game->g_Keyboard__state->code) {  // S
       game->local->player.transform.position[0] -= game->local->PLAYER_WALK_SPEED * deltaTime;
-      LOG_DEBUGF(
-          "player pos %3.3f %3.3f %3.3f",
-          game->local->player.transform.position[0],
-          game->local->player.transform.position[1],
-          game->local->player.transform.position[2]);
     }
 
     if (20 == game->g_Keyboard__state->code) {  // Q
-      game->local->player.transform.position[2] += game->local->PLAYER_WALK_SPEED * deltaTime;
-      LOG_DEBUGF(
-          "player pos %3.3f %3.3f %3.3f",
-          game->local->player.transform.position[0],
-          game->local->player.transform.position[1],
-          game->local->player.transform.position[2]);
+      game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
     }
     if (8 == game->g_Keyboard__state->code) {  // E
-      game->local->player.transform.position[2] -= game->local->PLAYER_WALK_SPEED * deltaTime;
-      LOG_DEBUGF(
-          "player pos %3.3f %3.3f %3.3f",
-          game->local->player.transform.position[0],
-          game->local->player.transform.position[1],
-          game->local->player.transform.position[2]);
-    }
-    if (224 == game->g_Keyboard__state->code) {  // Ctl
       game->local->player.transform.position[1] -= game->local->PLAYER_WALK_SPEED * deltaTime;
     }
+    if (224 == game->g_Keyboard__state->code) {  // Ctl
+      game->local->player.transform.position[2] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+    }
     if (226 == game->g_Keyboard__state->code) {  // Alt
-      game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
+      game->local->player.transform.position[2] += game->local->PLAYER_WALK_SPEED * deltaTime;
     }
   }
 
