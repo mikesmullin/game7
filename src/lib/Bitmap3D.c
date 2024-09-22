@@ -109,22 +109,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   vec3 up = {0.0f, 1.0f, 0.0f};  // World up vector
   glm_lookat(game->local->player.transform.position, target, up, view);
 
-  // vec3 cameraPos = {0.0f, 0.0f, game->local->player.transform.position[2]};  // Camera position
-  // vec3 cameraTarget = {
-  //     0.0f,
-  //     0.0f,
-  //     game->local->player.transform.position[2] + 1.0f};  // Look at the origin
-  // vec3 up = {0.0f, 1.0f, 0.0f};                           // Up direction
-
-  // vec3 target;
-  // glm_vec3_add(
-  //     game->local->player.transform.position,
-  //     (vec3){0.0f, 0.0f, -1.0f + game->local->player.transform.position[2] - 3.0f},
-  //     target);
-
-  // glm_lookat(game->local->player.transform.position, target, up, view);
-  // glm_lookat(cameraPos, cameraTarget, up, view);
-
   // Projection matrix (Perspective projection)
   mat4 projection;
   float fovy = glm_rad(game->local->player.camera.fov);     // Field of view (Y-axis)

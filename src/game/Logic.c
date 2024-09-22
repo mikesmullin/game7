@@ -246,6 +246,11 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
         game->local->player.transform.position[0],
         game->local->player.transform.position[1],
         game->local->player.transform.position[2]);
+    LOG_DEBUGF(
+        "player rot %3.3f %3.3f %3.3f",
+        game->local->player.transform.rotation[0],
+        game->local->player.transform.rotation[1],
+        game->local->player.transform.rotation[2]);
   }
 
   // Move backward (S)
