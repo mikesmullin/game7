@@ -322,7 +322,8 @@ void Bitmap3D__PostProcessing(Engine__State_t* game) {
   for (u32 i = 0; i < W * H; i++) {
     f32 b1 = zbuf[i];  // 0 .. 1
     b1 = 1.0f - b1;    // invert so that the horizon has most alpha
-    f32 cutoff = (Math__map(Math__sin(game->local->currentTime / 5000), -1, 1, 0.5, 1));  // 0 .. 1
+    // f32 cutoff = Math__map(Math__sin(game->local->currentTime / 5000), -1, 1, 0.5, 1);  // 0 .. 1
+    f32 cutoff = 0.95f;  // higher number = further visibility distance
     b1 = Math__map(MATH_CLAMP(0, b1, cutoff), 0, cutoff, 0, 1);
     b1 = 255.0f * b1;                      // 0 .. 255
     u32 fog = (u32)b1 << 24 & 0xff000000;  // 0x00 .. 0xff alpha 000000 black
