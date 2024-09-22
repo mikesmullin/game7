@@ -119,27 +119,17 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
   memset(game->local->screen.buf, 0, game->local->screen.len);
 
-  for (f32 z = -1.0f; z <= 1.0f; z += 0.25f) {
-    for (f32 y = -1.0f; y <= 1.0f; y += 0.25f) {
-      for (f32 x = -1.0f; x <= 1.0f; x += 0.25f) {
+  for (f32 z = -1.0f; z <= 1.0f; z += 0.1f) {
+    for (f32 y = -1.0f; y <= 1.0f; y += 0.1f) {
+      for (f32 x = -1.0f; x <= -0.91f; x += 0.1f) {
         u32 r = ((u32)((x + 1.0f) * 255.0f) / 2.0f);
         u32 g = ((u32)((y + 1.0f) * 255.0f) / 2.0f);
         u32 b = ((u32)((z + 1.0f) * 255.0f) / 2.0f);
         u32 color = (u32)0xff000000 | b << 16 | g << 8 | r;
-        Bitmap3D__Set3DPixel(
-            &game->local->screen,
-            x,
-            y,
-            z,
-            color,
-            model,
-            view,
-            // game->local->player.camera.projection
-            projection
-            /**/
-        );
-        // game->local->player.camera.view,
-        // game->local->player.camera.projection);
+        u32 xx = ((u32)(x * (W / 4.0f)) % 8) + 0;
+        u32 yy = ((u32)(y * (H / 4.0f)) % 8) + 0;
+        color = Bitmap__Get2DPixel(&game->local->atlas, xx, yy, 0xffff00ff);
+        Bitmap3D__Set3DPixel(&game->local->screen, x, y, z, color, model, view, projection);
       }
     }
   }

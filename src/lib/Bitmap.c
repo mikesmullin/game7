@@ -22,6 +22,13 @@ void Bitmap__Set2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 color) {
   }
 }
 
+u32 Bitmap__Get2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 def) {
+  if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+    return ((u32*)bmp->buf)[x + y * bmp->w];
+  }
+  return def;
+}
+
 // a.k.a. Blit/Copy
 void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dX, u32 dY) {
   u32 xp, yp;
