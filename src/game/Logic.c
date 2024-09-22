@@ -49,9 +49,10 @@ __declspec(dllexport) void logic_oninit_data() {
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 1.0f;                                // per-second
+  game->local->PLAYER_WALK_SPEED = 3.0f;                                // per-second
   game->local->PLAYER_TURN_SPEED = 1.0f;                                // per-second
   game->local->PLAYER_ZOOM_SPEED = 2 * game->local->PLAYER_WALK_SPEED;  // per-second
+  game->local->PLAYER_LOOK_SPEED = 0.1f;                                // per-second
 
   game->local->isVBODirty = true;
   game->local->isUBODirty[0] = true;
@@ -164,25 +165,25 @@ __declspec(dllexport) void logic_onfinger() {
   //     "clicks %u pressure %2.5f finger %u "
   //     "x %u y %u x_rel %d y_rel %d wheel_x %2.5f wheel_y %2.5f "
   //     "button_l %d button_m %d button_r %d button_x1 %d button_x2 %d ",
-  //     (state->g_Finger__state->event == FINGER_UP       ? "UP"
-  //      : state->g_Finger__state->event == FINGER_DOWN   ? "DOWN"
-  //      : state->g_Finger__state->event == FINGER_MOVE   ? "MOVE"
-  //      : state->g_Finger__state->event == FINGER_SCROLL ? "SCROLL"
-  //                                        : ""),
-  //     state->g_Finger__state->clicks,
-  //     state->g_Finger__state->pressure,
-  //     state->g_Finger__state->finger,
-  //     state->g_Finger__state->x,
-  //     state->g_Finger__state->y,
-  //     state->g_Finger__state->x_rel,
-  //     state->g_Finger__state->y_rel,
-  //     state->g_Finger__state->wheel_x,
-  //     state->g_Finger__state->wheel_y,
-  //     state->g_Finger__state->button_l,
-  //     state->g_Finger__state->button_m,
-  //     state->g_Finger__state->button_r,
-  //     state->g_Finger__state->button_x1,
-  //     state->g_Finger__state->button_x2);
+  //     (game->g_Finger__state->event == FINGER_UP       ? "UP"
+  //      : game->g_Finger__state->event == FINGER_DOWN   ? "DOWN"
+  //      : game->g_Finger__state->event == FINGER_MOVE   ? "MOVE"
+  //      : game->g_Finger__state->event == FINGER_SCROLL ? "SCROLL"
+  //                                                      : ""),
+  //     game->g_Finger__state->clicks,
+  //     game->g_Finger__state->pressure,
+  //     game->g_Finger__state->finger,
+  //     game->g_Finger__state->x,
+  //     game->g_Finger__state->y,
+  //     game->g_Finger__state->x_rel,
+  //     game->g_Finger__state->y_rel,
+  //     game->g_Finger__state->wheel_x,
+  //     game->g_Finger__state->wheel_y,
+  //     game->g_Finger__state->button_l,
+  //     game->g_Finger__state->button_m,
+  //     game->g_Finger__state->button_r,
+  //     game->g_Finger__state->button_x1,
+  //     game->g_Finger__state->button_x2);
 
   if (FINGER_SCROLL == game->g_Finger__state->event) {
     // TODO: how to animate camera zoom with spring damping/smoothing?
@@ -192,6 +193,13 @@ __declspec(dllexport) void logic_onfinger() {
     game->local->isUBODirty[0] = true;
     game->local->isUBODirty[1] = true;
   }
+
+  game->local->player.transform.rotation[0] =
+      game->local->player.transform.rotation[0] +
+      (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
+  game->local->player.transform.rotation[1] =
+      game->local->player.transform.rotation[1] +
+      (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
 }
 
 // on physics
@@ -199,32 +207,69 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   // LOG_DEBUGF("Logic dll onfixedupdate.");
   game->local->currentTime = currentTime;
 
-  if (game->g_Keyboard__state->pressed) {
-    if (4 == game->g_Keyboard__state->code) {  // A
-      game->local->player.transform.rotation[0] -= game->local->PLAYER_TURN_SPEED * deltaTime;
-    }
-    if (7 == game->g_Keyboard__state->code) {  // D
-      game->local->player.transform.rotation[0] += game->local->PLAYER_TURN_SPEED * deltaTime;
-    }
-    if (26 == game->g_Keyboard__state->code) {  // W
-      game->local->player.transform.position[0] += game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
-    if (22 == game->g_Keyboard__state->code) {  // S
-      game->local->player.transform.position[0] -= game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
+  // Direction vectors for movement
+  vec3 forward, right, front;
 
-    if (20 == game->g_Keyboard__state->code) {  // Q
-      game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
-    if (8 == game->g_Keyboard__state->code) {  // E
-      game->local->player.transform.position[1] -= game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
-    if (224 == game->g_Keyboard__state->code) {  // Ctl
-      game->local->player.transform.position[2] -= game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
-    if (226 == game->g_Keyboard__state->code) {  // Alt
-      game->local->player.transform.position[2] += game->local->PLAYER_WALK_SPEED * deltaTime;
-    }
+  // Convert yaw to radians for direction calculation
+  float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
+
+  // Calculate the front vector based on yaw only (for movement along the XZ plane)
+  front[0] = cosf(yaw_radians);
+  front[1] = 0.0f;
+  front[2] = sinf(yaw_radians);
+  glm_vec3_normalize(front);
+
+  // Calculate the right vector (perpendicular to the front vector)
+  glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
+  glm_vec3_normalize(right);
+
+  // Move forward (W)
+  if (26 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // W
+    glm_vec3_scale(front, game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+    glm_vec3_add(
+        game->local->player.transform.position,
+        forward,
+        game->local->player.transform.position);
+  }
+
+  // Move backward (S)
+  if (22 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // S
+    glm_vec3_scale(front, -game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+    glm_vec3_add(
+        game->local->player.transform.position,
+        forward,
+        game->local->player.transform.position);
+  }
+
+  // Move right (D)
+  if (7 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // D
+    glm_vec3_scale(right, game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+    glm_vec3_add(
+        game->local->player.transform.position,
+        forward,
+        game->local->player.transform.position);
+  }
+
+  // Move left (A)
+  if (4 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // A
+    glm_vec3_scale(right, -game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+    glm_vec3_add(
+        game->local->player.transform.position,
+        forward,
+        game->local->player.transform.position);
+  }
+
+  if (20 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Q
+    // game->local->player.transform.position[1] += game->local->PLAYER_WALK_SPEED * deltaTime;
+  }
+  if (8 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // E
+    // game->local->player.transform.position[1] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+  }
+  if (224 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Ctl
+    // game->local->player.transform.position[2] -= game->local->PLAYER_WALK_SPEED * deltaTime;
+  }
+  if (226 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Alt
+    // game->local->player.transform.position[2] += game->local->PLAYER_WALK_SPEED * deltaTime;
   }
 
   // state->isVBODirty = true;

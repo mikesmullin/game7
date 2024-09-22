@@ -66,8 +66,7 @@ void Bitmap3D__Set3DPixel(
   int screen_y = (int)((1.0f - clip_point[1]) * 0.5f * H);
 
   // Draw the pixel in the RGBA buffer
-  Bitmap__Set2DPixel(bmp, screen_x, screen_y, 0xffff00ff /*color*/);
-  // Bitmap__Set2DPixel(bmp, (x * 2 - 1) * W, (y * 2 - 1) * H, 0xffff00ff);
+  Bitmap__Set2DPixel(bmp, screen_x, screen_y, color);
 }
 
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
@@ -81,54 +80,80 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   glm_translate(model, translation);
   glm_rotate(
       model,
-      glm_rad(Math__sin(game->local->currentTime / 1000) * 90.0f),
+      glm_rad(Math__sin(game->local->currentTime / 10000) * 90.0f),
       (vec3){0.0f, 1.0f, 0.0f});
 
   // View matrix (camera setup)
   mat4 view;
   glm_mat4_identity(view);
-  vec3 cameraPos = {0.0f, 0.0f, 3.0f};  // Camera position
-  glm_vec3_add(cameraPos, game->local->player.transform.position, cameraPos);
-  vec3 cameraTarget = {0.0f, 0.0f, 0.0f};  // Look at the origin
-  glm_vec3_add(cameraTarget, game->local->player.transform.rotation, cameraTarget);
-  vec3 up = {0.0f, 1.0f, 0.0f};  // Up direction
-  glm_lookat(cameraPos, cameraTarget, up, view);
+
+  vec3 front;
+
+  // Convert yaw and pitch from degrees to radians
+  float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
+  float pitch_radians = glm_rad(game->local->player.transform.rotation[1]);
+
+  // Calculate the forward vector (camera direction)
+  front[0] = cosf(yaw_radians) * cosf(pitch_radians);
+  front[1] = sinf(pitch_radians);
+  front[2] = sinf(yaw_radians) * cosf(pitch_radians);
+
+  // Normalize the direction vector
+  glm_vec3_normalize(front);
+
+  // Camera target = position + front
+  vec3 target;
+  glm_vec3_add(game->local->player.transform.position, front, target);
+
+  // Set up the camera's view matrix (lookAt)
+  vec3 up = {0.0f, 1.0f, 0.0f};  // World up vector
+  glm_lookat(game->local->player.transform.position, target, up, view);
+
+  // vec3 cameraPos = {0.0f, 0.0f, game->local->player.transform.position[2]};  // Camera position
+  // vec3 cameraTarget = {
+  //     0.0f,
+  //     0.0f,
+  //     game->local->player.transform.position[2] + 1.0f};  // Look at the origin
+  // vec3 up = {0.0f, 1.0f, 0.0f};                           // Up direction
+
+  // vec3 target;
+  // glm_vec3_add(
+  //     game->local->player.transform.position,
+  //     (vec3){0.0f, 0.0f, -1.0f + game->local->player.transform.position[2] - 3.0f},
+  //     target);
+
+  // glm_lookat(game->local->player.transform.position, target, up, view);
+  // glm_lookat(cameraPos, cameraTarget, up, view);
 
   // Projection matrix (Perspective projection)
   mat4 projection;
-  float fovy = glm_rad(45.0f);  // Field of view (Y-axis)
-  float aspect = 1.0f;          // Aspect ratio (window width / height)
-  float nearZ = 0.1f;
-  float farZ = 1000.0f;
+  float fovy = glm_rad(game->local->player.camera.fov);     // Field of view (Y-axis)
+  float aspect = game->CANVAS_WIDTH / game->CANVAS_HEIGHT;  // Aspect ratio (window width / height)
+  float nearZ = game->local->player.camera.nearZ;
+  float farZ = game->local->player.camera.farZ;
   glm_perspective(fovy, aspect, nearZ, farZ, projection);
-
-  // glm_vec3_add(
-  //     game->local->player.transform.position,
-  //     game->local->player.transform.rotation,
-  //     center);
-  // glm_lookat(
-  //     game->local->player.transform.position,
-  //     center /*(vec3){0.0f, 0.0f, 0.0f}*/,
-  //     game->local->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
-  //     game->local->player.camera.view);
-
-  // glm_translate(game->local->player.camera.view, game->local->player.transform.position);
-  // glm_rotate(game->local->player.camera.view, );
-  // Bitmap3D__Perspective(
-  //     glm_rad(game->local->player.camera.fov),  // half the actual 90deg fov
-  //     (f32)game->CANVAS_WIDTH / game->CANVAS_HEIGHT,
-  //     game->local->player.camera.nearZ,
-  //     game->local->player.camera.farZ,
-  //     game->local->player.camera.projection);
 
   memset(game->local->screen.buf, 0, game->local->screen.len);
 
   for (f32 z = -1.0f; z <= 1.0f; z += 0.25f) {
     for (f32 y = -1.0f; y <= 1.0f; y += 0.25f) {
       for (f32 x = -1.0f; x <= 1.0f; x += 0.25f) {
-        u32 color = (u32)0xff000000 | (((u32)((z + 1.0f) * 0.5f) << 16)) |
-                    (((u32)((y + 1.0f) * 0.5f) << 8)) | ((u32)((x + 1.0f) * 0.5f));
-        Bitmap3D__Set3DPixel(&game->local->screen, x, y, z, color, model, view, projection);
+        u32 r = ((u32)((x + 1.0f) * 255.0f) / 2.0f);
+        u32 g = ((u32)((y + 1.0f) * 255.0f) / 2.0f);
+        u32 b = ((u32)((z + 1.0f) * 255.0f) / 2.0f);
+        u32 color = (u32)0xff000000 | b << 16 | g << 8 | r;
+        Bitmap3D__Set3DPixel(
+            &game->local->screen,
+            x,
+            y,
+            z,
+            color,
+            model,
+            view,
+            // game->local->player.camera.projection
+            projection
+            /**/
+        );
         // game->local->player.camera.view,
         // game->local->player.camera.projection);
       }

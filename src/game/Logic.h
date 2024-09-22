@@ -48,7 +48,7 @@ typedef struct {
 
 typedef struct {
   vec3 position;  // (x, y, z)
-  vec3 rotation;  // (yaw, pitch, roll)
+  vec4 rotation;  // (yaw, pitch, roll)
 } Transform_t;
 
 typedef struct {
@@ -92,6 +92,7 @@ typedef struct {
   f32 PLAYER_TURN_SPEED;
   f32 PLAYER_WALK_SPEED;
   f32 PLAYER_ZOOM_SPEED;
+  f32 PLAYER_LOOK_SPEED;
 
   u8 newTexId;
 
