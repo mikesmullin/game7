@@ -78,10 +78,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   glm_mat4_identity(model);
   vec3 translation = {0.0f, 0.0f, -2.0f};
   glm_translate(model, translation);
-  glm_rotate(
-      model,
-      glm_rad(Math__sin(game->local->currentTime / 10000) * 90.0f),
-      (vec3){0.0f, 1.0f, 0.0f});
+  // glm_rotate(
+  //     model,
+  //     glm_rad(Math__sin(game->local->currentTime / 10000) * 90.0f),
+  //     (vec3){0.0f, 1.0f, 0.0f});
 
   // View matrix (camera setup)
   mat4 view;
