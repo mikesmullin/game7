@@ -119,12 +119,10 @@ void Bitmap3D__RenderWall(
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
-  s32 x, y;
   u32 color = 0;
   u32* buf = (u32*)game->local->screen.buf;
   u32 len = game->local->screen.len;
 
-  f32 yd = 0, zd = 0, xd = 0;
   camX = game->local->player.transform.position[0];
   camY = game->local->player.transform.position[2];
   camZ = game->local->player.transform.position[1];
@@ -135,29 +133,34 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   rSin = Math__sin(rot);
   fov = H;
 
-  for (y = 0; y < H; y++) {
-    yd = ((y / (f32)H) * 2) - 1;  // -1 .. 1
-    f32 ydd = yd;
-    if (ydd < 0) {  // ceiling is mirrored, not flipped
-      ydd = -ydd;
+  // y/x = cartesian
+  // n   = normalized
+  // h   = homogeneous
+  // t   = texture
+
+  for (s32 y = 0; y < H; y++) {
+    f32 yn = ((y / (f32)H) * 2) - 1;  // -1 .. 1
+    f32 yh = yn;
+    if (yh < 0) {  // ceiling is mirrored, not flipped
+      yh = -yh;
     }
-    yd *= PS;
+    f32 yt = yn * PS;
 
-    zd = (camZ * PS) / yd;
-    if (yd < 0) {  // ceiling is mirrored, not flipped
-      zd = -zd;
+    f32 zt = (camZ * PS) / yt;
+    if (yn < 0) {  // ceiling is mirrored, not flipped
+      zt = -zt;
     }
 
-    for (x = 0; x < W; x++) {
-      xd = ((x / (f32)W) * 2) - 1;
-      xd *= zd;
+    for (s32 x = 0; x < W; x++) {
+      f32 xn = ((x / (f32)W) * 2) - 1;
+      f32 xt = xn * zt;
 
-      u32 xx = (u32)(((xd * rSin) + (zd * rCos)) + camX) & atlas_tile_size;
-      u32 yy = (u32)(((xd * rCos) - (zd * rSin)) + camY) & atlas_tile_size;
+      u32 xx = (u32)(((xt * rSin) + (zt * rCos)) + camX) & atlas_tile_size;
+      u32 yy = (u32)(((xt * rCos) - (zt * rSin)) + camY) & atlas_tile_size;
       color = ((u32*)game->local->atlas.buf)[(xx + yy * atlas_dim) % game->local->atlas.len];
       buf[(x + y * W) % len] = color;
 
-      game->local->zbuf[(x + y * W) % len] = ydd;
+      game->local->zbuf[(x + y * W) % len] = yh;
       // uncomment to render zbuf
       // buf[(x + y * W) % len] = (f32)((zd + 1.0f) * 0.5f * 0xffffffff);
     }
@@ -165,24 +168,21 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
   for (u32 i = 0; i < 1000; i++) {
     f32 x = Math__random(-1.0f, 1.0f);
+    f32 y = Math__random(-1.0f, 1.0f);
     f32 z = Math__random(-1.0f, 1.0f);
-    f32 y = 1 - camY;
 
-    f32 xx = (x * rCos) - (y * rSin);
-    f32 yy = z;
-    f32 zz = (y * rCos) - (x * rSin);
+    f32 xx = (x * rCos) - (z * rSin);
+    f32 yy = y;
+    f32 zz = z;  //(z * rCos) - (x * rSin);
 
-    if (zz > 0) {
-      u32 xP = (u32)(xx / zz * H + W / 2.0f) + camX;
-      u32 yP = (u32)(yy / zz * H + H / 2.0f) + camZ;
-      // u32 xP = (u32)(((x * rSin) - (y * rCos) * (W / 2.0f)) /* + camX*/);
-      // u32 yP = (u32)(((y * rCos) + (x * rSin) * (H / 2.0f)) /* + camY */);
+    // u32 xP = (u32)(xx / zz * H + W / 2.0f) + camX;
+    // u32 yP = (u32)(yy / zz * H + H / 2.0f) + camZ;
 
-      // LOG_DEBUGF("xx %3.3f, yy %3.3f", xx, yy);
-      // LOG_DEBUGF("xP %u, yP %u", xP, yP);
-      // ((f32*)game->local->zbuf)[(u32)(xP + yP * W) % (W * H)] = 1.0f;
-      Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0xffffffff);
-    }
+    u32 xP = (u32)(xx * (W / 2.0f));
+    u32 yP = (u32)(zz * (H / 2.0f));
+
+    // ((f32*)game->local->zbuf)[(u32)(xP + yP * W) % (W * H)] = 1.0f;
+    Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0xffffffff);
   }
 
   // Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 0, 0);
