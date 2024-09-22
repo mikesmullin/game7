@@ -116,6 +116,16 @@ void Bitmap3D__RenderWall(
       &game->local->atlas);
 }
 
+// rotate plane along axis
+void rot2d(f32 a, f32 b, f32 rSin, f32 rCos, f32* r) {
+  // a oscillates along the a-axis the circle intersecting a,y
+  // a-axis range +/- a+b+e
+  // where e = the extra required for the circle to intersect at a,b
+  // b-axis range is exactly the same, but offset by 90 degree phase (obviously)
+  r[0] = -(b * rSin) + (a * rCos);  // a-axis
+  r[1] = (a * rSin) + (b * rCos);   // b-axis
+}
+
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
@@ -160,14 +170,14 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       f32 xt = xn * zt;
 
       // rotate on XZ plane along Z axis (Z-UP)
-      f32 xr = (xt * rSin) + (zt * rCos);
-      f32 yr = (xt * rCos) - (zt * rSin);
+      f32 r[2] = {xt, zt};
+      rot2d(xt, zt, rSin, rCos, r);
 
-      u32 xo = xr + camX;
-      u32 yo = yr + camY;
+      f32 xo = r[0] + camX;
+      f32 yo = r[1] + camY;
 
-      u32 xg = xo & atlas_tile_size;
-      u32 yg = yo & atlas_tile_size;
+      u32 xg = (u32)xo & atlas_tile_size;
+      u32 yg = (u32)yo & atlas_tile_size;
 
       color = Bitmap__Get2DPixel(&game->local->atlas, xg, yg, 0xffff00ff);
       Bitmap__Set2DPixel(&game->local->screen, x, y, color);
