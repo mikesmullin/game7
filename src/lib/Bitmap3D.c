@@ -5,7 +5,8 @@
 #include "Math.h"
 
 static f32 camX, camY, camZ, rCos, rSin, rot, fov;
-static u8 atlas_tile_size = 8 - 1;
+static u8 atlas_tile_size = 8;
+static u8 floor_tile_idxX = 2;
 static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
@@ -200,10 +201,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       f32 Wxo = Wr[0] + camX;
       f32 Wyo = Wr[1] + camY;
 
-      u32 Txg = (u32)Wxo & atlas_tile_size;
-      u32 Tyg = (u32)Wyo & atlas_tile_size;
-
-      color = Bitmap__Get2DPixel(&game->local->atlas, Txg, Tyg, 0xffff00ff);
+      color = Bitmap__Get2DTiledPixel(
+          &game->local->atlas,
+          Wxo,
+          Wyo,
+          atlas_tile_size,
+          floor_tile_idxX =
+              (u8)((Math__sin(game->local->currentTime / 1000.0f) + 1.0f / 2.0f) * 2.0f),
+          0,
+          0xffff00ff);
       Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
 
       game->local->zbuf[(Sx + Sy * W) % len] = Syh;
