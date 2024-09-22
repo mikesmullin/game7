@@ -2,6 +2,8 @@
 
 #include <math.h>
 
+#include "Base.h"
+
 f64 Math__sin(f64 n) {
   return sin(n);
 }

@@ -146,6 +146,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
   // S = screen
   // W = world
+  // V = view
+  // M = model
   // T = texture (tile/block units, more accurately)
 
   // y/x = cartesian
@@ -175,20 +177,24 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     f32 Ty = Syn * PS;
 
     f32 Wz = 0.0f;
-    f32 zHeightOffset = (camZ * PS) * Math__sin(game->local->currentTime / 1000);
-    // zHeightOffset = offset from ceiling (more realistically Wz)
-    //   where -1 = floor, 0 = middle, 1 = ceiling
+    f32 Whn = 4.0f;     // arbitrary world size (art data)
+    f32 Wh = Whn * PS;  // world height (tile units)
+
+    camZ = MATH_CLAMP(camZ, 0, Wh);
+    f32 Vhn = ((camZ / Wh) * 2.0f) - 1.0f;  // -1 = floor, 0 = middle, 1 = ceiling
+    // Vhn = Math__sin(game->local->currentTime / 1000); // debug animate player y
+    f32 Vh = Vhn * Wh;
     if (Syn > 0) {
       // floor
     }
     if (Syn < 0) {
       // ceiling
-      zHeightOffset *= -1;  // determines eye position
-      Wz *= -1.0f;          // ensure ceiling is mirrored, not flipped
+      Vh *= -1.0f;  // determines eye position
+      Wz *= -1.0f;  // ensure ceiling is mirrored, not flipped
     }
-    Wz = (camZ * PS) + zHeightOffset;  // tile repeat count
-    Wz /= Ty;                          // perspective projection (depth)
-                                       //  near = few repeats, far = many repeats
+    Wz = Wh + Vh;  // tile repeat count
+    Wz /= Ty;      // perspective projection (depth)
+                   //  near = few repeats, far = many repeats
 
     for (s32 Sx = 0; Sx < W; Sx++) {
       f32 Sxn = ((Sx / (f32)W) * 2) - 1;
