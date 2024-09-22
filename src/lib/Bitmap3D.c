@@ -6,7 +6,7 @@
 
 static f32 camX, camY, camZ, rCos, rSin, rot, fov;
 static u8 atlas_tile_size = 8;
-static u8 floor_tile_idxX = 2;
+static u8 floor_tile_idxX = 0;
 static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
@@ -174,30 +174,49 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
     f32 Ty = Syn * PS;
 
-    f32 Wz = (camZ * PS);  // tile repeat count
-    Wz /= Ty;              // perspective projection (depth)
-    //  near = few repeats, far = many repeats
-
-    if (Syn < 0) {  // ceiling is mirrored, not flipped
-      Wz = -Wz;
+    // TODO: detach ceiling height from player height
+    f32 Wz = 0.0f;
+    f32 zHeightOffset = (camZ * PS) * Math__sin(game->local->currentTime / 1000.0f);
+    // zHeightOffset = offset from ceiling (more realistically Wz)
+    Wz = (camZ * PS) + zHeightOffset;  // tile repeat count
+    Wz /= Ty;                          // perspective projection (depth)
+                                       //  near = few repeats, far = many repeats
+    if (Wz > 0) {
+      // floor
     }
+    if (Wz < 0) {
+      // ceiling
+      Wz = (camZ * PS) - zHeightOffset;  // tile repeat count
+      // also ensure ceiling is mirrored, not flipped
+      Wz /= -Ty;  // perspective projection (depth)
+      //  near = few repeats, far = many repeats
+    }
+
+    // if (Syn < 0) {
+    //  // ensure ceiling is mirrored, not flipped
+    //   Wz = -Wz;
+    // }
 
     for (s32 Sx = 0; Sx < W; Sx++) {
       f32 Sxn = ((Sx / (f32)W) * 2) - 1;
 
-      f32 Tx = Sxn;
-      // repeat-x count
+      f32 Wx = Sxn;
+      // repeat-x count, which is actually:
+      //   by passing a decimal,
+      //   we cause texture pixels to be skipped or repeated
+      //   when rendered on screen
+      //   so smaller numbers = larger textures
+      //   larger numbers = smaller textures
       // pinching at 0,0 origin
-      Tx *= Wz;
+      //   inherited from `/= Ty` earlier
+      Wx *= Wz;
 
       // rotate on XZ plane along Z axis (Z-UP)
-      f32 Wr[2] = {Tx, Wz};
-      rot2d(Tx, Wz, rSin, rCos, Wr);
+      f32 Wr[2] = {Wx, Wz};
+      rot2d(Wx, Wz, rSin, rCos, Wr);
 
-      f32 s = Math__sin(game->local->currentTime / 500) * 10;
-      // if (s < -0.999 && x == 0) {
-      //   LOG_DEBUGF("s -");
-      // }
+      // translation must happen after rotation
+      // or the rotation origin seems detached from the player
       f32 Wxo = Wr[0] + camX;
       f32 Wyo = Wr[1] + camY;
 
@@ -206,8 +225,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
           Wxo,
           Wyo,
           atlas_tile_size,
-          floor_tile_idxX =
-              (u8)((Math__sin(game->local->currentTime / 1000.0f) + 1.0f / 2.0f) * 2.0f),
+          floor_tile_idxX,
           0,
           0xffff00ff);
       Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
