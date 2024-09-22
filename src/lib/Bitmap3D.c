@@ -168,19 +168,20 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     f32 z = Math__random(-1.0f, 1.0f);
     f32 y = 1 - camY;
 
-    f32 xx = (x * rCos) - (y * rSin) + camX;
+    f32 xx = (x * rCos) - (y * rSin);
     f32 yy = z;
-    f32 zz = (y * rCos) - (x * rSin) + camZ;
+    f32 zz = (y * rCos) - (x * rSin);
 
     if (zz > 0) {
-      u32 xP = (u32)(xx / zz * H + W / 2.0f);
-      u32 yP = (u32)(yy / zz * H + H / 2.0f);
+      u32 xP = (u32)(xx / zz * H + W / 2.0f) + camX;
+      u32 yP = (u32)(yy / zz * H + H / 2.0f) + camZ;
       // u32 xP = (u32)(((x * rSin) - (y * rCos) * (W / 2.0f)) /* + camX*/);
       // u32 yP = (u32)(((y * rCos) + (x * rSin) * (H / 2.0f)) /* + camY */);
 
       // LOG_DEBUGF("xx %3.3f, yy %3.3f", xx, yy);
       // LOG_DEBUGF("xP %u, yP %u", xP, yP);
-      Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0x00000000);
+      // ((f32*)game->local->zbuf)[(u32)(xP + yP * W) % (W * H)] = 1.0f;
+      Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0xffffffff);
     }
   }
 
@@ -221,6 +222,7 @@ f64 easeMike(f32 t, f32 s) {
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* game) {
+  return;
   u32* buf = (u32*)game->local->screen.buf;
   f32* zbuf = game->local->zbuf;
   for (u32 i = 0; i < W * H; i++) {
