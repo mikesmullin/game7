@@ -174,28 +174,21 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
     f32 Ty = Syn * PS;
 
-    // TODO: detach ceiling height from player height
     f32 Wz = 0.0f;
-    f32 zHeightOffset = (camZ * PS) * Math__sin(game->local->currentTime / 1000.0f);
+    f32 zHeightOffset = (camZ * PS) * Math__sin(game->local->currentTime / 1000);
     // zHeightOffset = offset from ceiling (more realistically Wz)
+    //   where -1 = floor, 0 = middle, 1 = ceiling
+    if (Syn > 0) {
+      // floor
+    }
+    if (Syn < 0) {
+      // ceiling
+      zHeightOffset *= -1;  // determines eye position
+      Wz *= -1.0f;          // ensure ceiling is mirrored, not flipped
+    }
     Wz = (camZ * PS) + zHeightOffset;  // tile repeat count
     Wz /= Ty;                          // perspective projection (depth)
                                        //  near = few repeats, far = many repeats
-    if (Wz > 0) {
-      // floor
-    }
-    if (Wz < 0) {
-      // ceiling
-      Wz = (camZ * PS) - zHeightOffset;  // tile repeat count
-      // also ensure ceiling is mirrored, not flipped
-      Wz /= -Ty;  // perspective projection (depth)
-      //  near = few repeats, far = many repeats
-    }
-
-    // if (Syn < 0) {
-    //  // ensure ceiling is mirrored, not flipped
-    //   Wz = -Wz;
-    // }
 
     for (s32 Sx = 0; Sx < W; Sx++) {
       f32 Sxn = ((Sx / (f32)W) * 2) - 1;
