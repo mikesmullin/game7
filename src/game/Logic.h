@@ -78,8 +78,8 @@ typedef struct {
   Bitmap_t screen;
   f32* zbuf;
   f32* zbufWall;
-  Bitmap_t brush;
   Bitmap_t atlas;
+  Bitmap_t glyphs0;
 
   bool isVBODirty;
   bool isUBODirty[2];

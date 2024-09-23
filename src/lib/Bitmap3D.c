@@ -189,10 +189,10 @@ void Bitmap3D__RenderWall2(
     f64 pr = (x - xPixel0) * iw;
     f64 iz = iz0 + iza * pr;
     if (x >= 0 && x < W) {
-      // if (game->local->zbufWall[x] > iz) {
-      //   continue;
-      // }
-      game->local->zbufWall[x] = iz;  // TODO: fix buffer overflow
+      if (game->local->zbufWall[x] < iz) {
+        continue;
+      }
+      game->local->zbufWall[x] = iz;
     }
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
     // u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);

@@ -24,6 +24,7 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
 
 void LoadTextures() {
   game->Vulkan__FReadImage(&game->local->atlas, "../assets/textures/atlas.png");
+  game->Vulkan__FReadImage(&game->local->glyphs0, "../assets/textures/glyphs0.png");
 }
 
 // on process start
@@ -422,6 +423,14 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
 
   Bitmap3D__RenderHorizon(game);
   Bitmap3D__PostProcessing(game);
+
+  Bitmap__SetText(
+      &game->local->screen,
+      &game->local->glyphs0,
+      "Hello World! :)",
+      10,
+      10,
+      0xff00ffff);
 
   game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
 }
