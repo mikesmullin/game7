@@ -150,6 +150,10 @@ f32 perspective(f32 Syn) {
   return Tz;
 }
 
+f32 deg2rad(f32 deg) {
+  return (Math__PI / 180.0f) * deg;
+}
+
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
@@ -244,18 +248,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     // unit cube
     f32 x = Math__random(-1.0f, 1.0f);
     f32 y = Math__random(-1.0f, 1.0f);
-    f32 z = Math__random(-1.0f, 1.0f);
+    f32 z = 0.0f;
 
-    // TODO: draw unit cube rotating on 2 axes in 3d
-
-    f32 deg = ((Math__sin(game->local->currentTime / 1000) + 1.0f) / 2.0f) * 90.0f;  // 0 .. 180
-    f32 rad = (Math__PI / 180.0f) * deg;
+    f32 deg = ((Math__sin(game->local->currentTime / 1000) + 0.0f) / 1.0f) * 90.0f;  // -90 .. +90
+    f32 rad = deg2rad(deg);
     f32 rS = Math__sin(rad);
     f32 rC = Math__cos(rad);
 
     f32 r[2] = {x, z};
-    // rot2d(x, y, rS, rC, r);  // counter-clockwise, or if only x then like skewed security-cam
-    // rot2d(x, z, rS, rC, r);
+    rot2d(x, z, rS, rC, r);  // counter-clockwise, or if only x then like skewed security-cam
 
     // scale model
 
@@ -265,24 +266,12 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     u32 xx = r[0] * s + center;
     // u32 yy = r[1] * s + center;
     u32 yy = y * s + center;
-    u32 zz = r[1] * s + center;
-
-    // draw xz pixels
-    f64 rr[2] = {r[0], r[1]};
-    // projectToScreen(r[0], r[1], rr);
-    u32 x3 = rr[0] * s + center;
-    u32 y3 = rr[1] * s + center;
-
-    if (x3 >= 0 && x3 < W && y3 >= 0 && y3 < H) {
-      game->local->zbuf[x3 + y3 * W] = (f32)1.0f;
-      Bitmap__Set2DPixel(&game->local->screen, x3, y3, 0xff00ff00);
-    }
 
     // draw xy pixels
 
     if (xx >= 0 && xx < W && yy >= 0 && yy < H) {
-      // game->local->zbuf[xx + yy * W] = (f32)1.0f;
-      // Bitmap__Set2DPixel(&game->local->screen, xx, yy, 0xffffffff);
+      game->local->zbuf[xx + yy * W] = (f32)1.0f;
+      Bitmap__Set2DPixel(&game->local->screen, xx, yy, 0xffffffff);
     }
   }
 
