@@ -414,8 +414,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     memset(game->local->screen.buf, 0, game->local->screen.len);
   }
 
+  f32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0, 2);
+  // left side fwd/back, left side left/right, right side fwd/back, right side left/right
+  // 2/even = whole, 1 odd = whole, 2/even = whole, 2/even = whole
   Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
-  // Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 2, 0);
   // Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 1, 0);
   // Bitmap3D__RenderWall(game, 0, 0, -1, 1, 0, 0xffff00ff, 1, 0);
   // Bitmap3D__RenderWall(game, 0, 0, -1, -1, 0, 0xffff00ff, 1, 0);
