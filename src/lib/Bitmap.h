@@ -18,6 +18,6 @@ void Bitmap__Set2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 color);
 u32 Bitmap__Get2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 def);
 u32 Bitmap__Get2DTiledPixel(Bitmap_t* bmp, u32 x, u32 y, u32 ts, u32 tx, u32 ty, u32 def);
 void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dstX, u32 dstY);
-void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y, u32 col);
+void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y, u32 fg, u32 bg);
 
 #endif  // BITMAP_H

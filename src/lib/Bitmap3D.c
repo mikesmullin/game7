@@ -88,6 +88,17 @@ f32 deg2rad(f32 deg) {
   return (Math__PI / 180.0f) * deg;
 }
 
+void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 color, char* format, ...) {
+  u32 len = 255;
+  char buf[len];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buf, len, format, args);
+  va_end(args);
+
+  Bitmap__SetText(&game->local->screen, &game->local->glyphs0, buf, x, y, color, 0xff000000);
+}
+
 void Bitmap3D__RenderWall2(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
   f64 br = 0.5f;   // block radius
@@ -129,6 +140,8 @@ void Bitmap3D__RenderWall2(
   f32 xt1 = 0.0f * 8;
 
   f64 zClip = 0.2;
+
+  Bitmap3D__DebugText(game, 10, 10, 0xff00ffff, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
 
   if (zz0 < zClip && zz1 < zClip) return;
 

@@ -71,7 +71,16 @@ void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dX, u32 dY) {
 }
 
 void Bitmap__Set2(
-    Bitmap_t* dst, Bitmap_t* src, u32 xOffs, u32 yOffs, u32 xo, u32 yo, u32 w, u32 h, u32 col) {
+    Bitmap_t* dst,
+    Bitmap_t* src,
+    u32 xOffs,
+    u32 yOffs,
+    u32 xo,
+    u32 yo,
+    u32 w,
+    u32 h,
+    u32 fg,
+    u32 bg) {
   for (u32 y = 0; y < h; y++) {
     u32 yPix = y + yOffs;
     if (yPix < 0 || yPix >= dst->h) continue;
@@ -81,18 +90,22 @@ void Bitmap__Set2(
       if (xPix < 0 || xPix >= dst->w) continue;
 
       u32 srcp = ((u32*)src->buf)[(x + xo) + (y + yo) * src->w];
-      if (srcp != 0xffffffff) {  // bitmask: white = transparency
-        ((u32*)dst->buf)[xPix + yPix * dst->w] = /*srcp * */ col;
+      if (srcp == 0xffffffff) {  // bitmask: white = transparency
+        if (0x00 != bg >> 16) {
+          ((u32*)dst->buf)[xPix + yPix * dst->w] = /*srcp * */ bg;
+        }
+      } else {
+        ((u32*)dst->buf)[xPix + yPix * dst->w] = /*srcp * */ fg;
       }
     }
   }
 }
 
-void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y, u32 col) {
+void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y, u32 fg, u32 bg) {
   for (u32 i = 0; 0 != str[i]; i++) {
     u32 ch = str[i];
     u32 xx = ch % 32;
     u32 yy = ch / 32;
-    Bitmap__Set2(screen, glyphs, x + i * 4, y, xx * 4, yy * 6, 3, 6, col);
+    Bitmap__Set2(screen, glyphs, x + i * 4, y, xx * 4, yy * 6, 3, 6, fg, bg);
   }
 }
