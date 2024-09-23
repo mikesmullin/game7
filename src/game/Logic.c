@@ -47,15 +47,16 @@ __declspec(dllexport) void logic_oninit_data() {
   game->WINDOW_WIDTH = dim * 4;
   game->WINDOW_HEIGHT = dim * 4;
 
-  game->local->WORLD_HEIGHT = 4;      // world height (will be multiplied by tile units)
-  game->local->ATLAS_TILE_SCALE = 8;  // pixel super sample factor
+  game->local->WORLD_HEIGHT = 1;      // world height (will be multiplied by tile units)
+  game->local->WORLD_TILE_SCALE = 1;  // pixel super sample factor
+  game->local->ATLAS_TILE_SIZE = 8;
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 8.0f;  // per-second
-  game->local->PLAYER_FLY_SPEED = 16.0f;  // per-second
+  game->local->PLAYER_WALK_SPEED = 1.0f;  // per-second
+  game->local->PLAYER_FLY_SPEED = 1.0f;   // per-second
   game->local->PLAYER_ZOOM_SPEED = 0.1f;  // per-second
-  game->local->PLAYER_LOOK_SPEED = 0.2f;  // deg/sec
+  game->local->PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 
   game->local->isVBODirty = true;
   game->local->isUBODirty[0] = true;
@@ -339,7 +340,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     game->local->player.transform.position[1] = MATH_CLAMP(
         0,
         game->local->player.transform.position[1],
-        game->local->WORLD_HEIGHT * game->local->ATLAS_TILE_SCALE);
+        game->local->WORLD_HEIGHT * game->local->WORLD_TILE_SCALE);
   }
 
   // state->isVBODirty = true;

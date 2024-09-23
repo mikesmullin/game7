@@ -107,7 +107,8 @@ typedef struct {
   Player_t player;
 
   u8 WORLD_HEIGHT;
-  u8 ATLAS_TILE_SCALE;
+  u8 WORLD_TILE_SCALE;
+  u8 ATLAS_TILE_SIZE;
 } Logic__State_t;
 
 void Player__Init(Logic__State_t* game);

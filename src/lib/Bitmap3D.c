@@ -38,10 +38,10 @@ f32 perspective(f32 Syn) {
     Vh *= -1.0f;  // determines eye position
     Ty *= -1.0f;  // ensure ceiling is mirrored, not flipped
   }
-  Ty *= Syn * PS;
-  Tz = Wh + Vh;  // tile repeat count
-  Tz /= Ty;      // perspective projection (depth)
-                 //  near = few repeats, far = many repeats
+  Ty *= Syn;
+  Tz = (Wh + Vh);  // tile repeat count
+  Tz /= Ty;        // perspective projection (depth)
+                   //  near = few repeats, far = many repeats
   return Tz;
 }
 
@@ -64,7 +64,7 @@ void Bitmap3D__RenderWall(
 
   f32 cX = -camX;
   f32 cY = camY;
-  f32 cZ = -camZ + 1.0f;
+  f32 cZ = -camZ + 0.5f;
   f32 rS = rSin;
   f32 rC = rCos;
   f64 fov = H;  // Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0.9, 1);
@@ -200,7 +200,7 @@ void Bitmap3D__RenderWall(
             &game->local->atlas,
             xTex,
             yTex,
-            game->local->ATLAS_TILE_SCALE,
+            game->local->ATLAS_TILE_SIZE,
             tx,
             ty,
             0xffffffff);
@@ -213,11 +213,12 @@ void Bitmap3D__RenderWall(
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
-  PS = game->local->ATLAS_TILE_SCALE;
-  Wh = game->local->WORLD_HEIGHT * PS;
+  PS = game->local->WORLD_TILE_SCALE;
+  Wh = game->local->WORLD_HEIGHT * game->local->WORLD_TILE_SCALE;
   u32 color = 0;
   u32* buf = (u32*)game->local->screen.buf;
   u32 len = game->local->screen.len;
+  f32 txs = 4.0f;  // texture scale (affects ceiling and floors; trying to match walls)
 
   camX = game->local->player.transform.position[2];
   camY = game->local->player.transform.position[0];
@@ -255,7 +256,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // y-axis = forward/backward(-)
   // z-axis = up/down
 
-  if (false) {
+  if (true) {
     for (s32 Sy = 0; Sy < H; Sy++) {
       f32 Syn = ((Sy / (f32)H) * 2) - 1;  // -1 .. 1
       f32 Syh = Syn;
@@ -290,9 +291,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 
         color = Bitmap__Get2DTiledPixel(
             &game->local->atlas,
-            Wxo,
-            Wyo,
-            game->local->ATLAS_TILE_SCALE,
+            Wxo * txs,
+            Wyo * txs,
+            game->local->ATLAS_TILE_SIZE,
             floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0,
                               // 3),
             0,
