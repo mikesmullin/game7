@@ -105,6 +105,9 @@ typedef struct {
 
   Arena_t* debugArena;
   Player_t player;
+
+  u8 WORLD_HEIGHT;
+  u8 ATLAS_TILE_SCALE;
 } Logic__State_t;
 
 void Player__Init(Logic__State_t* game);

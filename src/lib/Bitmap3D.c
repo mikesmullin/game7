@@ -5,12 +5,11 @@
 #include "Math.h"
 
 static f32 camX, camY, camZ, rCos, rSin, rot, fov;
-static u8 atlas_tile_size = 8;
 static u8 floor_tile_idxX = 0;
 static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
-static u32 PS = 8;  // pixel super sample factor
+static u32 PS;
 static f32 Wh;
 
 // rotate plane along axis
@@ -60,11 +59,12 @@ f32 deg2rad(f32 deg) {
  */
 void Bitmap3D__RenderWall(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
+  f64 tweak = 0.5f;
   // transformToCameraSpace
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
-  f64 xc0 = ((x0 - 0.5) - camX) * 2;
-  f64 yc0 = ((y0 - 0.5) - camY) * 2;
+  f64 xc0 = ((x0 - tweak) - camX) * 2;
+  f64 yc0 = ((y0 - tweak) - camY) * 2;
   // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
   // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
   // boundaries of the wall in 3D space (z-axis).
@@ -74,25 +74,25 @@ void Bitmap3D__RenderWall(
   rot2d(xc0, yc0, rSin, rCos, r);
   f64 xx0 = r[0];
   f64 zz0 = r[1];
-  f64 u0 = ((-0.5) - camZ) * 2;
-  f64 l0 = ((+0.5) - camZ) * 2;
+  f64 u0 = ((-tweak) - camZ) * 2;
+  f64 l0 = ((+tweak) - camZ) * 2;
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
-  f64 xc1 = ((x1 - 0.5) - camX) * 2;
-  f64 yc1 = ((y1 - 0.5) - camY) * 2;
+  f64 xc1 = ((x1 - tweak) - camX) * 2;
+  f64 yc1 = ((y1 - tweak) - camY) * 2;
   // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
   // f64 xx1 = xc1 * rCos - yc1 * rSin;
   // f64 zz1 = yc1 * rCos + xc1 * rSin;
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
   f64 zz1 = r[1];
-  f64 u1 = ((-0.5) - camZ) * 2;
-  f64 l1 = ((+0.5) - camZ) * 2;
+  f64 u1 = ((-tweak) - camZ) * 2;
+  f64 l1 = ((+tweak) - camZ) * 2;
 
   // Scales the texture coordinates by 16 to match the texture size.
-  tx *= 8.0f;
-  ty *= 8.0f;
+  tx *= PS;
+  ty *= PS;
 
   // projectToScreen
   // Projects the x-coordinates of the wall's two endpoints from 3D space
@@ -171,6 +171,8 @@ void Bitmap3D__RenderWall(
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
+  PS = game->local->ATLAS_TILE_SCALE;
+  Wh = game->local->WORLD_HEIGHT * PS;
   u32 color = 0;
   u32* buf = (u32*)game->local->screen.buf;
   u32 len = game->local->screen.len;
@@ -186,7 +188,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   rCos = Math__cos(rad);
   rSin = Math__sin(rad);
   fov = H;
-  Wh = game->WORLD_HEIGHT * PS;  // world height (tile units)
 
   // S = screen
   // W = world
@@ -248,7 +249,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
           &game->local->atlas,
           Wxo,
           Wyo,
-          atlas_tile_size,
+          game->local->ATLAS_TILE_SCALE,
           floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0,
                             // 3),
           0,
@@ -261,7 +262,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
   }
 
-  Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 0, 0);
+  // 1,1,0,0 = wall found at player pos -2.320 0.000 3.267 rot 54.400
+  Bitmap3D__RenderWall(game, 1, 1, 0, 0, 0, 0xffff00ff, 0, 0);
   // Bitmap3D__RenderFloor(game);
 }
 
