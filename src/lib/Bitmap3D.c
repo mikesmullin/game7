@@ -12,6 +12,45 @@ static u32 H;
 static u32 PS;
 static f32 Wh;
 
+f64 easeInQuart(f64 t) {
+  return t * t * t * t;
+}
+
+f64 easeOutQuart(f64 t) {
+  return 1 - Math__pow(1 - t, 4);
+}
+
+f64 easeInOutQuart(f64 t) {  // in/out 0 .. 1
+  return t < 0.5 ? 8 * t * t * t * t : 1 - Math__pow(-2 * t + 2, 4) / 2;
+}
+
+u32 alpha_blend(u32 bottom, u32 top) {
+  // Extract RGBA components
+  u32 src_a = (top >> 24) & 0xff;
+  u32 src_r = (top >> 16) & 0xff;
+  u32 src_g = (top >> 8) & 0xff;
+  u32 src_b = top & 0xff;
+
+  u32 dst_a = (bottom >> 24) & 0xff;
+  u32 dst_r = (bottom >> 16) & 0xff;
+  u32 dst_g = (bottom >> 8) & 0xff;
+  u32 dst_b = bottom & 0xff;
+
+  // Normalize alpha values to [0, 1]
+  f32 alpha_src = src_a / 255.0f;
+  f32 alpha_dst = dst_a / 255.0f;
+
+  // Apply alpha blending formula
+  u32 out_r = (u32)((alpha_src * src_r) + ((1 - alpha_src) * dst_r));
+  u32 out_g = (u32)((alpha_src * src_g) + ((1 - alpha_src) * dst_g));
+  u32 out_b = (u32)((alpha_src * src_b) + ((1 - alpha_src) * dst_b));
+  u32 out_a = (u32)((alpha_src * 255.0f) + ((1 - alpha_src) * alpha_dst * 255.0f));
+
+  // Combine components back into a single u32
+  u32 result = (out_a << 24) | (out_r << 16) | (out_g << 8) | out_b;
+  return result;
+}
+
 // rotate plane along axis
 void rot2d(f32 a, f32 b, f32 rSin, f32 rCos, f32* r) {
   // see: https://www.desmos.com/calculator/uvrekqtsis
@@ -153,7 +192,7 @@ void Bitmap3D__RenderWall2(
     // if (game->local->zbufWall[x] > iz) continue;
     // game->local->zbufWall[x] = iz; // TODO: fix buffer overflow
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
-    u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
+    // u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
 
     // Interpolates the projected y-coordinates of the wall's
     // top and bottom edges for the current x-position.
@@ -181,7 +220,7 @@ void Bitmap3D__RenderWall2(
           tx,
           ty,
           color);
-      // color2 *= color;  // apply tint
+      color2 = alpha_blend(color2, color);  // apply tint
       // color = 0xff000000 | ((u8)y) << 8 | (u8)x;
       Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
       game->local->zbuf[x + y * W] = 1 / iz * 4;
@@ -451,11 +490,11 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   f32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0, 2);
   // left side +fwd/-back, left side left/right, right side +fwd/-back, right side left/right
   // 2/even = whole, 1 odd = whole, 2/even = whole, 2/even = whole
-  Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
-  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0xffff00ff, 1, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0x660000ff, 0, 0);
+  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0x6600ff00, 1, 0);
   // TODO: why is 3 not squared on its corner?
-  Bitmap3D__RenderWall2(game, 0, 3, 2, 2, 0, 0xffff00ff, 2, 0);
-  Bitmap3D__RenderWall2(game, 2, 1, 0, 0, 0, 0xffff00ff, 0, 0);
+  Bitmap3D__RenderWall2(game, 0, 3, 2, 2, 0, 0x66ff0000, 2, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 0, 0, 0, 0x66ff00ff, 0, 0);
 
   // Bitmap3D__RenderFloor(game);
 }
@@ -474,45 +513,6 @@ void Bitmap3D__RenderFloor(Engine__State_t* game) {
       // buf[(x + y * W) % len] = color;
     }
   }
-}
-
-f64 easeInQuart(f64 t) {
-  return t * t * t * t;
-}
-
-f64 easeOutQuart(f64 t) {
-  return 1 - Math__pow(1 - t, 4);
-}
-
-f64 easeInOutQuart(f64 t) {  // in/out 0 .. 1
-  return t < 0.5 ? 8 * t * t * t * t : 1 - Math__pow(-2 * t + 2, 4) / 2;
-}
-
-u32 alpha_blend(u32 bottom, u32 top) {
-  // Extract RGBA components
-  u32 src_a = (top >> 24) & 0xff;
-  u32 src_r = (top >> 16) & 0xff;
-  u32 src_g = (top >> 8) & 0xff;
-  u32 src_b = top & 0xff;
-
-  u32 dst_a = (bottom >> 24) & 0xff;
-  u32 dst_r = (bottom >> 16) & 0xff;
-  u32 dst_g = (bottom >> 8) & 0xff;
-  u32 dst_b = bottom & 0xff;
-
-  // Normalize alpha values to [0, 1]
-  f32 alpha_src = src_a / 255.0f;
-  f32 alpha_dst = dst_a / 255.0f;
-
-  // Apply alpha blending formula
-  u32 out_r = (u32)((alpha_src * src_r) + ((1 - alpha_src) * dst_r));
-  u32 out_g = (u32)((alpha_src * src_g) + ((1 - alpha_src) * dst_g));
-  u32 out_b = (u32)((alpha_src * src_b) + ((1 - alpha_src) * dst_b));
-  u32 out_a = (u32)((alpha_src * 255.0f) + ((1 - alpha_src) * alpha_dst * 255.0f));
-
-  // Combine components back into a single u32
-  u32 result = (out_a << 24) | (out_r << 16) | (out_g << 8) | out_b;
-  return result;
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* game) {
