@@ -96,7 +96,14 @@ void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 color, char* f
   vsnprintf(buf, len, format, args);
   va_end(args);
 
-  Bitmap__SetText(&game->local->screen, &game->local->glyphs0, buf, x, y, color, 0xff000000);
+  Bitmap__SetText(
+      &game->local->screen,
+      &game->local->glyphs0,
+      buf,
+      x,
+      y,
+      color,
+      0x00000000 /*0xff000000*/);
 }
 
 void Bitmap3D__RenderWall2(
@@ -141,7 +148,9 @@ void Bitmap3D__RenderWall2(
 
   f64 zClip = 0.2;
 
-  Bitmap3D__DebugText(game, 10, 10, 0xff00ffff, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
+  if (1 == tex) {
+    Bitmap3D__DebugText(game, 4, 6, 0xff00ffff, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
+  }
 
   if (zz0 < zClip && zz1 < zClip) return;
 
@@ -238,9 +247,21 @@ void Bitmap3D__RenderWall2(
           color);
       color2 = alpha_blend(color2, color);  // apply tint
       // color = 0xff000000 | ((u8)y) << 8 | (u8)x;
+
       Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
       f32 bright = (16.0 / (1.0 / iz)) / 8.0f;
       game->local->zbuf[x + y * W] = bright;
+
+      if (x == game->local->CANVAS_CENTER_X && x == game->local->CANVAS_CENTER_Y) {
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * 2,
+            0xff00ff00,  //
+            "color2 %08x bright %08x",
+            color2,
+            bright);
+      }
     }
   }
 }
@@ -504,46 +525,36 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     memset(game->local->screen.buf, 0, game->local->screen.len);
   }
 
-  f32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0, 2);
-  u32 pC[2] = {0, 0};  //
-  // left side +fwd/-back, left side left/right, right side +fwd/-back, right side left/right
-  // 2/even = whole, 1 odd = whole, 2/even = whole, 2/even = whole
-  // c = 0.5, 0.5
-  // 0,0 0,1
-  // 0,1 1,1
-  // 1,1 0,1
-  // 0,1 0,0
-
-  static bool level[100][100];
-  static bool filled = false;
-  if (!filled) {
-    filled = true;
-    for (u32 y = 0; y < 100; y++) {
-      for (u32 x = 0; x < 100; x++) {
-        level[x][y] = false;
-      }
-    }
-    for (u32 i = 0; i < 2000; i++) {
-      u32 x = Math__urandom2(0, 100);
-      u32 y = Math__urandom2(0, 100);
-      level[x][y] = true;
-    }
-  }
-  for (u32 y = 0; y < 100; y++) {
-    for (u32 x = 0; x < 100; x++) {
-      if (level[x][y]) {
-        Bitmap3D__RenderWall2(game, x + 0, y + 0, x + 0, y + 1, 0, 0x330000ff, 1, 0);
-        Bitmap3D__RenderWall2(game, x + 0, y + 1, x + 1, y + 1, 0, 0x3300ff00, 2, 0);
-        Bitmap3D__RenderWall2(game, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 0, 0x33ff0000, 3, 0);
-        Bitmap3D__RenderWall2(game, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 0, 0x00ffffff, 4, 0);
-      }
-    }
-  }
+  // static bool level[100][100];
+  // static bool filled = false;
+  // if (!filled) {
+  //   filled = true;
+  //   for (u32 y = 0; y < 100; y++) {
+  //     for (u32 x = 0; x < 100; x++) {
+  //       level[x][y] = false;
+  //     }
+  //   }
+  //   for (u32 i = 0; i < 2000; i++) {
+  //     u32 x = Math__urandom2(0, 100);
+  //     u32 y = Math__urandom2(0, 100);
+  //     level[x][y] = true;
+  //   }
+  // }
+  // for (u32 y = 0; y < 100; y++) {
+  //   for (u32 x = 0; x < 100; x++) {
+  //     if (level[x][y]) {
+  //       Bitmap3D__RenderWall2(game, x + 0, y + 0, x + 0, y + 1, 0, 0x330000ff, 1, 0);
+  //       Bitmap3D__RenderWall2(game, x + 0, y + 1, x + 1, y + 1, 0, 0x3300ff00, 2, 0);
+  //       Bitmap3D__RenderWall2(game, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 0, 0x33ff0000, 3, 0);
+  //       Bitmap3D__RenderWall2(game, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 0, 0x00ffffff, 4, 0);
+  //     }
+  //   }
+  // }
 
   // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 0, 0x00ffffff, 3, 0);
-  // Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0x00ffffff, 1, 0);
-  // Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 0, 0x00ffffff, 2, 0);
-  // Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 0, 0x00ffffff, 4, 0);
+  Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 1, 0x00ffffff, 2, 0);
+  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 2, 0x00ffffff, 1, 0);
+  // Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 3, 0x00ffffff, 4, 0);
 
   // Bitmap3D__RenderFloor(game);
 }

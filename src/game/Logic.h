@@ -110,6 +110,8 @@ typedef struct {
   f32 WORLD_HEIGHT;
   f32 WORLD_TILE_SCALE;
   f32 ATLAS_TILE_SIZE;
+  f32 CANVAS_CENTER_X;
+  f32 CANVAS_CENTER_Y;
 } Logic__State_t;
 
 void Player__Init(Logic__State_t* game);

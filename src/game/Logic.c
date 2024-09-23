@@ -52,6 +52,9 @@ __declspec(dllexport) void logic_oninit_data() {
   game->local->WORLD_TILE_SCALE = 3.0f;  // pixel super sample factor
   game->local->ATLAS_TILE_SIZE = 8.0f;
 
+  game->local->CANVAS_CENTER_X = game->CANVAS_WIDTH / 2.0f;
+  game->local->CANVAS_CENTER_Y = game->CANVAS_HEIGHT / 2.0f;
+
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
   game->local->PLAYER_WALK_SPEED = 1.0f;  // per-second
@@ -423,6 +426,13 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
 
   Bitmap3D__RenderHorizon(game);
   Bitmap3D__PostProcessing(game);
+
+  // draw debug cursor
+  Bitmap__Set2DPixel(
+      &game->local->screen,
+      game->local->CANVAS_CENTER_X,
+      game->local->CANVAS_CENTER_Y,
+      0xffffffff);
 
   game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
 }
