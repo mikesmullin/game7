@@ -11,6 +11,7 @@ static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
 static u32 PS = 8;  // pixel super sample factor
+static f32 Wh;
 
 // Transforms 2D world coordinates into 3D camera space
 void transformToCameraSpace(f64 x, f64 y, f64* result) {
@@ -127,6 +128,28 @@ void rot2d(f32 a, f32 b, f32 rSin, f32 rCos, f32* r) {
   r[1] = (a * rSin) + (b * rCos);   // b-axis
 }
 
+// project Syn (screen) to Tz (texture) coord in perspective
+f32 perspective(f32 Syn) {
+  f32 Tz;
+  camZ = MATH_CLAMP(0, camZ, Wh);
+  f32 Vhn = ((camZ / Wh) * 2.0f) - 1.0f;  // -1 = floor, 0 = middle, 1 = ceiling
+  f32 Vh = Vhn * Wh;
+  f32 Ty = 1.0f;
+  if (Syn > 0) {
+    // floor
+  }
+  if (Syn < 0) {
+    // ceiling
+    Vh *= -1.0f;  // determines eye position
+    Ty *= -1.0f;  // ensure ceiling is mirrored, not flipped
+  }
+  Ty *= Syn * PS;
+  Tz = Wh + Vh;  // tile repeat count
+  Tz /= Ty;      // perspective projection (depth)
+                 //  near = few repeats, far = many repeats
+  return Tz;
+}
+
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
@@ -143,6 +166,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   rCos = Math__cos(rot);
   rSin = Math__sin(rot);
   fov = H;
+  Wh = game->WORLD_HEIGHT * PS;  // world height (tile units)
 
   // S = screen
   // W = world
@@ -175,26 +199,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
       Syh = -Syh;   // 1 .. 0 .. 1
     }
 
-    f32 Tz;
-    f32 Whn = 4.0f;     // arbitrary world size (art data)
-    f32 Wh = Whn * PS;  // world height (tile units)
-
-    camZ = MATH_CLAMP(0, camZ, Wh);
-    f32 Vhn = ((camZ / Wh) * 2.0f) - 1.0f;  // -1 = floor, 0 = middle, 1 = ceiling
-    f32 Vh = Vhn * Wh;
-    f32 Ty = 1.0f;
-    if (Syn > 0) {
-      // floor
-    }
-    if (Syn < 0) {
-      // ceiling
-      Vh *= -1.0f;  // determines eye position
-      Ty *= -1.0f;  // ensure ceiling is mirrored, not flipped
-    }
-    Ty *= Syn * PS;
-    Tz = Wh + Vh;  // tile repeat count
-    Tz /= Ty;      // perspective projection (depth)
-                   //  near = few repeats, far = many repeats
+    f32 Tz = perspective(Syn);
 
     for (s32 Sx = 0; Sx < W; Sx++) {
       f32 Sxn = ((Sx / (f32)W) * 2) - 1;
@@ -235,26 +240,50 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     }
   }
 
-  for (u32 i = 0; i < 1000; i++) {
+  for (u32 i = 0; i < 100; i++) {
+    // unit cube
     f32 x = Math__random(-1.0f, 1.0f);
     f32 y = Math__random(-1.0f, 1.0f);
     f32 z = Math__random(-1.0f, 1.0f);
 
-    f32 xx = (x * rCos) - (z * rSin);
-    f32 yy = y;
-    f32 zz = z;  //(z * rCos) - (x * rSin);
+    // TODO: draw unit cube rotating on 2 axes in 3d
 
-    // u32 xP = (u32)(xx / zz * H + W / 2.0f) + camX;
-    // u32 yP = (u32)(yy / zz * H + H / 2.0f) + camZ;
+    f32 deg = ((Math__sin(game->local->currentTime / 1000) + 1.0f) / 2.0f) * 90.0f;  // 0 .. 180
+    f32 rad = (Math__PI / 180.0f) * deg;
+    f32 rS = Math__sin(rad);
+    f32 rC = Math__cos(rad);
 
-    u32 xP = (u32)(xx * (W / 2.0f));
-    u32 yP = (u32)(zz * (H / 2.0f));
+    f32 r[2] = {x, z};
+    // rot2d(x, y, rS, rC, r);  // counter-clockwise, or if only x then like skewed security-cam
+    // rot2d(x, z, rS, rC, r);
 
-    // ((f32*)game->local->zbuf)[(u32)(xP + yP * W) % (W * H)] = 1.0f;
-    if (xP >= 0 && xP < W && yP >= 0 && yP < H) {
-      game->local->zbuf[xP + yP * W] = (f32)1.0f;
+    // scale model
+
+    // scale to viewport
+    f32 s = 2 * PS;         // scale-up
+    f32 center = W / 2.0f;  // assume square aspect
+    u32 xx = r[0] * s + center;
+    // u32 yy = r[1] * s + center;
+    u32 yy = y * s + center;
+    u32 zz = r[1] * s + center;
+
+    // draw xz pixels
+    f64 rr[2] = {r[0], r[1]};
+    // projectToScreen(r[0], r[1], rr);
+    u32 x3 = rr[0] * s + center;
+    u32 y3 = rr[1] * s + center;
+
+    if (x3 >= 0 && x3 < W && y3 >= 0 && y3 < H) {
+      game->local->zbuf[x3 + y3 * W] = (f32)1.0f;
+      Bitmap__Set2DPixel(&game->local->screen, x3, y3, 0xff00ff00);
     }
-    Bitmap__Set2DPixel(&game->local->screen, xP, yP, 0xffffffff);
+
+    // draw xy pixels
+
+    if (xx >= 0 && xx < W && yy >= 0 && yy < H) {
+      // game->local->zbuf[xx + yy * W] = (f32)1.0f;
+      // Bitmap__Set2DPixel(&game->local->screen, xx, yy, 0xffffffff);
+    }
   }
 
   // Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 0, 0);
@@ -320,7 +349,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* game) {
   u32* buf = (u32*)game->local->screen.buf;
   f32* zbuf = game->local->zbuf;
   for (u32 i = 0; i < W * H; i++) {
-    f32 b1 = zbuf[i];  // 0 .. 1
+    f32 b1 = zbuf[i];  // +1 .. 0 .. +1
     b1 = 1.0f - b1;    // invert so that the horizon has most alpha
     // f32 cutoff = Math__map(Math__sin(game->local->currentTime / 5000), -1, 1, 0.5, 1);  // 0 .. 1
     f32 cutoff = 0.95f;  // higher number = further visibility distance

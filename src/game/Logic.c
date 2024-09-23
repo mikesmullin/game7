@@ -47,6 +47,8 @@ __declspec(dllexport) void logic_oninit_data() {
   game->WINDOW_WIDTH = dim * 4;
   game->WINDOW_HEIGHT = dim * 4;
 
+  game->WORLD_HEIGHT = 4;
+
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
   game->local->PLAYER_WALK_SPEED = 8.0f;                                // per-second
@@ -162,7 +164,7 @@ __declspec(dllexport) void logic_onkey() {
 }
 
 __declspec(dllexport) void logic_onfinger() {
-  // LOG_DEBUGF(
+  // LOG_DEBUGF(`
   //     "SDL_FINGER state "
   //     "event %s "
   //     "clicks %u pressure %2.5f finger %u "

@@ -52,6 +52,7 @@ typedef struct {
   u16 WINDOW_HEIGHT;
   u16 CANVAS_WIDTH;
   u16 CANVAS_HEIGHT;
+  u8 WORLD_HEIGHT;
   u8 PHYSICS_FPS;
   u8 RENDER_FPS;
   char* shaderFiles[2];
