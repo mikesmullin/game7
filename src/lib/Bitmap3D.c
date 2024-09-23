@@ -88,7 +88,7 @@ f32 deg2rad(f32 deg) {
   return (Math__PI / 180.0f) * deg;
 }
 
-void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 color, char* format, ...) {
+void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, char* format, ...) {
   u32 len = 255;
   char buf[len];
   va_list args;
@@ -96,14 +96,7 @@ void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 color, char* f
   vsnprintf(buf, len, format, args);
   va_end(args);
 
-  Bitmap__SetText(
-      &game->local->screen,
-      &game->local->glyphs0,
-      buf,
-      x,
-      y,
-      color,
-      0x00000000 /*0xff000000*/);
+  Bitmap__SetText(&game->local->screen, &game->local->glyphs0, buf, x, y, fg, bg);
 }
 
 void Bitmap3D__RenderWall2(
@@ -149,7 +142,7 @@ void Bitmap3D__RenderWall2(
   f64 zClip = 0.2;
 
   if (1 == tex) {
-    Bitmap3D__DebugText(game, 4, 6, 0xff00ffff, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
+    Bitmap3D__DebugText(game, 4, 6, 0xff00ffff, 0, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
   }
 
   if (zz0 < zClip && zz1 < zClip) return;
@@ -203,6 +196,8 @@ void Bitmap3D__RenderWall2(
   f64 ixta = xt1 * iz1 - ixt0;
   f64 iw = 1 / (xPixel1 - xPixel0);
 
+  u32 dbd = 0;  // debug pixel draw count
+
   // Iterates over each x-coordinate between xp0 and xp1.
   // Interpolates the inverse depth (iz) and
   // checks if the current pixel is closer than the existing value in zBufferWall.
@@ -253,12 +248,15 @@ void Bitmap3D__RenderWall2(
       game->local->zbuf[x + y * W] = bright;
 
       if (x == game->local->CANVAS_CENTER_X && x == game->local->CANVAS_CENTER_Y) {
+        dbd++;
         Bitmap3D__DebugText(
             game,
             4,
             6 * 2,
-            0xff00ff00,  //
-            "color2 %08x bright %08x",
+            0xff00ff00,
+            0xff000000,  //
+            "dbd %u color2 %08x bright %08x",
+            dbd,
             color2,
             bright);
       }
