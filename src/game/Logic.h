@@ -52,8 +52,15 @@ typedef struct {
 } Transform_t;
 
 typedef struct {
+  f32 xAxis;
+  f32 yAxis;
+  f32 zAxis;
+} VirtualJoystick_t;
+
+typedef struct {
   Transform_t transform;
   Camera_t camera;
+  VirtualJoystick_t input;
 } Player_t;
 
 typedef struct {

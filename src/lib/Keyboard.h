@@ -7,19 +7,22 @@
 #include "Base.h"
 
 typedef struct {
-  bool pressed;
+  bool wKey;
+  bool aKey;
+  bool sKey;
+  bool dKey;
+  bool qKey;
+  bool eKey;
+  bool rKey;
   bool altKey;
   bool ctrlKey;
   bool shiftKey;
   bool metaKey;
-  u8 code;
-  u8 location;
+  bool escKey;
 } KeyboardState_t;
 
 extern KeyboardState_t g_Keyboard__state;
 
-void Keyboard__OnInput(const SDL_Event* event);
-void Keyboard__RegisterCallback(void(*cb));
-void Keyboard__DispatchCallbacks();
+void Keyboard__Poll();
 
 #endif

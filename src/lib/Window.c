@@ -158,7 +158,7 @@ void Window__RenderLoop(
       }
 
       Gamepad__OnInput(&e);
-      Keyboard__OnInput(&e);
+      // Keyboard__OnInput(&e);
       Finger__OnInput(&e);
 
       // SDL_UpdateWindowSurface(window);

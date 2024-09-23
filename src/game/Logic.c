@@ -138,30 +138,6 @@ __declspec(dllexport) void logic_onreload() {
   // state->Vulkan__UpdateTextureImage(&state->s_Vulkan, &atlas);
 }
 
-__declspec(dllexport) void logic_onkey() {
-  // LOG_DEBUGF(
-  //     "SDL_KEY{UP,DOWN} state "
-  //     "code %u location %u pressed %u alt %u "
-  //     "ctrl %u shift %u meta %u",
-  //     game->g_Keyboard__state->code,
-  //     game->g_Keyboard__state->location,
-  //     game->g_Keyboard__state->pressed,
-  //     game->g_Keyboard__state->altKey,
-  //     game->g_Keyboard__state->ctrlKey,
-  //     game->g_Keyboard__state->shiftKey,
-  //     game->g_Keyboard__state->metaKey);
-
-  if (game->mouseCaptured && 41 == game->g_Keyboard__state->code) {  // ESC
-    game->Window__CaptureMouse(false);
-    game->mouseCaptured = false;
-    // game->s_Window.quit = true;
-  }
-
-  if (21 == game->g_Keyboard__state->code) {  // R
-    LoadTextures();
-  }
-}
-
 __declspec(dllexport) void logic_onfinger() {
   // LOG_DEBUGF(`
   //     "SDL_FINGER state "
@@ -208,9 +184,21 @@ __declspec(dllexport) void logic_onfinger() {
     game->local->player.transform.rotation[0] =
         game->local->player.transform.rotation[0] +
         (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
+    while (game->local->player.transform.rotation[0] < 0.0f) {
+      game->local->player.transform.rotation[0] += 360.0f;
+    }
+    while (game->local->player.transform.rotation[0] >= 360.0f) {
+      game->local->player.transform.rotation[0] -= 360.0f;
+    }
     game->local->player.transform.rotation[1] =
         game->local->player.transform.rotation[1] +
         (-game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
+    while (game->local->player.transform.rotation[1] < 0.0f) {
+      game->local->player.transform.rotation[1] += 360.0f;
+    }
+    while (game->local->player.transform.rotation[1] >= 360.0f) {
+      game->local->player.transform.rotation[1] -= 360.0f;
+    }
 
     LOG_DEBUGF(
         "player rot %3.3f %3.3f %3.3f",
@@ -224,6 +212,70 @@ __declspec(dllexport) void logic_onfinger() {
 __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
   // LOG_DEBUGF("Logic dll onfixedupdate.");
   game->local->currentTime = currentTime;
+
+  // LOG_DEBUGF(
+  //     "SDL_KEY{UP,DOWN} state "
+  //     "w %u a %u s %u d %u q %u e %u r %u "
+  //     "alt %u ctrl %u shift %u meta %u esc %u",
+  //     game->g_Keyboard__state->wKey,
+  //     game->g_Keyboard__state->aKey,
+  //     game->g_Keyboard__state->sKey,
+  //     game->g_Keyboard__state->dKey,
+  //     game->g_Keyboard__state->qKey,
+  //     game->g_Keyboard__state->eKey,
+  //     game->g_Keyboard__state->rKey,
+  //     game->g_Keyboard__state->altKey,
+  //     game->g_Keyboard__state->ctrlKey,
+  //     game->g_Keyboard__state->shiftKey,
+  //     game->g_Keyboard__state->metaKey,
+  //     game->g_Keyboard__state->escKey);
+
+  if (!game->mouseCaptured) {
+    return;
+  }
+
+  if (game->g_Keyboard__state->escKey) {  // ESC
+    game->Window__CaptureMouse(false);
+    game->mouseCaptured = false;
+    // game->s_Window.quit = true;
+  }
+
+  if (game->g_Keyboard__state->rKey) {  // R
+    LoadTextures();
+  }
+
+  // W-S Forward/Backward axis
+  if (game->g_Keyboard__state->wKey && game->g_Keyboard__state->sKey) {
+    game->local->player.input.zAxis = 0.0f;
+  } else if (game->g_Keyboard__state->wKey) {
+    game->local->player.input.zAxis = 1.0f;
+  } else if (game->g_Keyboard__state->sKey) {
+    game->local->player.input.zAxis = -1.0f;
+  } else {
+    game->local->player.input.zAxis = 0.0f;
+  }
+
+  // A-D Left/Right axis
+  if (game->g_Keyboard__state->aKey && game->g_Keyboard__state->dKey) {
+    game->local->player.input.xAxis = 0.0f;
+  } else if (game->g_Keyboard__state->aKey) {
+    game->local->player.input.xAxis = 1.0f;
+  } else if (game->g_Keyboard__state->dKey) {
+    game->local->player.input.xAxis = -1.0f;
+  } else {
+    game->local->player.input.xAxis = 0.0f;
+  }
+
+  // Q-E Up/Down axis
+  if (game->g_Keyboard__state->qKey && game->g_Keyboard__state->eKey) {
+    game->local->player.input.yAxis = 0.0f;
+  } else if (game->g_Keyboard__state->qKey) {
+    game->local->player.input.yAxis = 1.0f;
+  } else if (game->g_Keyboard__state->eKey) {
+    game->local->player.input.yAxis = -1.0f;
+  } else {
+    game->local->player.input.yAxis = 0.0f;
+  }
 
   // Direction vectors for movement
   vec3 forward, right, front;
@@ -241,57 +293,34 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
   glm_vec3_normalize(right);
 
-  // Move forward (W)
-  if (26 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // W
-    glm_vec3_scale(front, game->local->PLAYER_WALK_SPEED * deltaTime, forward);
-    glm_vec3_add(
-        game->local->player.transform.position,
-        forward,
-        game->local->player.transform.position);
-
-    LOG_DEBUGF(
-        "player pos %3.3f %3.3f %3.3f",
-        game->local->player.transform.position[0],
-        game->local->player.transform.position[1],
-        game->local->player.transform.position[2]);
-  }
-
-  // Move backward (S)
-  if (22 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // S
-    glm_vec3_scale(front, -game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+  // apply forward/backward motion
+  if (0 != game->local->player.input.zAxis) {
+    glm_vec3_scale(
+        front,
+        game->local->player.input.zAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+        forward);
     glm_vec3_add(
         game->local->player.transform.position,
         forward,
         game->local->player.transform.position);
   }
 
-  // Move right (D)
-  if (7 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // D
-    glm_vec3_scale(right, game->local->PLAYER_WALK_SPEED * deltaTime, forward);
+  // apply left/right motion
+  if (0 != game->local->player.input.xAxis) {
+    glm_vec3_scale(
+        right,
+        -game->local->player.input.xAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+        forward);
     glm_vec3_add(
         game->local->player.transform.position,
         forward,
         game->local->player.transform.position);
   }
 
-  // Move left (A)
-  if (4 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // A
-    glm_vec3_scale(right, -game->local->PLAYER_WALK_SPEED * deltaTime, forward);
-    glm_vec3_add(
-        game->local->player.transform.position,
-        forward,
-        game->local->player.transform.position);
-  }
-
-  if (20 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Q
-    game->local->player.transform.position[1] += game->local->PLAYER_FLY_SPEED * deltaTime;
-  }
-  if (8 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // E
-    game->local->player.transform.position[1] -= game->local->PLAYER_FLY_SPEED * deltaTime;
-  }
-  if (224 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Ctl
-  }
-  if (226 == game->g_Keyboard__state->code && game->g_Keyboard__state->pressed) {  // Alt
+  // apply up/down motion
+  if (0 != game->local->player.input.yAxis) {
+    game->local->player.transform.position[1] +=
+        game->local->player.input.yAxis * game->local->PLAYER_FLY_SPEED * deltaTime;
   }
 
   // state->isVBODirty = true;

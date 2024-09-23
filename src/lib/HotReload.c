@@ -10,7 +10,6 @@ logic_onload_t logic_onload;
 logic_oninit_data_t logic_oninit_data;
 logic_oninit_compute_t logic_oninit_compute;
 logic_onreload_t logic_onreload;
-logic_onkey_t logic_onkey;
 logic_onfinger_t logic_onfinger;
 logic_onfixedupdate_t logic_onfixedupdate;
 logic_onupdate_t logic_onupdate;
@@ -97,7 +96,6 @@ int load_logic(const char* file) {
   logic_oninit_data = (logic_oninit_data_t)GetProcAddress(logic, "logic_oninit_data");
   logic_oninit_compute = (logic_oninit_compute_t)GetProcAddress(logic, "logic_oninit_compute");
   logic_onreload = (logic_onreload_t)GetProcAddress(logic, "logic_onreload");
-  logic_onkey = (logic_onkey_t)GetProcAddress(logic, "logic_onkey");
   logic_onfinger = (logic_onfinger_t)GetProcAddress(logic, "logic_onfinger");
   logic_onfixedupdate = (logic_onfixedupdate_t)GetProcAddress(logic, "logic_onfixedupdate");
   logic_onupdate = (logic_onupdate_t)GetProcAddress(logic, "logic_onupdate");

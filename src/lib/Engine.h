@@ -86,7 +86,6 @@ typedef void (*logic_onload_t)(Engine__State_t*);
 typedef void (*logic_oninit_data_t)();
 typedef void (*logic_oninit_compute_t)();
 typedef void (*logic_onreload_t)();
-typedef void (*logic_onkey_t)();
 typedef void (*logic_onfinger_t)();
 typedef void (*logic_onfixedupdate_t)(const f64 currentTime, const f64 deltaTime);
 typedef void (*logic_onupdate_t)(const f64 currentTime, const f64 deltaTime);

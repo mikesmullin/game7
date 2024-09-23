@@ -26,7 +26,6 @@ static Arena_t arena;
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime);
 static void renderCallback(const f64 currentTime, const f64 deltaTime);
-static void keyboardCallback();
 static void fingerCallback();
 
 static int check_load_logic() {
@@ -91,7 +90,6 @@ int Engine__Loop() {
 
   state->Window__CaptureMouse = &Window__CaptureMouse;
 
-  Keyboard__RegisterCallback(keyboardCallback);
   state->g_Keyboard__state = &g_Keyboard__state;
   Finger__RegisterCallback(fingerCallback);
   state->g_Finger__state = &g_Finger__state;
@@ -203,10 +201,6 @@ int Engine__Loop() {
   return 0;
 }
 
-static void keyboardCallback() {
-  logic_onkey();
-}
-
 static void fingerCallback() {
   logic_onfinger();
 }
@@ -215,6 +209,8 @@ static f64 accumulator1 = 0.0f;
 static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
+  Keyboard__Poll();
+
   accumulator1 += deltaTime;
   if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
     check_load_logic();
