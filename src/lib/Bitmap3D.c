@@ -67,7 +67,6 @@ void Bitmap3D__RenderWall(
   f32 cZ = -camZ + 0.5f;
   f32 rS = rSin;
   f32 rC = rCos;
-  f64 fov = H;  // Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0.9, 1);
 
   // transformToCameraSpace
   // Translates and scales the world coordinates (x0, y0) relative to
@@ -230,7 +229,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   f32 rad = deg2rad(rot);
   rCos = Math__cos(rad);
   rSin = Math__sin(rad);
-  fov = H;
+  fov = H / 2.0f;
 
   // S = screen
   // W = world
