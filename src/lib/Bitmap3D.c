@@ -102,8 +102,8 @@ void Bitmap3D__RenderWall2(
   // transformToCameraSpace()
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
-  f64 xc0 = ((x0 + 0.25) - cX) * um1;  // right hinged door
-  f64 yc0 = ((y0 - 1.00) - cY) * um1;  // sliding close from right
+  f64 xc0 = ((x0 - br) - cX) * um1;  // right hinged door
+  f64 yc0 = ((y0 - br) - cY) * um1;  // sliding close from right
   // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
   // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
   // boundaries of the wall in 3D space (z-axis).
@@ -111,19 +111,19 @@ void Bitmap3D__RenderWall2(
   rot2d(xc0, yc0, rSin, rCos, r);
   f64 xx0 = r[0];
   f64 zz0 = r[1];
-  f64 u0 = (-1 - cZ) * um1;  // t |\.
-  f64 l0 = (+1 - cZ) * um1;  // b |/
+  f64 u0 = (-br - cZ) * um1;  // t |\.
+  f64 l0 = (+br - cZ) * um1;  // b |/
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
-  f64 xc1 = ((x1 + 0.25) - cX) * um1;  // left hinged door
-  f64 yc1 = ((y1 + 0.00) - cY) * um1;  // sliding close from left
+  f64 xc1 = ((x1 - br) - cX) * um1;  // left hinged door
+  f64 yc1 = ((y1 - br) - cY) * um1;  // sliding close from left
   // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
   f64 zz1 = r[1];
-  f64 u1 = (-1 - cZ) * um1;  // t /|
-  f64 l1 = (+1 - cZ) * um1;  // b \|
+  f64 u1 = (-br - cZ) * um1;  // t /|
+  f64 l1 = (+br - cZ) * um1;  // b \|
 
   f32 xt0 = tx * 16;
   f32 xt1 = ty * 16;
@@ -223,7 +223,8 @@ void Bitmap3D__RenderWall2(
       color2 = alpha_blend(color2, color);  // apply tint
       // color = 0xff000000 | ((u8)y) << 8 | (u8)x;
       Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
-      game->local->zbuf[x + y * W] = 1 / iz * 4;
+      f32 bright = (16.0 / (1.0 / iz)) / 8.0f;
+      game->local->zbuf[x + y * W] = bright;
     }
   }
 }
@@ -392,11 +393,11 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
   PS = game->local->WORLD_TILE_SCALE;
-  Wh = game->local->WORLD_HEIGHT * game->local->WORLD_TILE_SCALE;
+  Wh = game->local->WORLD_HEIGHT;
   u32 color = 0;
   u32* buf = (u32*)game->local->screen.buf;
   u32 len = game->local->screen.len;
-  f32 txs = 4.0f;  // texture scale (affects ceiling and floors; trying to match walls)
+  f32 txs = 8.0f;  // texture scale (affects ceiling and floors; trying to match walls)
 
   camX = game->local->player.transform.position[2];
   camY = game->local->player.transform.position[0];
@@ -492,9 +493,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // 2/even = whole, 1 odd = whole, 2/even = whole, 2/even = whole
   Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0x660000ff, 0, 0);
   Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0x6600ff00, 1, 0);
-  // TODO: why is 3 not squared on its corner?
-  Bitmap3D__RenderWall2(game, 0, 3, 2, 2, 0, 0x66ff0000, 2, 0);
-  Bitmap3D__RenderWall2(game, 2, 1, 0, 0, 0, 0x66ff00ff, 0, 0);
+  Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 0, 0x66ff0000, 2, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 0, 0x66ff00ff, 0, 0);
 
   // Bitmap3D__RenderFloor(game);
 }
