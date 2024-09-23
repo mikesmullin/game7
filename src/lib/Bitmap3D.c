@@ -59,40 +59,47 @@ f32 deg2rad(f32 deg) {
  */
 void Bitmap3D__RenderWall(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
-  f64 tweak = 0.5f;
+  f64 br = 0.5f;   // block radius
+  f64 um1 = 1.0f;  // unknown multiplier (affects camera<->world scale, or floor_grid <-> cam)
+
+  // x0   1 xc0  -6 xx0   1 u0  -1 l0   1 xPixel0  64 xp0   0 yPixel00  67 iz0   0 ixt0   0
+  // y0   1 yc0   5 zz0   8 u0  -1 l0   1 xPixel1 127 xp1   0 yPixel01 113 iz0   0  0 iyt0   0
+
+  f32 cX = -camX;
+  f32 cY = camY;
+  f32 cZ = -camZ;
+  f32 rS = rSin;
+  f32 rC = rCos;
+
   // transformToCameraSpace
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
-  f64 xc0 = ((x0 - tweak) - camX) * 2;
-  f64 yc0 = ((y0 - tweak) - camY) * 2;
+  f64 xc0 = ((x0 - br) - cX) * um1;
+  f64 yc0 = ((y0 - br) - cY) * um1;
   // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
   // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
   // boundaries of the wall in 3D space (z-axis).
-  // f64 xx0 = xc0 * rCos - yc0 * rSin;
-  // f64 zz0 = yc0 * rCos + xc0 * rSin;
-  f32 r[2];
-  rot2d(xc0, yc0, rSin, rCos, r);
-  f64 xx0 = r[0];
-  f64 zz0 = r[1];
-  f64 u0 = ((-tweak) - camZ) * 2;
-  f64 l0 = ((+tweak) - camZ) * 2;
+  f64 xx0 = xc0 * rC - yc0 * rS;
+  f64 zz0 = yc0 * rC + xc0 * rS;
+  // f32 r[2];
+  // rot2d(xc0, yc0, rS, rC, r);
+  // f64 xx0 = r[0];
+  // f64 zz0 = r[1];
+  f64 u0 = ((-br) - cZ) * um1;
+  f64 l0 = ((+br) - cZ) * um1;
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
-  // relative to the camera.
-  f64 xc1 = ((x1 - tweak) - camX) * 2;
-  f64 yc1 = ((y1 - tweak) - camY) * 2;
+  // relative to the cera.
+  f64 xc1 = ((x1 - br) - cX) * um1;
+  f64 yc1 = ((y1 - br) - cY) * um1;
   // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
-  // f64 xx1 = xc1 * rCos - yc1 * rSin;
-  // f64 zz1 = yc1 * rCos + xc1 * rSin;
-  rot2d(xc1, yc1, rSin, rCos, r);
-  f64 xx1 = r[0];
-  f64 zz1 = r[1];
-  f64 u1 = ((-tweak) - camZ) * 2;
-  f64 l1 = ((+tweak) - camZ) * 2;
-
-  // Scales the texture coordinates by 16 to match the texture size.
-  tx *= PS;
-  ty *= PS;
+  f64 xx1 = xc1 * rC - yc1 * rS;
+  f64 zz1 = yc1 * rC + xc1 * rS;
+  // rot2d(xc1, yc1, rS, rC, r);
+  // f64 xx1 = r[0];
+  // f64 zz1 = r[1];
+  f64 u1 = ((-br) - cZ) * um1;
+  f64 l1 = ((+br) - cZ) * um1;
 
   // projectToScreen
   // Projects the x-coordinates of the wall's two endpoints from 3D space
@@ -129,6 +136,37 @@ void Bitmap3D__RenderWall(
   f64 ixta = ty * iz1 - ixt0;
   f64 iw = 1 / (xPixel1 - xPixel0);
 
+  // LOG_DEBUGF(
+  //     "x0 %3.0f xc0 %3.0f xx0 %3.0f u0 %3.0f l0 %3.0f xPixel0 %3.0f xp0 %3.0f yPixel00 %3.0f iz0
+  //     %3.0f"
+  //     "%3.0f ixt0 %3.0f",
+  //     x0,
+  //     xc0,
+  //     xx0,
+  //     u0,
+  //     l0,
+  //     xPixel0,
+  //     xp0,
+  //     yPixel00,
+  //     iz0,
+  //     ixt0);
+
+  // LOG_DEBUGF(
+  //     "y0 %3.0f yc0 %3.0f zz0 %3.0f u0 %3.0f l0 %3.0f xPixel1 %3.0f xp1 %3.0f yPixel01 %3.0f iz0
+  //     "
+  //     "%3.0f"
+  //     "%3.0f iyt0 %3.0f",
+  //     y0,
+  //     yc0,
+  //     zz0,
+  //     u0,
+  //     l0,
+  //     xPixel1,
+  //     xp1,
+  //     yPixel01,
+  //     iz0,
+  //     ixta);
+
   // Iterates over each x-coordinate between xp0 and xp1.
   // Interpolates the inverse depth (iz) and
   // checks if the current pixel is closer than the existing value in zBufferWall.
@@ -160,8 +198,14 @@ void Bitmap3D__RenderWall(
 
       if (x >= 0 && x < W && y >= 0 && y < H) {
         game->local->zbuf[x + y * W] = 1 / iz * 4;
-        // [((xTex) + (tex % 8) * 16) + (yTex + tex / 8 * 16) * 128
-        color = Bitmap__Get2DPixel(&game->local->atlas, xTex, yTex, 0xffffffff);
+        color = Bitmap__Get2DTiledPixel(
+            &game->local->atlas,
+            xTex,
+            yTex,
+            game->local->ATLAS_TILE_SCALE,
+            0,
+            0,
+            0xffffffff);
         Bitmap__Set2DPixel(&game->local->screen, x, y, color);
       }
     }
@@ -213,57 +257,61 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // y-axis = forward/backward(-)
   // z-axis = up/down
 
-  for (s32 Sy = 0; Sy < H; Sy++) {
-    f32 Syn = ((Sy / (f32)H) * 2) - 1;  // -1 .. 1
-    f32 Syh = Syn;
-    if (Syh < 0) {  // ceiling is mirrored, not flipped
-      Syh = -Syh;   // 1 .. 0 .. 1
-    }
+  if (false) {
+    for (s32 Sy = 0; Sy < H; Sy++) {
+      f32 Syn = ((Sy / (f32)H) * 2) - 1;  // -1 .. 1
+      f32 Syh = Syn;
+      if (Syh < 0) {  // ceiling is mirrored, not flipped
+        Syh = -Syh;   // 1 .. 0 .. 1
+      }
 
-    f32 Tz = perspective(Syn);
+      f32 Tz = perspective(Syn);
 
-    for (s32 Sx = 0; Sx < W; Sx++) {
-      f32 Sxn = ((Sx / (f32)W) * 2) - 1;
+      for (s32 Sx = 0; Sx < W; Sx++) {
+        f32 Sxn = ((Sx / (f32)W) * 2) - 1;
 
-      f32 Tx = Sxn;
-      // repeat-x count, which is actually:
-      //   by passing a decimal,
-      //   we cause texture pixels to be skipped or repeated
-      //   when rendered on screen
-      //   so smaller numbers = larger textures
-      //   larger numbers = smaller textures
-      // pinching at 0,0 origin
-      //   inherited from `/= Ty` earlier
-      Tx *= Tz;
+        f32 Tx = Sxn;
+        // repeat-x count, which is actually:
+        //   by passing a decimal,
+        //   we cause texture pixels to be skipped or repeated
+        //   when rendered on screen
+        //   so smaller numbers = larger textures
+        //   larger numbers = smaller textures
+        // pinching at 0,0 origin
+        //   inherited from `/= Ty` earlier
+        Tx *= Tz;
 
-      // rotate on XZ plane along Z axis (Z-UP)
-      f32 Wr[2] = {Tx, Tz};
-      rot2d(Tx, Tz, rSin, rCos, Wr);
+        // rotate on XZ plane along Z axis (Z-UP)
+        f32 Wr[2] = {Tx, Tz};
+        rot2d(Tx, Tz, rSin, rCos, Wr);
 
-      // translation must happen after rotation
-      // or the rotation origin seems detached from the player
-      f32 Wxo = Wr[0] + camX;
-      f32 Wyo = Wr[1] + camY;
+        // translation must happen after rotation
+        // or the rotation origin seems detached from the player
+        f32 Wxo = Wr[0] + camX;
+        f32 Wyo = Wr[1] + camY;
 
-      color = Bitmap__Get2DTiledPixel(
-          &game->local->atlas,
-          Wxo,
-          Wyo,
-          game->local->ATLAS_TILE_SCALE,
-          floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0,
-                            // 3),
-          0,
-          0xffff00ff);
-      Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
+        color = Bitmap__Get2DTiledPixel(
+            &game->local->atlas,
+            Wxo,
+            Wyo,
+            game->local->ATLAS_TILE_SCALE,
+            floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0,
+                              // 3),
+            0,
+            0xffff00ff);
+        Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
 
-      game->local->zbuf[(Sx + Sy * W) % len] = Syh;
-      // uncomment to render all white, revealing zbuf
-      // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, 0xffffffff);
+        game->local->zbuf[(Sx + Sy * W) % len] = Syh;
+        // uncomment to render all white, revealing zbuf
+        // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, 0xffffffff);
+      }
     }
   }
 
+  memset(game->local->screen.buf, 0, game->local->screen.len);
+
   // 1,1,0,0 = wall found at player pos -2.320 0.000 3.267 rot 54.400
-  Bitmap3D__RenderWall(game, 1, 1, 0, 0, 0, 0xffff00ff, 0, 0);
+  Bitmap3D__RenderWall(game, 1, 1, 0, 0, 0, 0xffff00ff, 2, 0);
   // Bitmap3D__RenderFloor(game);
 }
 

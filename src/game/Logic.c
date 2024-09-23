@@ -244,6 +244,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
 
   if (game->g_Keyboard__state->rKey) {  // R
     LoadTextures();
+    Player__Init(game->local);
   }
 
   // W-S Forward/Backward axis
@@ -277,6 +278,17 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     game->local->player.input.yAxis = -1.0f;
   } else {
     game->local->player.input.yAxis = 0.0f;
+  }
+
+  if (game->g_Keyboard__state->wKey || game->g_Keyboard__state->sKey ||
+      game->g_Keyboard__state->aKey || game->g_Keyboard__state->dKey ||
+      game->g_Keyboard__state->qKey || game->g_Keyboard__state->eKey) {
+    LOG_DEBUGF(
+        "player pos %3.3f %3.3f %3.3f rot %3.3f",
+        game->local->player.transform.position[0],
+        game->local->player.transform.position[1],
+        game->local->player.transform.position[2],
+        game->local->player.transform.rotation[0]);
   }
 
   // Direction vectors for movement
