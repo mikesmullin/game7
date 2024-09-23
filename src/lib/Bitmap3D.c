@@ -119,7 +119,9 @@ void Bitmap3D__RenderWall(
 }
 
 // rotate plane along axis
+
 void rot2d(f32 a, f32 b, f32 rSin, f32 rCos, f32* r) {
+  // see: https://www.desmos.com/calculator/uvrekqtsis
   // a oscillates along the a-axis the circle intersecting a,y
   // a-axis range +/- a+b+e
   // where e = the extra required for the circle to intersect at a,b
@@ -234,7 +236,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
           Wxo,
           Wyo,
           atlas_tile_size,
-          floor_tile_idxX = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0, 3),
+          floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0, 3),
           0,
           0xffff00ff);
       Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
@@ -251,7 +253,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     f32 y = Math__random(-1.0f, 1.0f);
     f32 z = 0.0f;
 
-    f32 deg = ((Math__sin(game->local->currentTime / 1000) + 0.0f) / 1.0f) * 90.0f;  // -90 .. +90
+    // f32 deg = ((Math__sin(game->local->currentTime / 1000) + 0.0f) / 1.0f) * 90.0f;  // -90 ..
+    // +90
+    f32 deg = game->local->player.transform.rotation[0];
     f32 rad = deg2rad(deg);
     f32 rS = Math__sin(rad);
     f32 rC = Math__cos(rad);
