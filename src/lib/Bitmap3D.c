@@ -60,16 +60,14 @@ f32 deg2rad(f32 deg) {
 void Bitmap3D__RenderWall(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
   f64 br = 0.5f;   // block radius
-  f64 um1 = 1.0f;  // unknown multiplier (affects camera<->world scale, or floor_grid <-> cam)
-
-  // x0   1 xc0  -6 xx0   1 u0  -1 l0   1 xPixel0  64 xp0   0 yPixel00  67 iz0   0 ixt0   0
-  // y0   1 yc0   5 zz0   8 u0  -1 l0   1 xPixel1 127 xp1   0 yPixel01 113 iz0   0  0 iyt0   0
+  f64 um1 = 2.0f;  // unknown multiplier (affects opacity between 0-0.01)
 
   f32 cX = -camX;
   f32 cY = camY;
-  f32 cZ = -camZ;
+  f32 cZ = -camZ + 1.0f;
   f32 rS = rSin;
   f32 rC = rCos;
+  f64 fov = H;  // Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0.9, 1);
 
   // transformToCameraSpace
   // Translates and scales the world coordinates (x0, y0) relative to
@@ -106,7 +104,7 @@ void Bitmap3D__RenderWall(
   // to 2D screen space using perspective projection (fov).
   f64 xCenter = W / 2.0f;
   f64 yCenter = H / 2.0f;
-  f64 fov = H;
+
   f64 xPixel0 = xCenter - (xx0 / zz0 * fov);
   f64 xPixel1 = xCenter - (xx1 / zz1 * fov);
 
@@ -203,8 +201,8 @@ void Bitmap3D__RenderWall(
             xTex,
             yTex,
             game->local->ATLAS_TILE_SCALE,
-            0,
-            0,
+            tx,
+            ty,
             0xffffffff);
         Bitmap__Set2DPixel(&game->local->screen, x, y, color);
       }
@@ -306,12 +304,19 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
         // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, 0xffffffff);
       }
     }
+  } else {
+    memset(game->local->screen.buf, 0, game->local->screen.len);
   }
 
-  memset(game->local->screen.buf, 0, game->local->screen.len);
+  Bitmap3D__RenderWall(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
+  Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 2, 0);
 
-  // 1,1,0,0 = wall found at player pos -2.320 0.000 3.267 rot 54.400
-  Bitmap3D__RenderWall(game, 1, 1, 0, 0, 0, 0xffff00ff, 2, 0);
+  Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 1, 0);
+  Bitmap3D__RenderWall(game, 0, 0, -1, 1, 0, 0xffff00ff, 1, 0);
+  Bitmap3D__RenderWall(game, 0, 0, -1, -1, 0, 0xffff00ff, 1, 0);
+  Bitmap3D__RenderWall(game, -1, 0, 0, 0, 0, 0xffff00ff, 1, 0);
+  Bitmap3D__RenderWall(game, -1, -1, 0, 0, 0, 0xffff00ff, 2, 0);
+
   // Bitmap3D__RenderFloor(game);
 }
 

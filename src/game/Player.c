@@ -15,11 +15,11 @@ void Player__Init(Logic__State_t* local) {
 
   // was: 0 8 0 0
 
-  local->player.transform.position[0] = -2.533f;
-  local->player.transform.position[1] = 0.0f;
-  local->player.transform.position[2] = -3.401f;
+  local->player.transform.position[0] = 1.113f;
+  local->player.transform.position[1] = 2.222f;
+  local->player.transform.position[2] = 5.728f;
 
-  local->player.transform.rotation[0] = 53.8f;
+  local->player.transform.rotation[0] = 254.6f;
   local->player.transform.rotation[1] = 0.0f;
   local->player.transform.rotation[2] = 0.0f;
   local->player.transform.rotation[3] = 0.0f;
