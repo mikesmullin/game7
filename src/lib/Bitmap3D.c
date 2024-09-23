@@ -125,8 +125,8 @@ void Bitmap3D__RenderWall2(
   f64 u1 = (-br - cZ) * um1;  // t /|
   f64 l1 = (+br - cZ) * um1;  // b \|
 
-  f32 xt0 = tx * 16;
-  f32 xt1 = ty * 16;
+  f32 xt0 = tx * 8;
+  f32 xt1 = ty * 8;
 
   f64 zClip = 0.2;
 
@@ -214,7 +214,7 @@ void Bitmap3D__RenderWall2(
       u32 yTex = (u32)(8 * pry);
       u32 color2 = Bitmap__Get2DTiledPixel(
           &game->local->atlas,
-          xTex / 2.0f,
+          xTex,
           yTex,
           game->local->ATLAS_TILE_SIZE,
           tx,
