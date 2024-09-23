@@ -188,8 +188,12 @@ void Bitmap3D__RenderWall2(
   for (u32 x = xp0; x < xp1; x++) {
     f64 pr = (x - xPixel0) * iw;
     f64 iz = iz0 + iza * pr;
-    // if (game->local->zbufWall[x] > iz) continue;
-    // game->local->zbufWall[x] = iz; // TODO: fix buffer overflow
+    if (x >= 0 && x < W) {
+      // if (game->local->zbufWall[x] > iz) {
+      //   continue;
+      // }
+      game->local->zbufWall[x] = iz;  // TODO: fix buffer overflow
+    }
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
     // u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
 
@@ -496,10 +500,32 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // 0,1 1,1
   // 1,1 0,1
   // 0,1 0,0
-  Bitmap3D__RenderWall2(game, 0, 0, 0, 1, 0, 0x330000ff, 1, 0);
-  Bitmap3D__RenderWall2(game, 0, 1, 1, 1, 0, 0x3300ff00, 2, 0);
-  Bitmap3D__RenderWall2(game, 1, 1 - 1, 0, 1 - 1, 0, 0x33ff0000, 3, 0);
-  Bitmap3D__RenderWall2(game, 0 + 1, 1, 0 + 1, 0, 0, 0x00ffffff, 4, 0);
+
+  static bool level[100][100];
+  static bool filled = false;
+  if (!filled) {
+    filled = true;
+    for (u32 y = 0; y < 100; y++) {
+      for (u32 x = 0; x < 100; x++) {
+        level[x][y] = false;
+      }
+    }
+    for (u32 i = 0; i < 2000; i++) {
+      u32 x = Math__urandom2(0, 100);
+      u32 y = Math__urandom2(0, 100);
+      level[x][y] = true;
+    }
+  }
+  for (u32 y = 0; y < 100; y++) {
+    for (u32 x = 0; x < 100; x++) {
+      if (level[x][y]) {
+        Bitmap3D__RenderWall2(game, x + 0, y + 0, x + 0, y + 1, 0, 0x330000ff, 1, 0);
+        Bitmap3D__RenderWall2(game, x + 0, y + 1, x + 1, y + 1, 0, 0x3300ff00, 2, 0);
+        Bitmap3D__RenderWall2(game, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 0, 0x33ff0000, 3, 0);
+        Bitmap3D__RenderWall2(game, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 0, 0x00ffffff, 4, 0);
+      }
+    }
+  }
 
   // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 0, 0x00ffffff, 3, 0);
   // Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0x00ffffff, 1, 0);
