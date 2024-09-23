@@ -89,7 +89,6 @@ typedef struct {
   Animation_t ANIM_VIKING_WALK_FRONT;
   AnimationState_t playerAnimationState;
 
-  f32 PLAYER_TURN_SPEED;
   f32 PLAYER_WALK_SPEED;
   f32 PLAYER_FLY_SPEED;
   f32 PLAYER_ZOOM_SPEED;

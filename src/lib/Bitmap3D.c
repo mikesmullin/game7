@@ -161,14 +161,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   u32* buf = (u32*)game->local->screen.buf;
   u32 len = game->local->screen.len;
 
-  camX = -game->local->player.transform.position[0];
-  camY = game->local->player.transform.position[2];
+  camX = game->local->player.transform.position[2];
+  camY = game->local->player.transform.position[0];
   camZ = game->local->player.transform.position[1];
   // camZ = -0.2 + Math__sin(game->local->player->bobPhase * 0.4) * 0.01 * game->local->player->bob
   // - game->local->player->y;
   rot = -game->local->player.transform.rotation[0];
-  rCos = Math__cos(rot);
-  rSin = Math__sin(rot);
+  f32 rad = deg2rad(rot);
+  rCos = Math__cos(rad);
+  rSin = Math__sin(rad);
   fov = H;
   Wh = game->WORLD_HEIGHT * PS;  // world height (tile units)
 
