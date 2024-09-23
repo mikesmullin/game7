@@ -65,7 +65,7 @@ void Bitmap3D__RenderWall2(
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
   f64 xc0 = ((x0 + 0.25) - cX) * um1;  // right hinged door
-  f64 yc0 = ((y0 - 1.25) - cY) * um1;  // sliding close from right
+  f64 yc0 = ((y0 - 1.00) - cY) * um1;  // sliding close from right
   // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
   // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
   // boundaries of the wall in 3D space (z-axis).
@@ -79,7 +79,7 @@ void Bitmap3D__RenderWall2(
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
   f64 xc1 = ((x1 + 0.25) - cX) * um1;  // left hinged door
-  f64 yc1 = ((y1 + 0) - cY) * um1;     // sliding close from left
+  f64 yc1 = ((y1 + 0.00) - cY) * um1;  // sliding close from left
   // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
@@ -415,14 +415,13 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   }
 
   f32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0, 2);
-  // left side fwd/back, left side left/right, right side fwd/back, right side left/right
+  // left side +fwd/-back, left side left/right, right side +fwd/-back, right side left/right
   // 2/even = whole, 1 odd = whole, 2/even = whole, 2/even = whole
   Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
-  // Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 1, 0);
-  // Bitmap3D__RenderWall(game, 0, 0, -1, 1, 0, 0xffff00ff, 1, 0);
-  // Bitmap3D__RenderWall(game, 0, 0, -1, -1, 0, 0xffff00ff, 1, 0);
-  // Bitmap3D__RenderWall(game, -1, 0, 0, 0, 0, 0xffff00ff, 1, 0);
-  // Bitmap3D__RenderWall(game, -1, -1, 0, 0, 0, 0xffff00ff, 2, 0);
+  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 0, 0xffff00ff, 1, 0);
+  // TODO: why is 3 not squared on its corner?
+  Bitmap3D__RenderWall2(game, 0, 3, 2, 2, 0, 0xffff00ff, 2, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 0, 0, 0, 0xffff00ff, 0, 0);
 
   // Bitmap3D__RenderFloor(game);
 }
