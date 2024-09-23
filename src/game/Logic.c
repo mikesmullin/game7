@@ -100,6 +100,7 @@ __declspec(dllexport) void logic_oninit_compute() {
       game->CANVAS_HEIGHT,
       4 /*RGBA*/);
   game->local->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT);
+  game->local->zbufWall = Arena__Push(game->arena, game->CANVAS_WIDTH);
 
   game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 

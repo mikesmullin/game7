@@ -51,8 +51,7 @@ f32 deg2rad(f32 deg) {
 
 void Bitmap3D__RenderWall2(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
-  f64 br = 0.5f;  // block radius
-  f64 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0.0f, 1.0f);
+  f64 br = 0.5f;   // block radius
   f64 um1 = 2.0f;  // unknown multiplier (affects opacity between 0-0.01)
 
   f32 cX = -camX;
@@ -87,6 +86,27 @@ void Bitmap3D__RenderWall2(
   f64 u1 = (-1 - cZ) * um1;  // t /|
   f64 l1 = (+1 - cZ) * um1;  // b \|
 
+  f32 xt0 = tx * 16;
+  f32 xt1 = ty * 16;
+
+  f64 zClip = 0.2;
+
+  if (zz0 < zClip && zz1 < zClip) return;
+
+  if (zz0 < zClip) {
+    f64 p = (zClip - zz0) / (zz1 - zz0);
+    zz0 = zz0 + (zz1 - zz0) * p;
+    xx0 = xx0 + (xx1 - xx0) * p;
+    xt0 = xt0 + (xt1 - xt0) * p;
+  }
+
+  if (zz1 < zClip) {
+    f64 p = (zClip - zz0) / (zz1 - zz0);
+    zz1 = zz0 + (zz1 - zz0) * p;
+    xx1 = xx0 + (xx1 - xx0) * p;
+    xt1 = xt0 + (xt1 - xt0) * p;
+  }
+
   // projectToScreen()
   // Projects the x-coordinates of the wall's two endpoints from 3D space
   // to 2D screen space using perspective projection (fov).
@@ -96,10 +116,9 @@ void Bitmap3D__RenderWall2(
   f64 xPixel0 = xCenter - (xx0 / zz0 * fov);
   f64 xPixel1 = xCenter - (xx1 / zz1 * fov);
 
-  if (xPixel0 >= xPixel1) return;  // don't render wall behind player
-
   // Determines the pixel boundaries (xp0, xp1) on the screen
   // where the wall will be rendered. These are clamped to the screen's width.
+  if (xPixel0 >= xPixel1) return;  // don't render wall behind player
   u32 xp0 = (u32)(xPixel0);
   u32 xp1 = (u32)(xPixel1);
   if (xp0 < 0) xp0 = 0;
@@ -116,10 +135,12 @@ void Bitmap3D__RenderWall2(
   // Precomputes inverse depth values (iz0, iz1) for depth interpolation across the wall.
   f64 iz0 = 1 / zz0;
   f64 iz1 = 1 / zz1;
+
   f64 iza = iz1 - iz0;
   // Prepares for interpolating texture coordinates and depth across the x-axis of the wall segment.
-  f64 ixt0 = tx * iz0;
-  f64 ixta = ty * iz1 - ixt0;
+
+  f64 ixt0 = xt0 * iz0;
+  f64 ixta = xt1 * iz1 - ixt0;
   f64 iw = 1 / (xPixel1 - xPixel0);
 
   // Iterates over each x-coordinate between xp0 and xp1.
@@ -129,12 +150,14 @@ void Bitmap3D__RenderWall2(
   for (u32 x = xp0; x < xp1; x++) {
     f64 pr = (x - xPixel0) * iw;
     f64 iz = iz0 + iza * pr;
-
+    // if (game->local->zbufWall[x] > iz) continue;
+    // game->local->zbufWall[x] = iz; // TODO: fix buffer overflow
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
+    u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
 
     // Interpolates the projected y-coordinates of the wall's
     // top and bottom edges for the current x-position.
-    f64 yPixel0 = yPixel00 + (yPixel10 - yPixel00) * pr - 0.5;
+    f64 yPixel0 = yPixel00 + (yPixel10 - yPixel00) * pr;
     f64 yPixel1 = yPixel01 + (yPixel11 - yPixel01) * pr;
 
     // Clamps the y-coordinates to the screen height.
@@ -148,9 +171,20 @@ void Bitmap3D__RenderWall2(
     // and sets the pixel color
     f64 ih = 1 / (yPixel1 - yPixel0);
     for (u32 y = yp0; y < yp1; y++) {
-      game->local->zbuf[x + y * W] = 1.0f;
-      color = 0xff000000 | ((u8)y) << 8 | (u8)x;
-      Bitmap__Set2DPixel(&game->local->screen, x, y, color);
+      f64 pry = (y - yPixel0) * ih;
+      u32 yTex = (u32)(8 * pry);
+      u32 color2 = Bitmap__Get2DTiledPixel(
+          &game->local->atlas,
+          xTex / 2.0f,
+          yTex,
+          game->local->ATLAS_TILE_SIZE,
+          tx,
+          ty,
+          color);
+      // color2 *= color;  // apply tint
+      // color = 0xff000000 | ((u8)y) << 8 | (u8)x;
+      Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
+      game->local->zbuf[x + y * W] = 1 / iz * 4;
     }
   }
 }
