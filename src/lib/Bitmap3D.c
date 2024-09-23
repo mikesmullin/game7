@@ -49,6 +49,112 @@ f32 deg2rad(f32 deg) {
   return (Math__PI / 180.0f) * deg;
 }
 
+void Bitmap3D__RenderWall2(
+    Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
+  f64 br = 0.5f;  // block radius
+  f64 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, 0.0f, 1.0f);
+  f64 um1 = 2.0f;  // unknown multiplier (affects opacity between 0-0.01)
+
+  f32 cX = -camX;
+  f32 cY = camY;
+  f32 cZ = -camZ + 0.5f;
+  f32 rS = rSin;
+  f32 rC = rCos;
+
+  // transformToCameraSpace()
+  // Translates and scales the world coordinates (x0, y0) relative to
+  // the camera's position (xCam, yCam).
+  f64 xc0 = ((x0 + 0.25) - cX) * um1;  // right hinged door
+  f64 yc0 = ((y0 - 1.25) - cY) * um1;  // sliding close from right
+  // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
+  // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
+  // boundaries of the wall in 3D space (z-axis).
+  f32 r[2];
+  rot2d(xc0, yc0, rSin, rCos, r);
+  f64 xx0 = r[0];
+  f64 zz0 = r[1];
+  f64 u0 = (-1 - cZ) * um1;  // t |\.
+  f64 l0 = (+1 - cZ) * um1;  // b |/
+
+  // Similarly, translates and scales the second endpoint (x1, y1) of the wall
+  // relative to the camera.
+  f64 xc1 = ((x1 + 0.25) - cX) * um1;  // left hinged door
+  f64 yc1 = ((y1 + 0) - cY) * um1;     // sliding close from left
+  // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
+  rot2d(xc1, yc1, rSin, rCos, r);
+  f64 xx1 = r[0];
+  f64 zz1 = r[1];
+  f64 u1 = (-1 - cZ) * um1;  // t /|
+  f64 l1 = (+1 - cZ) * um1;  // b \|
+
+  // projectToScreen()
+  // Projects the x-coordinates of the wall's two endpoints from 3D space
+  // to 2D screen space using perspective projection (fov).
+  f64 xCenter = W / 2.0f;
+  f64 yCenter = H / 2.0f;
+
+  f64 xPixel0 = xCenter - (xx0 / zz0 * fov);
+  f64 xPixel1 = xCenter - (xx1 / zz1 * fov);
+
+  if (xPixel0 >= xPixel1) return;  // don't render wall behind player
+
+  // Determines the pixel boundaries (xp0, xp1) on the screen
+  // where the wall will be rendered. These are clamped to the screen's width.
+  u32 xp0 = (u32)(xPixel0);
+  u32 xp1 = (u32)(xPixel1);
+  if (xp0 < 0) xp0 = 0;
+  if (xp1 > W) xp1 = W;
+
+  // Projects the y-coordinates of the wall's top and bottom edges
+  // onto the screen using perspective projection.
+  f64 yPixel00 = (u0 / zz0 * fov + yCenter);
+  f64 yPixel01 = (l0 / zz0 * fov + yCenter);
+  f64 yPixel10 = (u1 / zz1 * fov + yCenter);
+  f64 yPixel11 = (l1 / zz1 * fov + yCenter);
+
+  // texture mapping
+  // Precomputes inverse depth values (iz0, iz1) for depth interpolation across the wall.
+  f64 iz0 = 1 / zz0;
+  f64 iz1 = 1 / zz1;
+  f64 iza = iz1 - iz0;
+  // Prepares for interpolating texture coordinates and depth across the x-axis of the wall segment.
+  f64 ixt0 = tx * iz0;
+  f64 ixta = ty * iz1 - ixt0;
+  f64 iw = 1 / (xPixel1 - xPixel0);
+
+  // Iterates over each x-coordinate between xp0 and xp1.
+  // Interpolates the inverse depth (iz) and
+  // checks if the current pixel is closer than the existing value in zBufferWall.
+  // If so, calculates the corresponding x texture coordinate.
+  for (u32 x = xp0; x < xp1; x++) {
+    f64 pr = (x - xPixel0) * iw;
+    f64 iz = iz0 + iza * pr;
+
+    u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
+
+    // Interpolates the projected y-coordinates of the wall's
+    // top and bottom edges for the current x-position.
+    f64 yPixel0 = yPixel00 + (yPixel10 - yPixel00) * pr - 0.5;
+    f64 yPixel1 = yPixel01 + (yPixel11 - yPixel01) * pr;
+
+    // Clamps the y-coordinates to the screen height.
+    u32 yp0 = (u32)(yPixel0);
+    u32 yp1 = (u32)(yPixel1);
+    if (yp0 < 0) yp0 = 0;
+    if (yp1 > H) yp1 = H;
+
+    // Iterates over each y-coordinate between yp0 and yp1,
+    // calculates the corresponding y texture coordinate,
+    // and sets the pixel color
+    f64 ih = 1 / (yPixel1 - yPixel0);
+    for (u32 y = yp0; y < yp1; y++) {
+      game->local->zbuf[x + y * W] = 1.0f;
+      color = 0xff000000 | ((u8)y) << 8 | (u8)x;
+      Bitmap__Set2DPixel(&game->local->screen, x, y, color);
+    }
+  }
+}
+
 /**
  * This method renders a wall segment in 3D space. The parameters are:
  * @param x0, y0: Start coordinates of the wall segment in the world.
@@ -308,14 +414,13 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     memset(game->local->screen.buf, 0, game->local->screen.len);
   }
 
-  Bitmap3D__RenderWall(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
-  Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 2, 0);
-
-  Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 1, 0);
-  Bitmap3D__RenderWall(game, 0, 0, -1, 1, 0, 0xffff00ff, 1, 0);
-  Bitmap3D__RenderWall(game, 0, 0, -1, -1, 0, 0xffff00ff, 1, 0);
-  Bitmap3D__RenderWall(game, -1, 0, 0, 0, 0, 0xffff00ff, 1, 0);
-  Bitmap3D__RenderWall(game, -1, -1, 0, 0, 0, 0xffff00ff, 2, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 2, 2, 0, 0xffff00ff, 0, 0);
+  // Bitmap3D__RenderWall(game, 1, 0, 1, 1, 0, 0xffff00ff, 2, 0);
+  // Bitmap3D__RenderWall(game, 0, 0, 1, 1, 0, 0xffff00ff, 1, 0);
+  // Bitmap3D__RenderWall(game, 0, 0, -1, 1, 0, 0xffff00ff, 1, 0);
+  // Bitmap3D__RenderWall(game, 0, 0, -1, -1, 0, 0xffff00ff, 1, 0);
+  // Bitmap3D__RenderWall(game, -1, 0, 0, 0, 0, 0xffff00ff, 1, 0);
+  // Bitmap3D__RenderWall(game, -1, -1, 0, 0, 0, 0xffff00ff, 2, 0);
 
   // Bitmap3D__RenderFloor(game);
 }
