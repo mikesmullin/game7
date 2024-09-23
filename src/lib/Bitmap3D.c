@@ -234,7 +234,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
           Wxo,
           Wyo,
           atlas_tile_size,
-          floor_tile_idxX,
+          floor_tile_idxX = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0, 3),
           0,
           0xffff00ff);
       Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
