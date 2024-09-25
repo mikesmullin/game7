@@ -192,6 +192,20 @@ void Bitmap3D__RenderWall2(
   f64 ixta = xt1 * iz1 - ixt0;
   f64 iw = 1 / (xPixel1 - xPixel0);
 
+  if (1 == tex) {
+    Bitmap3D__DebugText(
+        game,
+        4,
+        6 * 27,
+        0xffffffff,
+        0,
+        "zz0 %+06.3f zz1 %+06.3f xx0 %+06.3f xt0 %+06.3f",
+        zz0,
+        zz1,
+        xx0,
+        xt0);
+  }
+
   u32 dbd = 0;  // debug pixel draw count
 
   // Iterates over each x-coordinate between xp0 and xp1.
@@ -226,6 +240,10 @@ void Bitmap3D__RenderWall2(
     // and sets the pixel color
     f64 ih = 1 / (yPixel1 - yPixel0);
     for (u32 y = yp0; y < yp1; y++) {
+      if (1 == tex) {
+        Bitmap3D__DebugText(game, 4, 6 * 26, 0xffffffff, 0, "debugger");
+      }
+
       f64 pry = (y - yPixel0) * ih;
       u32 yTex = (u32)(8 * pry);
       u32 color2 = Bitmap__Get2DTiledPixel(
@@ -375,10 +393,11 @@ void Bitmap3D__RenderWall2(
             6 * 28,
             0xff00ff00,
             0,
-            "dbd %u color2 %08x bright %08x",
+            "dbd %u color2 %08x bright %08x tx %u",
             dbd,
             color2,
-            bright);
+            bright,
+            (u8)tx);
       }
     }
   }
@@ -509,10 +528,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   //   }
   // }
 
-  Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 0, 0x00ffffff, 3, 0);
-  Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 1, 0x00ffffff, 2, 0);
-  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 2, 0x00ffffff, 1, 0);
-  Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 3, 0x00ffffff, 4, 0);
+  Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 3, 0x00ffffff, 3, 0);
+  Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 2, 0x00ffffff, 2, 0);
+  Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 1, 0x00ffffff, 1, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 4, 0x00ffffff, 4, 0);
 
   // Bitmap3D__RenderFloor(game);
 }

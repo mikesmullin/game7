@@ -17,13 +17,15 @@ void Bitmap__Init(Bitmap_t* bmp, u32 w, u32 h, u32 chan) {
 
 // set 32-bit pixel color at given 2d coordinate
 void Bitmap__Set2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 color) {
-  if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+  // if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+  if (!(x + y < 0 || x + y > bmp->len)) {
     ((u32*)bmp->buf)[x + y * bmp->w] = color;
   }
 }
 
 u32 Bitmap__Get2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 def) {
-  if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+  // if (x >= 0 && x < bmp->w && y >= 0 && y < bmp->h) {
+  if (!(x + y < 0 || x + y > bmp->len)) {
     return ((u32*)bmp->buf)[x + y * bmp->w];
   }
   return def;
