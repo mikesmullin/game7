@@ -57,8 +57,8 @@ __declspec(dllexport) void logic_oninit_data() {
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 1.0f;  // per-second
-  game->local->PLAYER_FLY_SPEED = 0.1f;   // per-second
+  game->local->PLAYER_WALK_SPEED = 1.5f;  // per-second
+  game->local->PLAYER_FLY_SPEED = 0.5f;   // per-second
   game->local->PLAYER_ZOOM_SPEED = 0.1f;  // per-second
   game->local->PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 

@@ -122,8 +122,8 @@ void Bitmap3D__RenderWall2(
   rot2d(xc0, yc0, rSin, rCos, r);
   f64 xx0 = r[0];
   f64 zz0 = r[1];
-  f64 u0 = (-br - cZ) * um1;  // t |\.
-  f64 l0 = (+br - cZ) * um1;  // b |/
+  f64 u0 = (-br - cZ) * 4.0f;  // t |\.
+  f64 l0 = (+br - cZ) * 4.0f;  // b |/
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
@@ -133,8 +133,8 @@ void Bitmap3D__RenderWall2(
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
   f64 zz1 = r[1];
-  f64 u1 = (-br - cZ) * um1;  // t /|
-  f64 l1 = (+br - cZ) * um1;  // b \|
+  f64 u1 = (-br - cZ) * 4.0f;  // t /|
+  f64 l1 = (+br - cZ) * 4.0f;  // b \|
 
   f32 xt0 = 1.0f * 8;
   f32 xt1 = 0.0f * 8;
