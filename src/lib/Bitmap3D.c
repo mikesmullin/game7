@@ -113,8 +113,8 @@ void Bitmap3D__RenderWall2(
   // transformToCameraSpace()
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
-  f64 xc0 = ((x0 - br) - cX) * um1;  // right hinged door
-  f64 yc0 = ((y0 - br) - cY) * um1;  // sliding close from right
+  f64 xc0 = ((x0 - br) - cX) * 2.0;  // right hinged door
+  f64 yc0 = ((y0 - br) - cY) * 2.0;  // sliding close from right
   // Rotates the point (xc0, yc0) using the precomputed sine and cosine values (rSin, rCos)
   // and calculates the transformed coordinates xx0 and zz0. u0 and l0 are the upper and lower
   // boundaries of the wall in 3D space (z-axis).
@@ -127,8 +127,8 @@ void Bitmap3D__RenderWall2(
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
-  f64 xc1 = ((x1 - br) - cX) * um1;  // left hinged door
-  f64 yc1 = ((y1 - br) - cY) * um1;  // sliding close from left
+  f64 xc1 = ((x1 - br) - cX) * 2.0;  // left hinged door
+  f64 yc1 = ((y1 - br) - cY) * 2.0;  // sliding close from left
   // Rotates the second point (xc1, yc1) and computes its transformed coordinates (xx1, zz1).
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
