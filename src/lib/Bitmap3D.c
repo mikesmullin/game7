@@ -269,7 +269,7 @@ void Bitmap3D__RenderWall2(
       f32 bright = (16.0 / (1.0 / iz)) / 8.0f;
       game->local->zbuf[(u32)(x + y * W)] = bright;
 
-      if (x == game->local->CANVAS_CENTER_X && y == game->local->CANVAS_CENTER_Y) {
+      if ((u32)x == game->local->CANVAS_DEBUG_X && (u32)y == game->local->CANVAS_DEBUG_Y) {
         dbd++;
         u32 row = 0;
 

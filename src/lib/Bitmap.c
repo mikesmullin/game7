@@ -1,5 +1,7 @@
 #include "Bitmap.h"
 
+#include <stdio.h>
+
 #include "Arena.h"
 #include "Base.h"
 
@@ -110,4 +112,16 @@ void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y
     u32 yy = ch / 32;
     Bitmap__Set2(screen, glyphs, x + i * 4, y, xx * 4, yy * 6, 3, 6, fg, bg);
   }
+}
+
+void Bitmap__DebugText(
+    Bitmap_t* dst, Bitmap_t* src, u32 x, u32 y, u32 fg, u32 bg, char* format, ...) {
+  u32 len = 255;
+  char buf[len];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buf, len, format, args);
+  va_end(args);
+
+  Bitmap__SetText(dst, src, buf, x, y, fg, bg);
 }

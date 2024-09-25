@@ -52,8 +52,8 @@ __declspec(dllexport) void logic_oninit_data() {
   game->local->WORLD_TILE_SCALE = 3.0f;  // pixel super sample factor
   game->local->ATLAS_TILE_SIZE = 8.0f;
 
-  game->local->CANVAS_CENTER_X = game->CANVAS_WIDTH / 2.0f;
-  game->local->CANVAS_CENTER_Y = game->CANVAS_HEIGHT / 2.0f;
+  game->local->CANVAS_DEBUG_X = game->CANVAS_WIDTH / 2.0f;
+  game->local->CANVAS_DEBUG_Y = game->CANVAS_HEIGHT / 2.0f;
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
@@ -206,13 +206,6 @@ __declspec(dllexport) void logic_onfinger() {
     while (game->local->player.transform.rotation[1] >= 360.0f) {
       game->local->player.transform.rotation[1] -= 360.0f;
     }
-
-    LOG_DEBUGF(
-        "player pos %3.3f %3.3f %3.3f rot %3.3f",
-        game->local->player.transform.position[0],
-        game->local->player.transform.position[1],
-        game->local->player.transform.position[2],
-        game->local->player.transform.rotation[0]);
   }
 }
 
@@ -284,17 +277,6 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     game->local->player.input.yAxis = -1.0f;
   } else {
     game->local->player.input.yAxis = 0.0f;
-  }
-
-  if (game->g_Keyboard__state->wKey || game->g_Keyboard__state->sKey ||
-      game->g_Keyboard__state->aKey || game->g_Keyboard__state->dKey ||
-      game->g_Keyboard__state->qKey || game->g_Keyboard__state->eKey) {
-    LOG_DEBUGF(
-        "player pos %3.3f %3.3f %3.3f rot %3.3f",
-        game->local->player.transform.position[0],
-        game->local->player.transform.position[1],
-        game->local->player.transform.position[2],
-        game->local->player.transform.rotation[0]);
   }
 
   // Direction vectors for movement
@@ -430,9 +412,22 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   // draw debug cursor
   Bitmap__Set2DPixel(
       &game->local->screen,
-      game->local->CANVAS_CENTER_X,
-      game->local->CANVAS_CENTER_Y,
+      game->local->CANVAS_DEBUG_X,
+      game->local->CANVAS_DEBUG_Y,
       0xffffffff);
+
+  Bitmap__DebugText(
+      &game->local->screen,
+      &game->local->glyphs0,
+      4,
+      6 * 29,
+      0xffffffff,
+      0,
+      "player pos x %+08.3f y %+08.3f z %+08.3f rot z %+08.3f",
+      game->local->player.transform.position[0],
+      game->local->player.transform.position[1],
+      game->local->player.transform.position[2],
+      game->local->player.transform.rotation[0]);
 
   game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
 }
