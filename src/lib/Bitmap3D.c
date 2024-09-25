@@ -141,10 +141,6 @@ void Bitmap3D__RenderWall2(
 
   f64 zClip = 0.2;
 
-  if (1 == tex) {
-    Bitmap3D__DebugText(game, 4, 6, 0xff00ffff, 0, "zz0 %+06.1f zz1 %+06.1f", zz0, zz1);
-  }
-
   if (zz0 < zClip && zz1 < zClip) return;
 
   if (zz0 < zClip) {
@@ -249,12 +245,136 @@ void Bitmap3D__RenderWall2(
 
       if (x == game->local->CANVAS_CENTER_X && y == game->local->CANVAS_CENTER_Y) {
         dbd++;
+        u32 row = 0;
+
         Bitmap3D__DebugText(
             game,
             4,
-            6 * 2,
+            6 * row++,
+            0xffffffff,
+            0,
+            "x0 %+06.3f xc0 %+06.3f u0 %+06.3f l0 %+06.3f",
+            x0,
+            xc0,
+            u0,
+            l0);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "xx0 %+06.3f y0 %+06.3f yc0 %+06.3f zz0 %+06.3f",
+            xx0,
+            y0,
+            yc0,
+            zz0);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "x1 %+06.3f xc1 %+06.3f u1 %+06.3f l1 %+06.3f",
+            x1,
+            xc1,
+            u1,
+            l1);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "xx1 %+06.3f y1 %+06.3f yc1 %+06.3f zz1 %+06.3f",
+            xx1,
+            y1,
+            yc1,
+            zz1);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "xP0 %+06.3f xP1 %+06.3f xp0 %03u xp1 %03u",
+            xPixel0,
+            xPixel1,
+            xp0,
+            xp1);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "yP00 %+06.3f yP01 %+06.3f yP10 %+06.3f yP11 %+06.3f",
+            yPixel00,
+            yPixel01,
+            yPixel10,
+            yPixel11);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "iz0 %+06.3f iz1 %+06.3f iza %+06.3f ixt0 %+06.3f",
+            iz0,
+            iz1,
+            iza,
+            ixt0);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "iw %+06.3f pr %+06.3f iz %+06.3f ixta %+06.3f",
+            iw,
+            pr,
+            iz,
+            ixta);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "yP0 %+06.1f yP1 %+06.1f zbw %+06.1f xTex %03u ",
+            yPixel0,
+            yPixel1,
+            game->local->zbufWall[x],
+            xTex);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * row++,
+            0xffffffff,
+            0,
+            "yp0 %+06.1f yp1 %+06.1f ih %+06.3f y %+06.3f",
+            yp0,
+            yp1,
+            ih,
+            y);
+
+        Bitmap3D__DebugText(game, 4, 6 * row++, 0xffffffff, 0, "pry %+06.3f yTex %03u", pry, yTex);
+
+        Bitmap3D__DebugText(
+            game,
+            4,
+            6 * 28,
             0xff00ff00,
-            0xff000000,  //
+            0,
             "dbd %u color2 %08x bright %08x",
             dbd,
             color2,
@@ -389,10 +509,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   //   }
   // }
 
-  // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 0, 0x00ffffff, 3, 0);
+  Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 0, 0x00ffffff, 3, 0);
   Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 1, 0x00ffffff, 2, 0);
   Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 2, 0x00ffffff, 1, 0);
-  // Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 3, 0x00ffffff, 4, 0);
+  Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 3, 0x00ffffff, 4, 0);
 
   // Bitmap3D__RenderFloor(game);
 }
