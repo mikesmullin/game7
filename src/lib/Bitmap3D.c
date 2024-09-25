@@ -110,6 +110,11 @@ void Bitmap3D__RenderWall2(
   f32 rS = rSin;
   f32 rC = rCos;
 
+  x0 -= br;
+  y0 -= br;
+  x1 -= br;
+  y1 -= br;
+
   // transformToCameraSpace()
   // Translates and scales the world coordinates (x0, y0) relative to
   // the camera's position (xCam, yCam).
