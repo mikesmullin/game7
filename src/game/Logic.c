@@ -103,9 +103,9 @@ __declspec(dllexport) void logic_oninit_compute() {
       game->CANVAS_WIDTH,
       game->CANVAS_HEIGHT,
       4 /*RGBA*/);
-  game->local->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT);
-  game->local->zbufWall = Arena__Push(game->arena, game->CANVAS_WIDTH);
-
+  game->local->zbuf =
+      Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
+  game->local->zbufWall = Arena__Push(game->arena, game->CANVAS_WIDTH * sizeof(f32));
   game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 
   LoadTextures();
@@ -409,12 +409,15 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   Bitmap3D__RenderHorizon(game);
   Bitmap3D__PostProcessing(game);
 
+  // game->local->CANVAS_DEBUG_X = 80;
+  // game->local->CANVAS_DEBUG_Y = 40;
+
   // draw debug cursor
   Bitmap__Set2DPixel(
       &game->local->screen,
       game->local->CANVAS_DEBUG_X,
       game->local->CANVAS_DEBUG_Y,
-      0xffffffff);
+      Math__urandom() | 0xffff0000 + 0xff993399);
 
   Bitmap__DebugText(
       &game->local->screen,
