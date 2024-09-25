@@ -169,8 +169,8 @@ void Bitmap3D__RenderWall2(
   // Determines the pixel boundaries (xp0, xp1) on the screen
   // where the wall will be rendered. These are clamped to the screen's width.
   if (xPixel0 >= xPixel1) return;  // don't render wall behind player
-  u32 xp0 = (u32)(xPixel0);
-  u32 xp1 = (u32)(xPixel1);
+  f64 xp0 = xPixel0;
+  f64 xp1 = xPixel1;
   if (xp0 < 0) xp0 = 0;
   if (xp1 > W) xp1 = W;
 
@@ -212,14 +212,26 @@ void Bitmap3D__RenderWall2(
   // Interpolates the inverse depth (iz) and
   // checks if the current pixel is closer than the existing value in zBufferWall.
   // If so, calculates the corresponding x texture coordinate.
-  for (u32 x = xp0; x < xp1; x++) {
+  if (1 == tex) {
+    Bitmap3D__DebugText(
+        game,
+        4,
+        6 * 26,
+        0xffffffff,
+        0,
+        "debugger xp0 %+06.3f xp1 %+06.3f",
+        xp0,
+        xp1);
+  }
+  for (f64 x = xp0; x < xp1; x++) {
     f64 pr = (x - xPixel0) * iw;
     f64 iz = iz0 + iza * pr;
+
     if (x >= 0 && x < W) {
-      if (game->local->zbufWall[x] < iz) {
+      if (game->local->zbufWall[(u32)x] < iz) {
         continue;
       }
-      game->local->zbufWall[x] = iz;
+      game->local->zbufWall[(u32)x] = iz;
     }
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
     // u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
@@ -239,11 +251,7 @@ void Bitmap3D__RenderWall2(
     // calculates the corresponding y texture coordinate,
     // and sets the pixel color
     f64 ih = 1 / (yPixel1 - yPixel0);
-    for (u32 y = yp0; y < yp1; y++) {
-      if (1 == tex) {
-        Bitmap3D__DebugText(game, 4, 6 * 26, 0xffffffff, 0, "debugger");
-      }
-
+    for (f64 y = yp0; y < yp1; y++) {
       f64 pry = (y - yPixel0) * ih;
       u32 yTex = (u32)(8 * pry);
       u32 color2 = Bitmap__Get2DTiledPixel(
@@ -259,7 +267,7 @@ void Bitmap3D__RenderWall2(
 
       Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
       f32 bright = (16.0 / (1.0 / iz)) / 8.0f;
-      game->local->zbuf[x + y * W] = bright;
+      game->local->zbuf[(u32)(x + y * W)] = bright;
 
       if (x == game->local->CANVAS_CENTER_X && y == game->local->CANVAS_CENTER_Y) {
         dbd++;
@@ -370,7 +378,7 @@ void Bitmap3D__RenderWall2(
             "yP0 %+06.1f yP1 %+06.1f zbw %+06.1f xTex %03u ",
             yPixel0,
             yPixel1,
-            game->local->zbufWall[x],
+            game->local->zbufWall[(u32)x],
             xTex);
 
         Bitmap3D__DebugText(
