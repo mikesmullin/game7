@@ -46,3 +46,12 @@ C:\> node build_scripts/Makefile.mjs watch
    - https://www.youtube.com/watch?v=3IAlJSIjvH0
    - https://www.youtube.com/watch?v=Tc763vPm4Ws
 
+- 3D Transforms & Perspective Projection Math
+  - https://www.youtube.com/watch?v=rvJHkYnAR3w
+  - https://www.youtube.com/watch?v=o-xwmTODTUI
+  - https://www.youtube.com/watch?v=7Gtxd-ew4lk
+  - https://www.youtube.com/watch?v=wciU07gPqUE
+  - https://www.youtube.com/watch?v=U0_ONQQ5ZNM
+  - https://www.youtube.com/watch?v=JC5IMfK7Yfw
+  - https://www.youtube.com/watch?v=rs4B8-qoY1I
+  - https://chatgpt.com/share/66f4c8ea-db3c-8009-b897-c56886dd3b3b
