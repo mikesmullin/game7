@@ -6,6 +6,7 @@
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
+#include "Level.h"
 #include "Player.h"
 
 static Engine__State_t* game;
@@ -25,6 +26,7 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
 void LoadTextures() {
   game->Vulkan__FReadImage(&game->local->atlas, "../assets/textures/atlas.png");
   game->Vulkan__FReadImage(&game->local->glyphs0, "../assets/textures/glyphs0.png");
+  game->Vulkan__FReadImage(&game->local->level1, "../assets/textures/level1.png");
 }
 
 // on process start
@@ -109,6 +111,7 @@ __declspec(dllexport) void logic_oninit_compute() {
   game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 
   LoadTextures();
+  Level__Load(game, 1);
 
   game->Audio__LoadAudioFile(game->local->audioFiles[AUDIO_PICKUP_COIN]);
 
@@ -241,9 +244,11 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     // game->s_Window.quit = true;
   }
 
+  // TODO: do this on key up only, to avoid multiple calls at once!
   if (game->g_Keyboard__state->rKey) {  // R
     LoadTextures();
-    Player__Init(game->local);
+    Level__Load(game, 0);
+    // Player__Init(game->local);
   }
 
   // W-S Forward/Backward axis
@@ -407,6 +412,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
   }
 
   Bitmap3D__RenderHorizon(game);
+  Level__Render(game);
   Bitmap3D__PostProcessing(game);
 
   // game->local->CANVAS_DEBUG_X = 80;
@@ -426,7 +432,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
       6 * 29,
       0xffffffff,
       0,
-      "player pos x %+08.3f y %+08.3f z %+08.3f rot z %+08.3f",
+      "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
       game->local->player.transform.position[0],
       game->local->player.transform.position[1],
       game->local->player.transform.position[2],

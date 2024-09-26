@@ -508,32 +508,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     memset(game->local->screen.buf, 0, game->local->screen.len);
   }
 
-  static bool level[100][100];
-  static bool filled = false;
-  if (!filled) {
-    filled = true;
-    for (u32 y = 0; y < 100; y++) {
-      for (u32 x = 0; x < 100; x++) {
-        level[x][y] = false;
-      }
-    }
-    for (u32 i = 0; i < 2000; i++) {
-      u32 x = Math__urandom2(0, 100);
-      u32 y = Math__urandom2(0, 100);
-      level[x][y] = true;
-    }
-  }
-  for (u32 y = 0; y < 100; y++) {
-    for (u32 x = 0; x < 100; x++) {
-      if (level[x][y]) {
-        Bitmap3D__RenderWall2(game, x + 0, y + 0, x + 0, y + 1, 1, 0x00ffffff, 1, 0);
-        Bitmap3D__RenderWall2(game, x + 0, y + 1, x + 1, y + 1, 2, 0x00ffffff, 2, 0);
-        Bitmap3D__RenderWall2(game, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 3, 0x00ffffff, 3, 0);
-        Bitmap3D__RenderWall2(game, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 4, 0x00ffffff, 4, 0);
-      }
-    }
-  }
-
   // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 3, 0x00ffffff, 3, 0);
   // Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 2, 0x00ffffff, 2, 0);
   // Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 1, 0x00ffffff, 1, 0);

@@ -80,6 +80,9 @@ typedef struct {
   f32* zbufWall;
   Bitmap_t atlas;
   Bitmap_t glyphs0;
+  Bitmap_t level1;
+  u8 currentLevel;
+  bool levelLoaded;
 
   bool isVBODirty;
   bool isUBODirty[2];

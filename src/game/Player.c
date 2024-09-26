@@ -13,13 +13,11 @@ void Player__Init(Logic__State_t* local) {
   local->player.camera.nearZ = 0.1f;
   local->player.camera.farZ = 1000.0f;
 
-  // was: 0 8 0 0
+  local->player.transform.position[0] = 0.0f;
+  local->player.transform.position[1] = 0.370f;
+  local->player.transform.position[2] = 0.0f;
 
-  local->player.transform.position[0] = 2.196f;
-  local->player.transform.position[1] = 0.192f;
-  local->player.transform.position[2] = 1.000f;
-
-  local->player.transform.rotation[0] = 229.699f;
+  local->player.transform.rotation[0] = 180.0f;
   local->player.transform.rotation[1] = 0.0f;
   local->player.transform.rotation[2] = 0.0f;
   local->player.transform.rotation[3] = 0.0f;
