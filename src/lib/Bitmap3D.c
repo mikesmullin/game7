@@ -9,7 +9,6 @@ static u8 floor_tile_idxX = 0;
 static u8 atlas_dim = 64;
 static u32 W;
 static u32 H;
-static u32 PS;
 static f32 Wh;
 
 f64 easeInQuart(f64 t) {
@@ -101,8 +100,7 @@ void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, ch
 
 void Bitmap3D__RenderWall2(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
-  f64 br = 0.5f;   // block radius
-  f64 um1 = 2.0f;  // unknown multiplier (affects opacity between 0-0.01)
+  f64 br = 0.5f;  // block radius
 
   f32 cX = -camX;
   f32 cY = camY;
@@ -127,8 +125,8 @@ void Bitmap3D__RenderWall2(
   rot2d(xc0, yc0, rSin, rCos, r);
   f64 xx0 = r[0];
   f64 zz0 = r[1];
-  f64 u0 = (-br - cZ) * 4.0f;  // t |\.
-  f64 l0 = (+br - cZ) * 4.0f;  // b |/
+  f64 u0 = (-br - cZ) * 2.0f;  // t |\.
+  f64 l0 = (+br - cZ) * 2.0f;  // b |/
 
   // Similarly, translates and scales the second endpoint (x1, y1) of the wall
   // relative to the camera.
@@ -138,8 +136,8 @@ void Bitmap3D__RenderWall2(
   rot2d(xc1, yc1, rSin, rCos, r);
   f64 xx1 = r[0];
   f64 zz1 = r[1];
-  f64 u1 = (-br - cZ) * 4.0f;  // t /|
-  f64 l1 = (+br - cZ) * 4.0f;  // b \|
+  f64 u1 = (-br - cZ) * 2.0f;  // t /|
+  f64 l1 = (+br - cZ) * 2.0f;  // b \|
 
   f32 xt0 = 1.0f * 8;
   f32 xt1 = 0.0f * 8;
@@ -173,7 +171,7 @@ void Bitmap3D__RenderWall2(
 
   // Determines the pixel boundaries (xp0, xp1) on the screen
   // where the wall will be rendered. These are clamped to the screen's width.
-  if (xPixel0 >= xPixel1) return;  // don't render wall behind player
+  //  if (xPixel0 >= xPixel1) return;  // don't render wall behind player
   f64 xp0 = xPixel0;
   f64 xp1 = xPixel1;
   if (xp0 < 0) xp0 = 0;
@@ -251,8 +249,8 @@ void Bitmap3D__RenderWall2(
       u32 yTex = (u32)(8 * pry);
       u32 color2 = Bitmap__Get2DTiledPixel(
           &game->local->atlas,
-          xTex,
-          yTex,
+          (xTex & 15) + ((u32)tx % 8),
+          (yTex & 15) + ((u32)tx / 8),
           game->local->ATLAS_TILE_SIZE,
           tx,
           ty,
@@ -409,7 +407,6 @@ void Bitmap3D__RenderWall2(
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
-  PS = game->local->WORLD_TILE_SCALE;
   Wh = game->local->WORLD_HEIGHT;
   u32 color = 0;
   u32* buf = (u32*)game->local->screen.buf;
@@ -426,7 +423,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   f32 rad = deg2rad(rot);
   rCos = Math__cos(rad);
   rSin = Math__sin(rad);
-  fov = H / 2.0f;
+  fov = H;
 
   // S = screen
   // W = world
@@ -493,11 +490,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
             Wxo * txs,
             Wyo * txs,
             game->local->ATLAS_TILE_SIZE,
-            floor_tile_idxX,  // = Math__map(Math__sin(game->local->currentTime / 1000), -1, 1, 0,
-                              // 3),
+            floor_tile_idxX,
             0,
             0xffff00ff);
-        Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
+        // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
 
         game->local->zbuf[(Sx + Sy * W) % len] = Syh;
         // uncomment to render all white, revealing zbuf

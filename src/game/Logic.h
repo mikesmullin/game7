@@ -111,7 +111,6 @@ typedef struct {
   Player_t player;
 
   f32 WORLD_HEIGHT;
-  f32 WORLD_TILE_SCALE;
   f32 ATLAS_TILE_SIZE;
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
