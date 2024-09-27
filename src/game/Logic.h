@@ -71,7 +71,6 @@ typedef struct {
 } Player_t;
 
 typedef struct Menu_t {
-  bool pretend;
   void (*tick)(
       struct Menu_t* menu, bool up, bool down, bool left, bool right, bool use, void* state);
   void (*render)(struct Menu_t* menu, Bitmap_t* target);
@@ -79,7 +78,6 @@ typedef struct Menu_t {
 
 typedef struct {
   Menu_t base;
-  u8 selected;
   Bitmap_t bmp;
 } TitleMenu_t;
 
