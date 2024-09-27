@@ -36,6 +36,14 @@ typedef struct {
 } Animation_t;
 
 typedef struct {
+  PlayerFacing_t facing;
+  PlayerAnimState_t state;
+  u8 frame;
+  f64 seek;
+  Animation_t* anim;
+} AnimationState_t;
+
+typedef struct {
   f32 fov;  // field of view
   // TODO: remove all but my game logic .h from the dll, which is delaying compile times
   // TODO: incl. the windows.h > minwindef.h which is overriding `near` keyword
@@ -64,12 +72,19 @@ typedef struct {
 } Player_t;
 
 typedef struct {
-  PlayerFacing_t facing;
-  PlayerAnimState_t state;
-  u8 frame;
-  f64 seek;
-  Animation_t* anim;
-} AnimationState_t;
+  // TODO: equivalent of subclassing?
+  void* menu;
+} Game_t;
+
+typedef struct {
+  bool pretend;
+} Menu_t;
+
+typedef struct {
+  Menu_t* menu;
+  u8 selected;
+  Bitmap_t bmp;
+} TitleMenu_t;
 
 typedef struct {
   Arena_t* arena;
@@ -114,6 +129,8 @@ typedef struct {
   f32 ATLAS_TILE_SIZE;
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
+
+  Game_t* game;
 } Logic__State_t;
 
 void Player__Init(Logic__State_t* game);

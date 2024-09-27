@@ -83,6 +83,7 @@ const COMPILER_TRANSLATION_UNITS = [
   rel(workspaceFolder, 'src', 'components', '*.c'),
   rel(workspaceFolder, 'src', 'lib', '*.c'),
   rel(workspaceFolder, 'src', 'game', '*.c'),
+  rel(workspaceFolder, 'src', 'game', 'menu', '*.c'),
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
 ];
@@ -333,7 +334,7 @@ const compile_reload = async (outname) => {
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
-      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c') && !file.includes('Bitmap.c') && !file.includes('Bitmap3D.c') && !file.includes('Screen.c') && !file.includes('Arena.c') && !file.includes('String.c') && !file.includes('Player.c') && !file.includes('Level.c')) { continue; }
+      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c') && !file.includes('Bitmap.c') && !file.includes('Bitmap3D.c') && !file.includes('Screen.c') && !file.includes('Arena.c') && !file.includes('String.c') && !file.includes('Player.c') && !file.includes('Level.c') && !file.includes('Game.c') && !file.includes('Menu.c') && !file.includes('TitleMenu.c')) { continue; }
       dsts.push(rel(workspaceFolder, file));
     }
   }

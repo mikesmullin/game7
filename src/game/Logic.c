@@ -6,6 +6,7 @@
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Math.h"
+#include "Game.h"
 #include "Level.h"
 #include "Player.h"
 
@@ -128,6 +129,9 @@ __declspec(dllexport) void logic_oninit_compute() {
 
   game->local->isUBODirty[0] = true;
   game->local->isUBODirty[1] = true;
+
+  game->local->game = Game__alloc(game);
+  Game__init(game->local->game, game);
 }
 
 __declspec(dllexport) void logic_onreload() {
@@ -337,6 +341,8 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   // state->isVBODirty = true;
   // state->isUBODirty[0] = true;
   // state->isUBODirty[1] = true;
+
+  Game__tick(game->local->game, game);
 }
 
 static f64 accumulator2 = 0.0f;
@@ -412,32 +418,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
     game->Vulkan__UpdateUniformBuffer(&game->s_Vulkan, game->s_Vulkan.m_currentFrame, &game->ubo1);
   }
 
-  Bitmap3D__RenderHorizon(game);
-  Level__Render(game);
-  Bitmap3D__PostProcessing(game);
-
-  // game->local->CANVAS_DEBUG_X = 80;
-  // game->local->CANVAS_DEBUG_Y = 40;
-
-  // draw debug cursor
-  Bitmap__Set2DPixel(
-      &game->local->screen,
-      game->local->CANVAS_DEBUG_X,
-      game->local->CANVAS_DEBUG_Y,
-      Math__urandom() | 0xffff0000 + 0xff993399);
-
-  Bitmap__DebugText(
-      &game->local->screen,
-      &game->local->glyphs0,
-      4,
-      6 * 29,
-      0xffffffff,
-      0,
-      "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-      game->local->player.transform.position[0],
-      game->local->player.transform.position[1],
-      game->local->player.transform.position[2],
-      game->local->player.transform.rotation[0]);
+  Game__render(game->local->game, game);
 
   game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
 }
