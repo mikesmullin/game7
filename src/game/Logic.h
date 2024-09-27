@@ -7,7 +7,6 @@
 #include "../lib/Arena.h"
 #include "../lib/Base.h"
 #include "../lib/Bitmap.h"
-#include "Player.h"
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
@@ -71,20 +70,22 @@ typedef struct {
   VirtualJoystick_t input;
 } Player_t;
 
-typedef struct {
-  // TODO: equivalent of subclassing?
-  void* menu;
-} Game_t;
-
-typedef struct {
+typedef struct Menu_t {
   bool pretend;
+  void (*tick)(
+      struct Menu_t* menu, bool up, bool down, bool left, bool right, bool use, void* state);
+  void (*render)(struct Menu_t* menu, Bitmap_t* target);
 } Menu_t;
 
 typedef struct {
-  Menu_t* menu;
+  Menu_t base;
   u8 selected;
   Bitmap_t bmp;
 } TitleMenu_t;
+
+typedef struct {
+  Menu_t* menu;
+} Game_t;
 
 typedef struct {
   Arena_t* arena;

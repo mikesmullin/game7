@@ -15,18 +15,27 @@ Game_t* Game__alloc(Engine__State_t* game) {
 
 void Game__init(Game_t* game, Engine__State_t* state) {
   game->menu = TitleMenu__alloc(state);
-  TitleMenu__init(game->menu, state);
+  TitleMenu__init((Menu_t*)game->menu, state);
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {
-  // TODO: need for polymorphism? vtables?
-  TitleMenu__tick(game->menu, state);
+  if (NULL == game->menu) {
+    return;
+  }
+  game->menu->tick(
+      game->menu,
+      state->g_Keyboard__state->wKey,
+      state->g_Keyboard__state->sKey,
+      state->g_Keyboard__state->aKey,
+      state->g_Keyboard__state->dKey,
+      state->g_Keyboard__state->eKey,
+      state);
 }
 
 void Game__render(Game_t* game, Engine__State_t* state) {
   // TODO: need for polymorphism? vtables?
   if (NULL != game->menu) {  // title screen
-    TitleMenu__render(game->menu, state);
+    game->menu->render(game->menu, &state->local->screen);
   } else {  // in-game
     Bitmap3D__RenderHorizon(state);
     Level__Render(state);

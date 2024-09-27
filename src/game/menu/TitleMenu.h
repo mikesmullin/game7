@@ -3,9 +3,10 @@
 
 #include "../../lib/Engine.h"
 
-TitleMenu_t* TitleMenu__alloc(Engine__State_t* game);
-void TitleMenu__init(TitleMenu_t* menu, Engine__State_t* game);
-void TitleMenu__render(TitleMenu_t* menu, Engine__State_t* game);
-void TitleMenu__tick(TitleMenu_t* menu, Engine__State_t* game);
+Menu_t* TitleMenu__alloc(Engine__State_t* state);
+void TitleMenu__init(Menu_t* menu, Engine__State_t* state);
+void TitleMenu__tick(
+    struct Menu_t* menu, bool up, bool down, bool left, bool right, bool use, void* state);
+void TitleMenu__render(struct Menu_t* menu, Bitmap_t* target);
 
 #endif  // TITLEMENU_H
