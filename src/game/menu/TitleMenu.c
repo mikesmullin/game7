@@ -8,10 +8,12 @@ Menu_t* TitleMenu__alloc(Engine__State_t* state) {
   return Arena__Push(state->arena, sizeof(TitleMenu_t));
 }
 
-void TitleMenu__tick(
-    struct Menu_t* menu, bool up, bool down, bool left, bool right, bool use, void* state) {
-  if (use) {
-    ((Engine__State_t*)state)->local->game->menu = NULL;
+void TitleMenu__tick(struct Menu_t* menu, void* _state) {
+  Engine__State_t* state = _state;
+
+  if (state->inputState->use) {
+    state->inputState->use = false;
+    state->local->game->menu = NULL;
   }
 }
 

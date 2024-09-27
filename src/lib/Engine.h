@@ -77,7 +77,7 @@ typedef struct {
   void (*Window__CaptureMouse)(const bool state);
   bool mouseCaptured;
 
-  KeyboardState_t* g_Keyboard__state;
+  InputState_t* inputState;
   FingerState_t* g_Finger__state;
 } Engine__State_t;
 

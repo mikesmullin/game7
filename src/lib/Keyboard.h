@@ -4,6 +4,7 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
+#include "Arena.h"
 #include "Base.h"
 
 typedef struct {
@@ -11,18 +12,30 @@ typedef struct {
   bool aKey;
   bool sKey;
   bool dKey;
+  bool spKey;
   bool qKey;
   bool eKey;
   bool rKey;
-  bool altKey;
-  bool ctrlKey;
-  bool shiftKey;
-  bool metaKey;
+  // bool altKey;
+  // bool ctrlKey;
+  // bool shiftKey;
+  // bool metaKey;
   bool escKey;
 } KeyboardState_t;
 
-extern KeyboardState_t g_Keyboard__state;
+typedef struct {
+  bool fwd;
+  bool back;
+  bool left;
+  bool right;
+  bool use;
+  bool up;
+  bool down;
+  bool reload;
+  bool escape;
+} InputState_t;
 
-void Keyboard__Poll();
+InputState_t* Keyboard__Alloc(Arena_t* arena);
+void Keyboard__Poll(InputState_t* state);
 
 #endif

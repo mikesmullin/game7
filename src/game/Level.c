@@ -28,9 +28,13 @@ void Level__Render(Engine__State_t* game) {
           if (!game->local->levelLoaded) {
             game->local->levelLoaded = true;
             // TODO: fix the coords being rendered out of order and flipped
-            game->local->player.transform.position[0] = y;
-            game->local->player.transform.position[2] = -x;
-            LOG_DEBUGF("Teleport player to %+03i %+03i", y, -x);
+            game->local->player.transform.position[0] = y + 0.8f;
+            game->local->player.transform.position[2] = -x + 0.8f;
+            game->local->player.transform.rotation[0] = 180.0f;
+            LOG_DEBUGF(
+                "Teleport player to %+03i %+03i",
+                (s32)game->local->player.transform.position[0],
+                (s32)game->local->player.transform.position[2]);
           }
         } else {
           LOG_DEBUGF("Unrecognized Level pixel color %08x", color);

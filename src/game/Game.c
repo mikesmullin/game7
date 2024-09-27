@@ -22,14 +22,7 @@ void Game__tick(Game_t* game, Engine__State_t* state) {
   if (NULL == game->menu) {
     return;
   }
-  game->menu->tick(
-      game->menu,
-      state->g_Keyboard__state->wKey,
-      state->g_Keyboard__state->sKey,
-      state->g_Keyboard__state->aKey,
-      state->g_Keyboard__state->dKey,
-      state->g_Keyboard__state->eKey,
-      state);
+  game->menu->tick(game->menu, state);
 }
 
 void Game__render(Game_t* game, Engine__State_t* state) {

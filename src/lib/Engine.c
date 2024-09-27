@@ -90,7 +90,7 @@ int Engine__Loop() {
 
   state->Window__CaptureMouse = &Window__CaptureMouse;
 
-  state->g_Keyboard__state = &g_Keyboard__state;
+  state->inputState = Keyboard__Alloc(state->arena);
   Finger__RegisterCallback(fingerCallback);
   state->g_Finger__state = &g_Finger__state;
 
@@ -209,7 +209,7 @@ static f64 accumulator1 = 0.0f;
 static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
-  Keyboard__Poll();
+  Keyboard__Poll(state->inputState);
 
   accumulator1 += deltaTime;
   if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {

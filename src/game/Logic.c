@@ -222,66 +222,65 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
 
   // LOG_DEBUGF(
   //     "SDL_KEY{UP,DOWN} state "
-  //     "w %u a %u s %u d %u q %u e %u r %u "
-  //     "alt %u ctrl %u shift %u meta %u esc %u",
-  //     game->g_Keyboard__state->wKey,
-  //     game->g_Keyboard__state->aKey,
-  //     game->g_Keyboard__state->sKey,
-  //     game->g_Keyboard__state->dKey,
-  //     game->g_Keyboard__state->qKey,
-  //     game->g_Keyboard__state->eKey,
-  //     game->g_Keyboard__state->rKey,
-  //     game->g_Keyboard__state->altKey,
-  //     game->g_Keyboard__state->ctrlKey,
-  //     game->g_Keyboard__state->shiftKey,
-  //     game->g_Keyboard__state->metaKey,
-  //     game->g_Keyboard__state->escKey);
+  //     "w %u a %u s %u d %u q %u e %u sp %u"
+  //     "r %u esc %u",
+  //     game->inputState->fwd,
+  //     game->inputState->left,
+  //     game->inputState->back,
+  //     game->inputState->right,
+  //     game->inputState->use,
+  //     game->inputState->up,
+  //     game->inputState->down,
+  //     game->inputState->reload,
+  //     game->inputState->escape);
 
   if (!game->mouseCaptured) {
     return;
   }
 
-  if (game->g_Keyboard__state->escKey) {  // ESC
+  if (game->inputState->escape) {  // ESC
+    game->inputState->escape = false;
     game->Window__CaptureMouse(false);
     game->mouseCaptured = false;
     // game->s_Window.quit = true;
   }
 
   // TODO: do this on key up only, to avoid multiple calls at once!
-  if (game->g_Keyboard__state->rKey) {  // R
+  if (true == game->inputState->reload) {  // R
+    game->inputState->reload = false;
     LoadTextures();
     Level__Load(game, 0);
     // Player__Init(game->local);
   }
 
   // W-S Forward/Backward axis
-  if (game->g_Keyboard__state->wKey && game->g_Keyboard__state->sKey) {
+  if (game->inputState->fwd && game->inputState->back) {
     game->local->player.input.zAxis = 0.0f;
-  } else if (game->g_Keyboard__state->wKey) {
+  } else if (game->inputState->fwd) {
     game->local->player.input.zAxis = 1.0f;
-  } else if (game->g_Keyboard__state->sKey) {
+  } else if (game->inputState->back) {
     game->local->player.input.zAxis = -1.0f;
   } else {
     game->local->player.input.zAxis = 0.0f;
   }
 
   // A-D Left/Right axis
-  if (game->g_Keyboard__state->aKey && game->g_Keyboard__state->dKey) {
+  if (game->inputState->left && game->inputState->right) {
     game->local->player.input.xAxis = 0.0f;
-  } else if (game->g_Keyboard__state->aKey) {
+  } else if (game->inputState->left) {
     game->local->player.input.xAxis = 1.0f;
-  } else if (game->g_Keyboard__state->dKey) {
+  } else if (game->inputState->right) {
     game->local->player.input.xAxis = -1.0f;
   } else {
     game->local->player.input.xAxis = 0.0f;
   }
 
   // Q-E Up/Down axis
-  if (game->g_Keyboard__state->qKey && game->g_Keyboard__state->eKey) {
+  if (game->inputState->up && game->inputState->down) {
     game->local->player.input.yAxis = 0.0f;
-  } else if (game->g_Keyboard__state->qKey) {
+  } else if (game->inputState->up) {
     game->local->player.input.yAxis = 1.0f;
-  } else if (game->g_Keyboard__state->eKey) {
+  } else if (game->inputState->down) {
     game->local->player.input.yAxis = -1.0f;
   } else {
     game->local->player.input.yAxis = 0.0f;
