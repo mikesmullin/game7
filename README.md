@@ -2,6 +2,15 @@
 
 This prototype explores 8-bit/retro style gaming.
 
+### Features include:
+- Stateful Hot-reloading (via .DLL + file watcher)
+- Metaprogramming (via [mikesmullin/metacode](https://github.com/mikesmullin/metacode/))
+- Modular
+- Object-Oriented (ie. `Class__Method` naming convention)
+- Inheritance (via Struct Composition)
+- Polymorphism (ie. for Generics/Subclass invocation)
+- Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints)
+
 ## Building
 
 ### on Windows
