@@ -1,7 +1,5 @@
 #include "Logic.h"
 
-#include <string.h>
-
 #include "../lib/Arena.h"
 #include "../lib/Array.h"
 #include "../lib/Bitmap.h"
@@ -10,7 +8,6 @@
 #include "../lib/Keyboard.h"
 #include "../lib/Log.h"
 #include "../lib/Math.h"
-// #include "../lib/Time.h"
 #include "Game.h"
 #include "Level.h"
 
@@ -122,12 +119,12 @@ __declspec(dllexport) void logic_oninit_compute() {
   }
 
   // setup scene
-  glm_vec3_copy((vec3){0, 0, 1.5}, game->world.cam);
-  glm_vec3_copy((vec3){0, 0, 0}, game->world.look);
+  glms_vec3_copy((vec3){0, 0, 1.5}, game->world.cam);
+  glms_vec3_copy((vec3){0, 0, 0}, game->world.look);
 
-  glm_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].pos);
-  glm_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].rot);
-  glm_vec3_copy(
+  glms_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].pos);
+  glms_vec3_copy((vec3){0, 0, 0}, game->instances[INSTANCE_FLOOR_0].rot);
+  glms_vec3_copy(
       (vec3){PixelsToUnits(100), PixelsToUnits(100), 1},  // ABGR
       game->instances[INSTANCE_FLOOR_0].scale);
   game->instances[INSTANCE_FLOOR_0].texId = 0;
@@ -300,34 +297,34 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     vec3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    float yaw_radians = glm_rad(logic->player.transform.rotation[0]);
+    float yaw_radians = glms_rad(logic->player.transform.rotation[0]);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
     front[0] = Math__cos(yaw_radians);
     front[1] = 0.0f;
     front[2] = Math__sin(yaw_radians);
-    glm_vec3_normalize(front);
+    glms_vec3_normalize(front);
 
     // Calculate the right vector (perpendicular to the front vector)
-    glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
-    glm_vec3_normalize(right);
+    glms_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
+    glms_vec3_normalize(right);
 
     // apply forward/backward motion
     if (0 != logic->player.input.zAxis) {
-      glm_vec3_scale(
+      glms_vec3_scale(
           front,
           logic->player.input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime,
           forward);
-      glm_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
+      glms_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
     }
 
     // apply left/right motion
     if (0 != logic->player.input.xAxis) {
-      glm_vec3_scale(
+      glms_vec3_scale(
           right,
           -logic->player.input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime,
           forward);
-      glm_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
+      glms_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
     }
 
     // apply up/down motion
@@ -398,7 +395,7 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
     logic->isUBODirty[game->VulkanWrapper__GetCurrentFrame()] = false;
 
     // 3d cam
-    glm_lookat(
+    glms_lookat(
         game->world.cam,
         game->world.look,
         logic->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
@@ -406,16 +403,16 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
 
     game->VulkanWrapper__SetAspectRatio(game->world.aspect);  // sync viewport
 
-    glm_perspective(
-        glm_rad(45.0f),  // half the actual 90deg fov
+    glms_perspective(
+        glms_rad(45.0f),  // half the actual 90deg fov
         game->world.aspect,
         0.1f,  // TODO: adjust clipping range for z depth?
         10.0f,
         game->ubo1.proj);
 
-    // glm_ortho(-0.5f, +0.5f, -0.5f, +0.5f, 0.1f, 10.0f, ubo1.proj);
-    glm_vec2_copy(game->world.user1, game->ubo1.user1);
-    glm_vec2_copy(game->world.user2, game->ubo1.user2);
+    // glms_ortho(-0.5f, +0.5f, -0.5f, +0.5f, 0.1f, 10.0f, ubo1.proj);
+    glms_vec2_copy(game->world.user1, game->ubo1.user1);
+    glms_vec2_copy(game->world.user2, game->ubo1.user2);
 
     // TODO: not sure i make use of one UBO per frame, really
     game->VulkanWrapper__UpdateUniformBuffer(game->VulkanWrapper__GetCurrentFrame(), &game->ubo1);
