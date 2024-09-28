@@ -100,8 +100,7 @@ else if (isMac) {
 const COMPILER_TRANSLATION_UNITS = [
   rel(workspaceFolder, 'src', 'components', '*.c'),
   rel(workspaceFolder, 'src', 'lib', '*.c'),
-  rel(workspaceFolder, 'src', 'game', '*.c'),
-  rel(workspaceFolder, 'src', 'game', 'menu', '*.c'),
+  rel(workspaceFolder, 'src', 'game', '**', '*.c'),
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
 ];

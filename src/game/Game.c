@@ -7,7 +7,7 @@
 #include "../lib/Math.h"
 #include "Level.h"
 #include "Logic.h"
-#include "menu/TitleMenu.h"
+#include "menus/TitleMenu.h"
 
 Game_t* Game__alloc(Arena_t* arena) {
   Game_t* g = Arena__Push(arena, sizeof(Game_t));
