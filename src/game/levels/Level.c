@@ -1,11 +1,11 @@
 #include "Level.h"
 
-#include "../lib/Bitmap.h"
-#include "../lib/Bitmap3D.h"
-#include "../lib/Engine.h"
-#include "../lib/Log.h"
-#include "../lib/Math.h"
-#include "Logic.h"
+#include "../../lib/Bitmap.h"
+#include "../../lib/Bitmap3D.h"
+#include "../../lib/Engine.h"
+#include "../../lib/Log.h"
+#include "../../lib/Math.h"
+#include "../Logic.h"
 
 void Level__Load(Engine__State_t* game, u8 id) {
   Logic__State_t* logic = game->local;

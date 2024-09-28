@@ -5,8 +5,8 @@
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Math.h"
-#include "Level.h"
 #include "Logic.h"
+#include "levels/Level.h"
 #include "menus/TitleMenu.h"
 
 Game_t* Game__alloc(Arena_t* arena) {

@@ -9,8 +9,8 @@
 #include "../lib/Log.h"
 #include "../lib/Math.h"
 #include "Game.h"
-#include "Level.h"
 #include "entities/Player.h"
+#include "levels/Level.h"
 
 static Engine__State_t* game;
 
