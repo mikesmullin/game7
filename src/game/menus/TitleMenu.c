@@ -29,8 +29,7 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
   self->playedAudio = false;
 }
 
-void TitleMenu__render(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
@@ -57,8 +56,7 @@ void TitleMenu__render(struct Menu_t* menu, void* _state) {
       "Copyright (C) 2024 Mike Smullin");
 }
 
-void TitleMenu__tick(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 

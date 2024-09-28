@@ -33,14 +33,12 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   entity->transform.rotation[3] = 0.0f;
 }
 
-void Player__render(struct Entity_t* entity, void* _state) {
-  Engine__State_t* state = _state;
+void Player__render(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
 }
 
-void Player__tick(struct Entity_t* entity, void* _state) {
-  Engine__State_t* state = _state;
+void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
 }

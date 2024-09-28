@@ -18,8 +18,7 @@ void AboutMenu__init(Menu_t* menu, Engine__State_t* state) {
   menu->render = &AboutMenu__render;
 }
 
-void AboutMenu__render(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void AboutMenu__render(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   AboutMenu_t* self = (AboutMenu_t*)menu;
 
@@ -35,8 +34,7 @@ void AboutMenu__render(struct Menu_t* menu, void* _state) {
       "Made by Mike Smullin");
 }
 
-void AboutMenu__tick(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void AboutMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   AboutMenu_t* self = (AboutMenu_t*)menu;
 

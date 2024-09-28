@@ -7,7 +7,7 @@ typedef struct Engine__State_t Engine__State_t;
 
 Menu_t* TitleMenu__alloc(Arena_t* state);
 void TitleMenu__init(Menu_t* menu, Engine__State_t* state);
-void TitleMenu__tick(struct Menu_t* menu, void* state);
-void TitleMenu__render(struct Menu_t* menu, void* state);
+void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state);
+void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state);
 
 #endif  // TITLE_MENU_H

@@ -19,8 +19,7 @@ void HelpMenu__init(Menu_t* menu, Engine__State_t* state) {
   menu->render = &HelpMenu__render;
 }
 
-void HelpMenu__render(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   HelpMenu_t* self = (HelpMenu_t*)menu;
 
@@ -40,8 +39,7 @@ void HelpMenu__render(struct Menu_t* menu, void* _state) {
   }
 }
 
-void HelpMenu__tick(struct Menu_t* menu, void* _state) {
-  Engine__State_t* state = _state;
+void HelpMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   HelpMenu_t* self = (HelpMenu_t*)menu;
 

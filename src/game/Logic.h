@@ -24,6 +24,7 @@ typedef double f64;
 
 typedef struct String8Node String8Node;
 typedef struct Arena_t Arena_t;
+typedef struct Engine__State_t Engine__State_t;
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
@@ -85,8 +86,8 @@ typedef struct VirtualJoystick_t {
 } VirtualJoystick_t;
 
 typedef struct Menu_t {
-  void (*tick)(struct Menu_t* menu, void* state);
-  void (*render)(struct Menu_t* menu, void* state);
+  void (*tick)(struct Menu_t* menu, Engine__State_t* state);
+  void (*render)(struct Menu_t* menu, Engine__State_t* state);
 } Menu_t;
 
 typedef struct TitleMenu_t {
@@ -111,8 +112,8 @@ typedef struct Game_t {
 } Game_t;
 
 typedef struct Entity_t {
-  void (*tick)(struct Entity_t* menu, void* state);
-  void (*render)(struct Entity_t* menu, void* state);
+  void (*tick)(struct Entity_t* menu, Engine__State_t* state);
+  void (*render)(struct Entity_t* menu, Engine__State_t* state);
   Transform_t transform;
   void* level;
   void* sprites;
@@ -125,6 +126,15 @@ typedef struct Player_t {
   Camera_t camera;
   VirtualJoystick_t input;
 } Player_t;
+
+typedef struct Sprite_t {
+  void (*tick)(struct Sprite_t* menu, Engine__State_t* state);
+  void (*render)(struct Sprite_t* menu, Engine__State_t* state);
+  Transform_t transform;
+  u32 tex;
+  u32 color;
+  bool removed;
+} Sprite_t;
 
 typedef struct Logic__State_t {
   f64 currentTime;
