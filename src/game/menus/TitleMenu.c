@@ -6,6 +6,7 @@
 #include "../../lib/Keyboard.h"
 #include "../../lib/String.h"
 #include "../Logic.h"
+#include "../levels/Level.h"
 #include "AboutMenu.h"
 #include "HelpMenu.h"
 
@@ -82,6 +83,10 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
 
     if (0 == self->selection) {
       logic->game->menu = NULL;
+      Level_t* level1 = Level__alloc(state->arena);
+      Level__init(state->arena, level1);
+      Level__load(level1, state, "../assets/textures/level1.png");
+      logic->game->currentLevel = level1;
     } else if (1 == self->selection) {
       logic->game->menu = HelpMenu__alloc(state->arena);
       HelpMenu__init(logic->game->menu, state);

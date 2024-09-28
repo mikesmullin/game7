@@ -20,10 +20,17 @@ void Game__init(Game_t* game, Engine__State_t* state) {
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {
-  if (NULL == game->menu) {
-    return;
+  Logic__State_t* logic = state->local;
+
+  // menu system
+  if (NULL != game->menu) {
+    game->menu->tick(game->menu, state);
   }
-  game->menu->tick(game->menu, state);
+
+  // in-game
+  else {
+    Level__tick(logic->game->currentLevel, state);
+  }
 }
 
 void Game__render(Game_t* game, Engine__State_t* state) {
@@ -37,7 +44,7 @@ void Game__render(Game_t* game, Engine__State_t* state) {
   // in-game
   else {
     Bitmap3D__RenderHorizon(state);
-    Level__Render(state);
+    Level__render(logic->game->currentLevel, state);
     Bitmap3D__PostProcessing(state);
 
     // game->local->CANVAS_DEBUG_X = 80;

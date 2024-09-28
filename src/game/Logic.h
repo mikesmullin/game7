@@ -13,6 +13,7 @@ typedef double f64;
 typedef struct String8Node String8Node;
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
+typedef struct List_t List_t;
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
@@ -95,10 +96,6 @@ typedef struct HelpMenu_t {
   Menu_t base;
 } HelpMenu_t;
 
-typedef struct Game_t {
-  Menu_t* menu;
-} Game_t;
-
 typedef struct Entity_t {
   void (*tick)(struct Entity_t* menu, Engine__State_t* state);
   void (*render)(struct Entity_t* menu, Engine__State_t* state);
@@ -116,13 +113,38 @@ typedef struct Player_t {
 } Player_t;
 
 typedef struct Sprite_t {
-  void (*tick)(struct Sprite_t* menu, Engine__State_t* state);
-  void (*render)(struct Sprite_t* menu, Engine__State_t* state);
+  void (*tick)(struct Sprite_t* sprite, Engine__State_t* state);
+  void (*render)(struct Sprite_t* sprite, Engine__State_t* state);
   Transform_t transform;
   u32 tex;
   u32 color;
   bool removed;
 } Sprite_t;
+
+typedef struct Level_t {
+  Bitmap_t* bmp;
+  List_t* blocks;
+  List_t* entities;
+  u32 wallTex;
+  u32 ceilTex;
+  u32 floorTex;
+  u32 wallCol;
+  u32 ceilCol;
+  u32 floorCol;
+  bool firstRender;
+} Level_t;
+
+typedef struct Block_t {
+  u32 id;
+  bool blocking;
+  bool masked;
+  vec2 position;
+} Block_t;
+
+typedef struct Game_t {
+  Menu_t* menu;
+  Level_t* currentLevel;
+} Game_t;
 
 typedef struct Logic__State_t {
   f64 currentTime;
@@ -132,9 +154,6 @@ typedef struct Logic__State_t {
   f32* zbufWall;
   Bitmap_t atlas;
   Bitmap_t glyphs0;
-  Bitmap_t level1;
-  u8 currentLevel;
-  bool levelLoaded;
 
   bool isVBODirty;
   bool isUBODirty[2];

@@ -32,7 +32,6 @@ void LoadTextures() {
 
   game->Vulkan__FReadImage(&logic->atlas, "../assets/textures/atlas.png");
   game->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
-  game->Vulkan__FReadImage(&logic->level1, "../assets/textures/level1.png");
 }
 
 // on process start
@@ -115,7 +114,6 @@ __declspec(dllexport) void logic_oninit_compute() {
   logic->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 
   LoadTextures();
-  Level__Load(game, 1);
   for (u32 i = 0; i < ARRAY_COUNT(logic->audioFiles); i++) {
     game->Audio__LoadAudioFile(logic->audioFiles[i]);
   }
@@ -260,7 +258,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     if (true == game->inputState->reload) {  // R
       game->inputState->reload = false;
       LoadTextures();
-      Level__Load(game, 0);
+      logic->game->currentLevel->firstRender = true;  // tp to spawn
       // Player__Init(logic);
     }
 

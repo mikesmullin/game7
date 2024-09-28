@@ -6,6 +6,12 @@
 #include "Arena.h"
 #include "Log.h"
 
+// TODO: rename to Alloc
+Bitmap_t* Bitmap__Prealloc(Arena_t* a) {
+  return Arena__Push(a, sizeof(Bitmap_t));
+}
+
+// TODO: merge into Init
 void Bitmap__Alloc(Arena_t* a, Bitmap_t* bmp, u32 w, u32 h, u32 chan) {
   Bitmap__Init(bmp, w, h, chan);
 
