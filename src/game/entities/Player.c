@@ -23,14 +23,14 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   self->camera.nearZ = 0.1f;
   self->camera.farZ = 1000.0f;
 
-  entity->transform.position[0] = 0.0f;
-  entity->transform.position[1] = 0.370f;
-  entity->transform.position[2] = 0.0f;
+  entity->transform.position.x = 0.0f;
+  entity->transform.position.y = 0.370f;
+  entity->transform.position.z = 0.0f;
 
-  entity->transform.rotation[0] = 180.0f;
-  entity->transform.rotation[1] = 0.0f;
-  entity->transform.rotation[2] = 0.0f;
-  entity->transform.rotation[3] = 0.0f;
+  entity->transform.rotation.x = 180.0f;
+  entity->transform.rotation.y = 0.0f;
+  entity->transform.rotation.z = 0.0f;
+  entity->transform.rotation.w = 0.0f;
 }
 
 void Player__render(struct Entity_t* entity, Engine__State_t* state) {

@@ -10,21 +10,26 @@ typedef f32 vec3[3];
 typedef f32 vec4[4];
 typedef vec4 mat4[4];
 
-// typedef struct vec2 {
-//   f32 x, y;
-// } vec2;
+typedef struct v2 {
+  f32 x, y;
+} v2;
 
-// typedef struct vec3 {
-//   f32 x, y, z;
-// } vec3;
+typedef struct v3 {
+  f32 x, y, z;
+} v3;
 
-// typedef struct vec4 {
-//   f32 x, y, z, w;
-// } vec4;
+typedef struct v4 {
+  f32 x, y, z, w;
+} v4;
 
-// typedef struct mat4 {
-//   vec4 a, b, c, d;
-// } mat4;
+typedef struct m4 {
+  vec4 a, b, c, d;
+} m4;
+
+void glms_v3_add(v3 a, v3 b, v3* dest);
+void glms_v3_scale(v3 v, f32 scale, v3* dest);
+void glms_v3_normalize(v3* dest);
+void glms_v3_cross(v3 a, v3 b, v3* dest);
 
 f32 glms_rad(f32 degrees);
 void glms_vec3_copy(vec3 src, vec3 dest);

@@ -204,23 +204,22 @@ __declspec(dllexport) void logic_onfinger() {
   }
 
   if (game->mouseCaptured) {
-    logic->player->transform.rotation[0] =
-        logic->player->transform.rotation[0] +
+    logic->player->transform.rotation.x +=
         (logic->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
-    while (logic->player->transform.rotation[0] < 0.0f) {
-      logic->player->transform.rotation[0] += 360.0f;
+    while (logic->player->transform.rotation.x < 0.0f) {
+      logic->player->transform.rotation.x += 360.0f;
     }
-    while (logic->player->transform.rotation[0] >= 360.0f) {
-      logic->player->transform.rotation[0] -= 360.0f;
+    while (logic->player->transform.rotation.x >= 360.0f) {
+      logic->player->transform.rotation.x -= 360.0f;
     }
-    logic->player->transform.rotation[1] =
-        logic->player->transform.rotation[1] +
+    logic->player->transform.rotation.y =
+        logic->player->transform.rotation.y +
         (-logic->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
-    while (logic->player->transform.rotation[1] < 0.0f) {
-      logic->player->transform.rotation[1] += 360.0f;
+    while (logic->player->transform.rotation.y < 0.0f) {
+      logic->player->transform.rotation.y += 360.0f;
     }
-    while (logic->player->transform.rotation[1] >= 360.0f) {
-      logic->player->transform.rotation[1] -= 360.0f;
+    while (logic->player->transform.rotation.y >= 360.0f) {
+      logic->player->transform.rotation.y -= 360.0f;
     }
   }
 }
@@ -296,40 +295,40 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     }
 
     // Direction vectors for movement
-    vec3 forward, right, front;
+    v3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    float yaw_radians = glms_rad(logic->player->transform.rotation[0]);
+    float yaw_radians = glms_rad(logic->player->transform.rotation.x);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
-    front[0] = Math__cos(yaw_radians);
-    front[1] = 0.0f;
-    front[2] = Math__sin(yaw_radians);
-    glms_vec3_normalize(front);
+    front.x = Math__cos(yaw_radians);
+    front.y = 0.0f;
+    front.z = Math__sin(yaw_radians);
+    glms_v3_normalize(&front);
 
     // Calculate the right vector (perpendicular to the front vector)
-    glms_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
-    glms_vec3_normalize(right);
+    glms_v3_cross(front, (v3){0.0f, 1.0f, 0.0f}, &right);
+    glms_v3_normalize(&right);
 
     // apply forward/backward motion
     if (0 != player->input.zAxis) {
-      glms_vec3_scale(front, player->input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime, forward);
-      glms_vec3_add(logic->player->transform.position, forward, logic->player->transform.position);
+      glms_v3_scale(front, player->input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime, &forward);
+      glms_v3_add(logic->player->transform.position, forward, &logic->player->transform.position);
     }
 
     // apply left/right motion
     if (0 != player->input.xAxis) {
-      glms_vec3_scale(right, -player->input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime, forward);
-      glms_vec3_add(logic->player->transform.position, forward, logic->player->transform.position);
+      glms_v3_scale(right, -player->input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime, &forward);
+      glms_v3_add(logic->player->transform.position, forward, &logic->player->transform.position);
     }
 
     // apply up/down motion
     if (0 != player->input.yAxis) {
-      logic->player->transform.position[1] +=
+      logic->player->transform.position.y +=
           player->input.yAxis * logic->PLAYER_FLY_SPEED * deltaTime;
 
-      logic->player->transform.position[1] =
-          MATH_CLAMP(0, logic->player->transform.position[1], 1.0f /*logic->WORLD_HEIGHT*/);
+      logic->player->transform.position.y =
+          MATH_CLAMP(0, logic->player->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
     }
   }
 

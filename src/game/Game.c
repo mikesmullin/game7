@@ -18,7 +18,7 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
   game->currentLevel = NULL;
-  game->lastBlockUid = 0;
+  game->lastUid = 0;
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {
@@ -67,9 +67,9 @@ void Game__render(Game_t* game, Engine__State_t* state) {
         0xffffffff,
         0,
         "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-        logic->player->transform.position[0],
-        logic->player->transform.position[1],
-        logic->player->transform.position[2],
-        logic->player->transform.rotation[0]);
+        logic->player->transform.position.x,
+        logic->player->transform.position.y,
+        logic->player->transform.position.z,
+        logic->player->transform.rotation.x);
   }
 }

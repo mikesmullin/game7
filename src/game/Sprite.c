@@ -14,13 +14,13 @@ void Sprite__init(Sprite_t* sprite, Engine__State_t* state) {
 
   sprite->tick = &Sprite__tick;
   sprite->render = &Sprite__render;
-  sprite->transform.position[0] = 0.0f;
-  sprite->transform.position[1] = 0.0f;
-  sprite->transform.position[1] = 0.0f;
-  sprite->transform.rotation[0] = 0.0f;
-  sprite->transform.rotation[1] = 0.0f;
-  sprite->transform.rotation[2] = 0.0f;
-  sprite->transform.rotation[3] = 0.0f;
+  sprite->transform.position.x = 0.0f;
+  sprite->transform.position.y = 0.0f;
+  sprite->transform.position.z = 0.0f;
+  sprite->transform.rotation.x = 0.0f;
+  sprite->transform.rotation.y = 0.0f;
+  sprite->transform.rotation.z = 0.0f;
+  sprite->transform.rotation.w = 0.0f;
   sprite->tex = 0;
   sprite->color = 0xffff0ff;
   sprite->removed = false;

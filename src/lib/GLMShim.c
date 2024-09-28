@@ -5,6 +5,39 @@
 
 #include "Math.h"
 
+// Adds two v3
+void glms_v3_add(v3 a, v3 b, v3* dest) {
+  dest->x = a.x + b.x;
+  dest->y = a.y + b.y;
+  dest->z = a.z + b.z;
+}
+
+// Scales a vec3 by a scalar value
+void glms_v3_scale(v3 v, f32 scale, v3* dest) {
+  dest->x = v.x * scale;
+  dest->y = v.y * scale;
+  dest->z = v.z * scale;
+}
+
+// Normalizes a vec3
+void glms_v3_normalize(v3* dest) {
+  f32 len = sqrtf(dest->x * dest->x + dest->y * dest->y + dest->z * dest->z);
+  if (len > 0.0f) {
+    dest->x /= len;
+    dest->y /= len;
+    dest->z /= len;
+  }
+}
+
+// Cross product of two vec3
+void glms_v3_cross(v3 a, v3 b, v3* dest) {
+  dest->x = a.y * b.z - a.z * b.y;
+  dest->y = a.z * b.x - a.x * b.z;
+  dest->z = a.x * b.y - a.y * b.x;
+}
+
+// ---
+
 // Converts degrees to radians
 f32 glms_rad(f32 degrees) {
   // return glm_rad(degrees);

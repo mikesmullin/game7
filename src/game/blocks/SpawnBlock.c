@@ -41,15 +41,9 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
 
     // TODO: fix the coords being rendered out of order and flipped
-    logic->player->transform.position[0] = block->y + 0.8f;
-    logic->player->transform.position[1] = 0.370f;
-    logic->player->transform.position[2] = -block->x + 0.8f;
-    logic->player->transform.rotation[0] = 180.0f;
-
-    LOG_DEBUGF(
-        "Teleport player to %+03i %+03i %+03i",
-        (s32)logic->player->transform.position[0],
-        (s32)logic->player->transform.position[1],
-        (s32)logic->player->transform.position[2]);
+    logic->player->transform.position.x = block->y + 0.8f;
+    logic->player->transform.position.y = 0.370f;
+    logic->player->transform.position.z = -block->x + 0.8f;
+    logic->player->transform.rotation.x = 180.0f;
   }
 }

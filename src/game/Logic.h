@@ -64,8 +64,8 @@ typedef struct Camera_t {
 } Camera_t;
 
 typedef struct Transform_t {
-  vec3 position;  // (x, y, z)
-  vec4 rotation;  // (yaw, pitch, roll)
+  v3 position;  // (x, y, z)
+  v4 rotation;  // (yaw, pitch, roll)
 } Transform_t;
 
 typedef struct VirtualJoystick_t {
@@ -99,6 +99,7 @@ typedef struct HelpMenu_t {
 typedef struct Entity_t {
   void (*tick)(struct Entity_t* menu, Engine__State_t* state);
   void (*render)(struct Entity_t* menu, Engine__State_t* state);
+  u32 id;
   Transform_t transform;
   void* level;
   void* sprites;
@@ -155,7 +156,7 @@ typedef struct Level_t {
 typedef struct Game_t {
   Menu_t* menu;
   Level_t* currentLevel;
-  u32 lastBlockUid;
+  u32 lastUid;
 } Game_t;
 
 typedef struct Logic__State_t {
