@@ -121,6 +121,24 @@ typedef struct Sprite_t {
   bool removed;
 } Sprite_t;
 
+typedef struct Block_t {
+  void (*tick)(struct Block_t* block, Engine__State_t* state);
+  void (*render)(struct Block_t* block, Engine__State_t* state);
+  u32 id;
+  bool blocking;
+  bool masked;
+  f32 x, y;
+} Block_t;
+
+typedef struct WallBlock_t {
+  Block_t base;
+} WallBlock_t;
+
+typedef struct SpawnBlock_t {
+  Block_t base;
+  bool firstTick;
+} SpawnBlock_t;
+
 typedef struct Level_t {
   Bitmap_t* bmp;
   List_t* blocks;
@@ -131,19 +149,13 @@ typedef struct Level_t {
   u32 wallCol;
   u32 ceilCol;
   u32 floorCol;
-  bool firstRender;
+  SpawnBlock_t* spawner;
 } Level_t;
-
-typedef struct Block_t {
-  u32 id;
-  bool blocking;
-  bool masked;
-  vec2 position;
-} Block_t;
 
 typedef struct Game_t {
   Menu_t* menu;
   Level_t* currentLevel;
+  u32 lastBlockUid;
 } Game_t;
 
 typedef struct Logic__State_t {

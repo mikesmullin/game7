@@ -17,6 +17,8 @@ Game_t* Game__alloc(Arena_t* arena) {
 void Game__init(Game_t* game, Engine__State_t* state) {
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
+  game->currentLevel = NULL;
+  game->lastBlockUid = 0;
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {

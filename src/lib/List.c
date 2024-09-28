@@ -35,7 +35,7 @@ void List__append(Arena_t* arena, List_t* list, void* data) {
   list->len++;
 }
 
-void* List__get(List_t* list, u32 index) {
+void* List__getOne(List_t* list, u32 index) {
   List__Node_t* c = list->head;
   u32 i = 0;
   while (NULL != c) {

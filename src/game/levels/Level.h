@@ -1,9 +1,6 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include <stdint.h>
-
-typedef uint8_t u8;
 typedef struct Arena_t Arena_t;
 typedef struct Level_t Level_t;
 typedef struct Engine__State_t Engine__State_t;

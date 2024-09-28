@@ -258,7 +258,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     if (true == game->inputState->reload) {  // R
       game->inputState->reload = false;
       LoadTextures();
-      logic->game->currentLevel->firstRender = true;  // tp to spawn
+      logic->game->currentLevel->spawner->firstTick = true;  // tp to spawn
       // Player__Init(logic);
     }
 
