@@ -84,12 +84,6 @@ typedef struct VirtualJoystick_t {
   f32 zAxis;
 } VirtualJoystick_t;
 
-typedef struct Player_t {
-  Transform_t transform;
-  Camera_t camera;
-  VirtualJoystick_t input;
-} Player_t;
-
 typedef struct Menu_t {
   void (*tick)(struct Menu_t* menu, void* state);
   void (*render)(struct Menu_t* menu, void* state);
@@ -115,6 +109,22 @@ typedef struct HelpMenu_t {
 typedef struct Game_t {
   Menu_t* menu;
 } Game_t;
+
+typedef struct Entity_t {
+  void (*tick)(struct Entity_t* menu, void* state);
+  void (*render)(struct Entity_t* menu, void* state);
+  Transform_t transform;
+  void* level;
+  void* sprites;
+  bool flying;
+  bool removed;
+} Entity_t;
+
+typedef struct Player_t {
+  Entity_t base;
+  Camera_t camera;
+  VirtualJoystick_t input;
+} Player_t;
 
 typedef struct Logic__State_t {
   f64 currentTime;
@@ -152,7 +162,7 @@ typedef struct Logic__State_t {
   u8 newTexId;
 
   Arena_t* debugArena;
-  Player_t player;
+  Entity_t* player;
 
   f32 WORLD_HEIGHT;
   f32 ATLAS_TILE_SIZE;
@@ -161,7 +171,5 @@ typedef struct Logic__State_t {
 
   Game_t* game;
 } Logic__State_t;
-
-void Player__Init(Logic__State_t* game);
 
 #endif  // LOGIC_H

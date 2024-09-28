@@ -10,6 +10,7 @@
 #include "../lib/Math.h"
 #include "Game.h"
 #include "Level.h"
+#include "entities/Player.h"
 
 static Engine__State_t* game;
 
@@ -44,7 +45,8 @@ __declspec(dllexport) void logic_onload(Engine__State_t* _state) {
 __declspec(dllexport) void logic_oninit_data() {
   Logic__State_t* logic = Arena__Push(game->arena, sizeof(Logic__State_t));
   game->local = logic;
-  Player__Init(logic);
+  logic->player = Player__alloc(game->arena);
+  Player__init(logic->player, game);
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";
@@ -204,22 +206,23 @@ __declspec(dllexport) void logic_onfinger() {
   }
 
   if (game->mouseCaptured) {
-    logic->player.transform.rotation[0] = logic->player.transform.rotation[0] +
-                                          (logic->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
-    while (logic->player.transform.rotation[0] < 0.0f) {
-      logic->player.transform.rotation[0] += 360.0f;
+    logic->player->transform.rotation[0] =
+        logic->player->transform.rotation[0] +
+        (logic->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
+    while (logic->player->transform.rotation[0] < 0.0f) {
+      logic->player->transform.rotation[0] += 360.0f;
     }
-    while (logic->player.transform.rotation[0] >= 360.0f) {
-      logic->player.transform.rotation[0] -= 360.0f;
+    while (logic->player->transform.rotation[0] >= 360.0f) {
+      logic->player->transform.rotation[0] -= 360.0f;
     }
-    logic->player.transform.rotation[1] =
-        logic->player.transform.rotation[1] +
+    logic->player->transform.rotation[1] =
+        logic->player->transform.rotation[1] +
         (-logic->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
-    while (logic->player.transform.rotation[1] < 0.0f) {
-      logic->player.transform.rotation[1] += 360.0f;
+    while (logic->player->transform.rotation[1] < 0.0f) {
+      logic->player->transform.rotation[1] += 360.0f;
     }
-    while (logic->player.transform.rotation[1] >= 360.0f) {
-      logic->player.transform.rotation[1] -= 360.0f;
+    while (logic->player->transform.rotation[1] >= 360.0f) {
+      logic->player->transform.rotation[1] -= 360.0f;
     }
   }
 }
@@ -227,6 +230,7 @@ __declspec(dllexport) void logic_onfinger() {
 // on physics
 __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
   Logic__State_t* logic = game->local;
+  Player_t* player = (Player_t*)logic->player;
 
   // LOG_DEBUGF("Logic dll onfixedupdate.");
   logic->currentTime = currentTime;
@@ -262,42 +266,42 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
 
     // W-S Forward/Backward axis
     if (game->inputState->fwd && game->inputState->back) {
-      logic->player.input.zAxis = 0.0f;
+      player->input.zAxis = 0.0f;
     } else if (game->inputState->fwd) {
-      logic->player.input.zAxis = 1.0f;
+      player->input.zAxis = 1.0f;
     } else if (game->inputState->back) {
-      logic->player.input.zAxis = -1.0f;
+      player->input.zAxis = -1.0f;
     } else {
-      logic->player.input.zAxis = 0.0f;
+      player->input.zAxis = 0.0f;
     }
 
     // A-D Left/Right axis
     if (game->inputState->left && game->inputState->right) {
-      logic->player.input.xAxis = 0.0f;
+      player->input.xAxis = 0.0f;
     } else if (game->inputState->left) {
-      logic->player.input.xAxis = 1.0f;
+      player->input.xAxis = 1.0f;
     } else if (game->inputState->right) {
-      logic->player.input.xAxis = -1.0f;
+      player->input.xAxis = -1.0f;
     } else {
-      logic->player.input.xAxis = 0.0f;
+      player->input.xAxis = 0.0f;
     }
 
     // Q-E Up/Down axis
     if (game->inputState->up && game->inputState->down) {
-      logic->player.input.yAxis = 0.0f;
+      player->input.yAxis = 0.0f;
     } else if (game->inputState->up) {
-      logic->player.input.yAxis = 1.0f;
+      player->input.yAxis = 1.0f;
     } else if (game->inputState->down) {
-      logic->player.input.yAxis = -1.0f;
+      player->input.yAxis = -1.0f;
     } else {
-      logic->player.input.yAxis = 0.0f;
+      player->input.yAxis = 0.0f;
     }
 
     // Direction vectors for movement
     vec3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    float yaw_radians = glms_rad(logic->player.transform.rotation[0]);
+    float yaw_radians = glms_rad(logic->player->transform.rotation[0]);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
     front[0] = Math__cos(yaw_radians);
@@ -310,30 +314,24 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     glms_vec3_normalize(right);
 
     // apply forward/backward motion
-    if (0 != logic->player.input.zAxis) {
-      glms_vec3_scale(
-          front,
-          logic->player.input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime,
-          forward);
-      glms_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
+    if (0 != player->input.zAxis) {
+      glms_vec3_scale(front, player->input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime, forward);
+      glms_vec3_add(logic->player->transform.position, forward, logic->player->transform.position);
     }
 
     // apply left/right motion
-    if (0 != logic->player.input.xAxis) {
-      glms_vec3_scale(
-          right,
-          -logic->player.input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime,
-          forward);
-      glms_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
+    if (0 != player->input.xAxis) {
+      glms_vec3_scale(right, -player->input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime, forward);
+      glms_vec3_add(logic->player->transform.position, forward, logic->player->transform.position);
     }
 
     // apply up/down motion
-    if (0 != logic->player.input.yAxis) {
-      logic->player.transform.position[1] +=
-          logic->player.input.yAxis * logic->PLAYER_FLY_SPEED * deltaTime;
+    if (0 != player->input.yAxis) {
+      logic->player->transform.position[1] +=
+          player->input.yAxis * logic->PLAYER_FLY_SPEED * deltaTime;
 
-      logic->player.transform.position[1] =
-          MATH_CLAMP(0, logic->player.transform.position[1], 1.0f /*logic->WORLD_HEIGHT*/);
+      logic->player->transform.position[1] =
+          MATH_CLAMP(0, logic->player->transform.position[1], 1.0f /*logic->WORLD_HEIGHT*/);
     }
   }
 

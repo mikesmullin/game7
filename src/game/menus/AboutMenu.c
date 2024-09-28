@@ -1,3 +1,5 @@
+#include "AboutMenu.h"
+
 #include <string.h>
 
 #include "../../lib/Arena.h"
@@ -10,9 +12,6 @@
 Menu_t* AboutMenu__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(AboutMenu_t));
 }
-
-void AboutMenu__render(struct Menu_t* menu, void* _state);
-void AboutMenu__tick(struct Menu_t* menu, void* _state);
 
 void AboutMenu__init(Menu_t* menu, Engine__State_t* state) {
   menu->tick = &AboutMenu__tick;

@@ -58,9 +58,9 @@ void Game__render(Game_t* game, Engine__State_t* state) {
         0xffffffff,
         0,
         "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-        logic->player.transform.position[0],
-        logic->player.transform.position[1],
-        logic->player.transform.position[2],
-        logic->player.transform.rotation[0]);
+        logic->player->transform.position[0],
+        logic->player->transform.position[1],
+        logic->player->transform.position[2],
+        logic->player->transform.rotation[0]);
   }
 }
