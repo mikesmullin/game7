@@ -34,6 +34,22 @@ CPP_COMPILER_ARGS.push('-m64');
 const C_COMPILER_INCLUDES = [];
 const CPP_COMPILER_INCLUDES = [];
 
+const ENGINE_ONLY = [
+  'src/main.c',
+  'src/lib/Audio.c',
+  'src/lib/Engine.c',
+  'src/lib/File.c',
+  'src/lib/Finger.c',
+  'src/lib/Gamepad.c',
+  'src/lib/HotReload.c',
+  'src/lib/Keyboard.c',
+  'src/lib/SDL.c',
+  'src/lib/Shader.c',
+  'src/lib/Time.c',
+  'src/lib/Vulkan.c',
+  'src/lib/Window.c',
+];
+
 if (isWin) {
   C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'sdl-2.26.1', 'include')}`);
   C_COMPILER_INCLUDES.push(`-I${rel(workspaceFolder, 'vendor', 'cglm-0.9.2', 'include')}`);
@@ -97,6 +113,9 @@ const C_CONDITIONAL_COMPILER_ARGS = (src) => {
   }
   return [];
 };
+
+const nixPath = (p) =>
+  path.posix.normalize(p.replace(/\\/g, '/'));
 
 const generate_clangd_compile_commands = async () => {
   console.log('scanning directory...');
@@ -333,9 +352,9 @@ const compile_reload = async (outname) => {
   const dsts = [];
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
-      if (file.includes('HotReload.c') || file.includes('Engine.c')) { continue; }
-      if (!file.includes('Logic.c') && !file.includes('Log.c') && !file.includes('Math.c') && !file.includes('Bitmap.c') && !file.includes('Bitmap3D.c') && !file.includes('Screen.c') && !file.includes('Arena.c') && !file.includes('String.c') && !file.includes('Player.c') && !file.includes('Level.c') && !file.includes('Game.c') && !file.includes('Menu.c') && !file.includes('TitleMenu.c')) { continue; }
-      dsts.push(rel(workspaceFolder, file));
+      if (!ENGINE_ONLY.includes(nixPath(file))) {
+        dsts.push(rel(workspaceFolder, file));
+      }
     }
   }
 
