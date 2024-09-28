@@ -21,7 +21,7 @@ typedef struct KeyboardState_t {
   bool escKey;
 } KeyboardState_t;
 
-typedef struct InputState_t {
+typedef struct KbInputState_t {
   bool fwd;
   bool back;
   bool left;
@@ -31,9 +31,9 @@ typedef struct InputState_t {
   bool down;
   bool reload;
   bool escape;
-} InputState_t;
+} KbInputState_t;
 
-InputState_t* Keyboard__Alloc(Arena_t* arena);
-void Keyboard__Poll(InputState_t* state);
+KbInputState_t* Keyboard__Alloc(Arena_t* arena);
+void Keyboard__Poll(KbInputState_t* kbState);
 
 #endif

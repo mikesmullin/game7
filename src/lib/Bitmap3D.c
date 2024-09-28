@@ -421,13 +421,13 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   u32 len = logic->screen.len;
   f32 txs = 8.0f;  // texture scale (affects ceiling and floors; trying to match walls)
 
-  camX = logic->player->transform.position.z;
-  camY = logic->player->transform.position.x;
-  camZ = logic->player->transform.position.y;
-  // camZ = -0.2 + Math__sin(logic->player->bobPhase * 0.4) * 0.01 *
-  // logic->player->bob
-  // - logic->player->y;
-  rot = -logic->player->transform.rotation.x;
+  camX = logic->game->curPlyr->transform.position.z;
+  camY = logic->game->curPlyr->transform.position.x;
+  camZ = logic->game->curPlyr->transform.position.y;
+  // camZ = -0.2 + Math__sin(logic->game->curPlyr->bobPhase * 0.4) * 0.01 *
+  // logic->game->curPlyr->bob
+  // - logic->game->curPlyr->y;
+  rot = -logic->game->curPlyr->transform.rotation.x;
   f32 rad = deg2rad(rot);
   rCos = Math__cos(rad);
   rSin = Math__sin(rad);

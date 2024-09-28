@@ -38,8 +38,8 @@ void AboutMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   AboutMenu_t* self = (AboutMenu_t*)menu;
 
-  if (state->inputState->use) {
-    state->inputState->use = false;
+  if (state->kbState->use) {
+    state->kbState->use = false;
 
     // TODO: reuse existing TitleMenu instance like a singleton, to avoid memory leak
     logic->game->menu = TitleMenu__alloc(state->arena);

@@ -22,7 +22,7 @@ void SpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->tick = &SpawnBlock__tick;
   block->render = &SpawnBlock__render;
   self->firstTick = true;
-  logic->game->currentLevel->spawner = self;
+  logic->game->curLvl->spawner = self;
 }
 
 void SpawnBlock__render(Block_t* block, Engine__State_t* state) {
@@ -41,9 +41,9 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
 
     // TODO: fix the coords being rendered out of order and flipped
-    logic->player->transform.position.x = block->y + 0.8f;
-    logic->player->transform.position.y = 0.370f;
-    logic->player->transform.position.z = -block->x + 0.8f;
-    logic->player->transform.rotation.x = 180.0f;
+    logic->game->curPlyr->transform.position.x = block->y + 0.8f;
+    logic->game->curPlyr->transform.position.y = 0.370f;
+    logic->game->curPlyr->transform.position.z = -block->x + 0.8f;
+    logic->game->curPlyr->transform.rotation.x = 180.0f;
   }
 }

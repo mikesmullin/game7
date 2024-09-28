@@ -4,14 +4,15 @@
 #include <SDL2/SDL.h>
 
 #include "Arena.h"
+// #include "Log.h"
 
 static KeyboardState_t lastState;
 
-InputState_t* Keyboard__Alloc(Arena_t* arena) {
-  return Arena__Push(arena, sizeof(InputState_t));
+KbInputState_t* Keyboard__Alloc(Arena_t* arena) {
+  return Arena__Push(arena, sizeof(KbInputState_t));
 }
 
-void Keyboard__Poll(InputState_t* state) {
+void Keyboard__Poll(KbInputState_t* kbState) {
   // Get the state of the keyboard
   const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
@@ -42,59 +43,72 @@ void Keyboard__Poll(InputState_t* state) {
   // KEYBOARD_UPDATE_LATCH(T_KEYS)
   // #metagen
   if (false == lastState.wKey && true == keystate[SDL_SCANCODE_W]) {
-    state->fwd = true;
+    kbState->fwd = true;
   } else if (false == keystate[SDL_SCANCODE_W]) {
-    state->fwd = false;
+    kbState->fwd = false;
   }
   lastState.wKey = keystate[SDL_SCANCODE_W];
   if (false == lastState.sKey && true == keystate[SDL_SCANCODE_S]) {
-    state->back = true;
+    kbState->back = true;
   } else if (false == keystate[SDL_SCANCODE_S]) {
-    state->back = false;
+    kbState->back = false;
   }
   lastState.sKey = keystate[SDL_SCANCODE_S];
   if (false == lastState.aKey && true == keystate[SDL_SCANCODE_A]) {
-    state->left = true;
+    kbState->left = true;
   } else if (false == keystate[SDL_SCANCODE_A]) {
-    state->left = false;
+    kbState->left = false;
   }
   lastState.aKey = keystate[SDL_SCANCODE_A];
   if (false == lastState.dKey && true == keystate[SDL_SCANCODE_D]) {
-    state->right = true;
+    kbState->right = true;
   } else if (false == keystate[SDL_SCANCODE_D]) {
-    state->right = false;
+    kbState->right = false;
   }
   lastState.dKey = keystate[SDL_SCANCODE_D];
   if (false == lastState.spKey && true == keystate[SDL_SCANCODE_SPACE]) {
-    state->use = true;
+    kbState->use = true;
   } else if (false == keystate[SDL_SCANCODE_SPACE]) {
-    state->use = false;
+    kbState->use = false;
   }
   lastState.spKey = keystate[SDL_SCANCODE_SPACE];
   if (false == lastState.qKey && true == keystate[SDL_SCANCODE_Q]) {
-    state->up = true;
+    kbState->up = true;
   } else if (false == keystate[SDL_SCANCODE_Q]) {
-    state->up = false;
+    kbState->up = false;
   }
   lastState.qKey = keystate[SDL_SCANCODE_Q];
   if (false == lastState.eKey && true == keystate[SDL_SCANCODE_E]) {
-    state->down = true;
+    kbState->down = true;
   } else if (false == keystate[SDL_SCANCODE_E]) {
-    state->down = false;
+    kbState->down = false;
   }
   lastState.eKey = keystate[SDL_SCANCODE_E];
   if (false == lastState.rKey && true == keystate[SDL_SCANCODE_R]) {
-    state->reload = true;
+    kbState->reload = true;
   } else if (false == keystate[SDL_SCANCODE_R]) {
-    state->reload = false;
+    kbState->reload = false;
   }
   lastState.rKey = keystate[SDL_SCANCODE_R];
   if (false == lastState.escKey && true == keystate[SDL_SCANCODE_ESCAPE]) {
-    state->escape = true;
+    kbState->escape = true;
   } else if (false == keystate[SDL_SCANCODE_ESCAPE]) {
-    state->escape = false;
+    kbState->escape = false;
   }
   lastState.escKey = keystate[SDL_SCANCODE_ESCAPE];
-
   // #metaend
+
+  // LOG_DEBUGF(
+  //     "kbState "
+  //     "w %u a %u s %u d %u q %u e %u sp %u "
+  //     "r %u esc %u",
+  //     kbState->fwd,
+  //     kbState->left,
+  //     kbState->back,
+  //     kbState->right,
+  //     kbState->use,
+  //     kbState->up,
+  //     kbState->down,
+  //     kbState->reload,
+  //     kbState->escape);
 }

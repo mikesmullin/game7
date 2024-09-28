@@ -2,6 +2,9 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
+#include "../../lib/Finger.h"
+#include "../../lib/Keyboard.h"
+#include "../../lib/Math.h"
 #include "../Logic.h"
 
 Entity_t* Player__alloc(Arena_t* arena) {
@@ -41,4 +44,103 @@ void Player__render(struct Entity_t* entity, Engine__State_t* state) {
 void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
+
+  if (state->mouseCaptured) {
+    if (true == state->kbState->reload) {  // R
+      state->kbState->reload = false;
+      logic->game->curLvl->spawner->firstTick = true;  // tp to spawn
+    }
+
+    if (state->mouseCaptured) {
+      if (0 != state->mState->x) {
+        logic->game->curPlyr->transform.rotation.x += state->mState->x * logic->PLAYER_LOOK_SPEED;
+        logic->game->curPlyr->transform.rotation.x =
+            Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
+        state->mState->x = 0;
+      }
+
+      if (0 != state->mState->y) {
+        logic->game->curPlyr->transform.rotation.y += -state->mState->y * logic->PLAYER_LOOK_SPEED;
+        logic->game->curPlyr->transform.rotation.y =
+            Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
+        state->mState->y = 0;
+      }
+    }
+
+    // W-S Forward/Backward axis
+    if (state->kbState->fwd && state->kbState->back) {
+      self->input.zAxis = 0.0f;
+    } else if (state->kbState->fwd) {
+      self->input.zAxis = 1.0f;
+    } else if (state->kbState->back) {
+      self->input.zAxis = -1.0f;
+    } else {
+      self->input.zAxis = 0.0f;
+    }
+
+    // A-D Left/Right axis
+    if (state->kbState->left && state->kbState->right) {
+      self->input.xAxis = 0.0f;
+    } else if (state->kbState->left) {
+      self->input.xAxis = 1.0f;
+    } else if (state->kbState->right) {
+      self->input.xAxis = -1.0f;
+    } else {
+      self->input.xAxis = 0.0f;
+    }
+
+    // Q-E Up/Down axis
+    if (state->kbState->up && state->kbState->down) {
+      self->input.yAxis = 0.0f;
+    } else if (state->kbState->up) {
+      self->input.yAxis = 1.0f;
+    } else if (state->kbState->down) {
+      self->input.yAxis = -1.0f;
+    } else {
+      self->input.yAxis = 0.0f;
+    }
+
+    // Direction vectors for movement
+    v3 forward, right, front;
+
+    // Convert yaw to radians for direction calculation
+    float yaw_radians = glms_rad(entity->transform.rotation.x);
+
+    // Calculate the front vector based on yaw only (for movement along the XZ plane)
+    front.x = Math__cos(yaw_radians);
+    front.y = 0.0f;
+    front.z = Math__sin(yaw_radians);
+    glms_v3_normalize(&front);
+
+    // Calculate the right vector (perpendicular to the front vector)
+    glms_v3_cross(front, (v3){0.0f, 1.0f, 0.0f}, &right);
+    glms_v3_normalize(&right);
+
+    // apply forward/backward motion
+    if (0 != self->input.zAxis) {
+      glms_v3_scale(
+          front,
+          self->input.zAxis * logic->PLAYER_WALK_SPEED * state->deltaTime,
+          &forward);
+      glms_v3_add(entity->transform.position, forward, &entity->transform.position);
+    }
+
+    // apply left/right motion
+    if (0 != self->input.xAxis) {
+      glms_v3_scale(
+          right,
+          -self->input.xAxis * logic->PLAYER_WALK_SPEED * state->deltaTime,
+          &forward);
+      glms_v3_add(entity->transform.position, forward, &entity->transform.position);
+    }
+
+    // apply up/down motion
+    if (0 != self->input.yAxis) {
+      entity->transform.position.y +=
+          self->input.yAxis * logic->PLAYER_FLY_SPEED * state->deltaTime;
+
+      entity->transform.position.y =
+          MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
+    }
+  }
 }

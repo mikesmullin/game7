@@ -14,9 +14,11 @@ typedef float f32;
 typedef double f64;
 
 typedef struct Arena_t Arena_t;
-typedef struct InputState_t InputState_t;
+typedef struct KbInputState_t KbInputState_t;
+typedef struct PointerInputState_t PointerInputState_t;
 typedef struct FingerState_t FingerState_t;
 typedef struct Bitmap_t Bitmap_t;
+typedef struct Logic__State_t Logic__State_t;
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit
 
@@ -48,7 +50,9 @@ typedef struct ubo_ProjView_t {
 
 typedef struct Engine__State_t {
   Arena_t* arena;
-  void* local;
+  Logic__State_t* local;
+  f64 currentTime;
+  f64 deltaTime;
   char* WINDOW_TITLE;
   char* ENGINE_NAME;
   u16 WINDOW_WIDTH;
@@ -83,18 +87,10 @@ typedef struct Engine__State_t {
   void (*Window__CaptureMouse)(const bool state);
   bool mouseCaptured;
 
-  InputState_t* inputState;
-  FingerState_t* g_Finger__state;
+  KbInputState_t* kbState;
+  PointerInputState_t* mState;
   bool dllLoadedOnce;
 } Engine__State_t;
-
-typedef void (*logic_onload_t)(Engine__State_t*);
-typedef void (*logic_oninit_data_t)();
-typedef void (*logic_oninit_compute_t)();
-typedef void (*logic_onreload_t)();
-typedef void (*logic_onfinger_t)();
-typedef void (*logic_onfixedupdate_t)(const f64 currentTime, const f64 deltaTime);
-typedef void (*logic_onupdate_t)(const f64 currentTime, const f64 deltaTime);
 
 int Engine__Loop();
 

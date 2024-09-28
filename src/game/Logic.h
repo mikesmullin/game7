@@ -15,6 +15,13 @@ typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
 
+typedef void (*logic_onload_t)(Engine__State_t* state);
+typedef void (*logic_oninit_data_t)(Engine__State_t* state);
+typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
+typedef void (*logic_onreload_t)(Engine__State_t* state);
+typedef void (*logic_onfixedupdate_t)(Engine__State_t* state);
+typedef void (*logic_onupdate_t)(Engine__State_t* state);
+
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
 };
@@ -155,13 +162,12 @@ typedef struct Level_t {
 
 typedef struct Game_t {
   Menu_t* menu;
-  Level_t* currentLevel;
+  Level_t* curLvl;
+  Entity_t* curPlyr;
   u32 lastUid;
 } Game_t;
 
 typedef struct Logic__State_t {
-  f64 currentTime;
-
   Bitmap_t screen;
   f32* zbuf;
   f32* zbufWall;
@@ -173,7 +179,6 @@ typedef struct Logic__State_t {
 
   vec3 VEC3_Y_UP;
 
-  u16 CANVAS_WH;
   u16 PIXELS_PER_UNIT;
 
   char* audioFiles[4];
@@ -192,7 +197,6 @@ typedef struct Logic__State_t {
   u8 newTexId;
 
   Arena_t* debugArena;
-  Entity_t* player;
 
   f32 WORLD_HEIGHT;
   f32 ATLAS_TILE_SIZE;

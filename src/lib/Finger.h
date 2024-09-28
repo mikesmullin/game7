@@ -7,6 +7,9 @@ typedef int32_t s32;
 typedef uint8_t u8;
 typedef float f32;
 
+typedef struct Arena_t Arena_t;
+typedef union SDL_Event SDL_Event;
+
 typedef enum FingerEvent {
   FINGER_NONE = 0,
   FINGER_MOVE = 1,
@@ -33,10 +36,14 @@ typedef struct FingerState_t {
   f32 wheel_y;
 } FingerState_t;
 
-extern FingerState_t g_Finger__state;
+typedef struct PointerInputState_t {
+  s32 x, y;
+  f32 wheely;
+  bool btn1;
+} PointerInputState_t;
 
-void Finger__OnInput(const void* _event);
-void Finger__RegisterCallback(void(*cb));
-void Finger__DispatchCallbacks();
+PointerInputState_t* Finger__Alloc(Arena_t* arena);
+void Finger__OnEvent(const SDL_Event* event);
+void Finger__Poll(PointerInputState_t* state);
 
 #endif  // FINGER_H

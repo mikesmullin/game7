@@ -22,8 +22,8 @@ void WallBlock__render(Block_t* block, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   f32 x = block->x;
   f32 y = block->y;
-  u32 tex = logic->game->currentLevel->wallTex;
-  u32 col = logic->game->currentLevel->wallCol;
+  u32 tex = logic->game->curLvl->wallTex;
+  u32 col = logic->game->curLvl->wallCol;
 
   // render pixel as 3d cube of 4 faces (N,S,E,W)
   Bitmap3D__RenderWall2(state, x + 0, y + 0, x + 0, y + 1, 1, col, tex, 0);

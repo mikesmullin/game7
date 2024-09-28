@@ -43,8 +43,8 @@ void HelpMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   HelpMenu_t* self = (HelpMenu_t*)menu;
 
-  if (state->inputState->use) {
-    state->inputState->use = false;
+  if (state->kbState->use) {
+    state->kbState->use = false;
 
     logic->game->menu = TitleMenu__alloc(state->arena);
     TitleMenu__init(logic->game->menu, state);

@@ -4,8 +4,11 @@
 #include "../lib/Bitmap.h"
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
+#include "../lib/Finger.h"
+#include "../lib/Keyboard.h"
 #include "../lib/Math.h"
 #include "Logic.h"
+#include "entities/Player.h"
 #include "levels/Level.h"
 #include "menus/TitleMenu.h"
 
@@ -17,21 +20,41 @@ Game_t* Game__alloc(Arena_t* arena) {
 void Game__init(Game_t* game, Engine__State_t* state) {
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
-  game->currentLevel = NULL;
+  game->curLvl = NULL;
+  game->curPlyr = NULL;
   game->lastUid = 0;
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
+  if (!state->mouseCaptured && state->mState->btn1) {
+    state->mState->btn1 = false;
+    state->Window__CaptureMouse(true);
+    state->mouseCaptured = true;
+  }
+
+  if (state->mouseCaptured) {
+    if (state->kbState->escape) {  // ESC
+      state->kbState->escape = false;
+      state->Window__CaptureMouse(false);
+      state->mouseCaptured = false;
+    }
+  }
+
   // menu system
   if (NULL != game->menu) {
+    if (NULL == game->curPlyr) {
+      game->curPlyr = Player__alloc(state->arena);
+      Player__init(game->curPlyr, state);
+    }
     game->menu->tick(game->menu, state);
   }
 
   // in-game
   else {
-    Level__tick(logic->game->currentLevel, state);
+    game->curPlyr->tick(game->curPlyr, state);
+    Level__tick(logic->game->curLvl, state);
   }
 }
 
@@ -46,7 +69,7 @@ void Game__render(Game_t* game, Engine__State_t* state) {
   // in-game
   else {
     Bitmap3D__RenderHorizon(state);
-    Level__render(logic->game->currentLevel, state);
+    Level__render(logic->game->curLvl, state);
     Bitmap3D__PostProcessing(state);
 
     // game->local->CANVAS_DEBUG_X = 80;
@@ -67,9 +90,9 @@ void Game__render(Game_t* game, Engine__State_t* state) {
         0xffffffff,
         0,
         "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-        logic->player->transform.position.x,
-        logic->player->transform.position.y,
-        logic->player->transform.position.z,
-        logic->player->transform.rotation.x);
+        logic->game->curPlyr->transform.position.x,
+        logic->game->curPlyr->transform.position.y,
+        logic->game->curPlyr->transform.position.z,
+        logic->game->curPlyr->transform.rotation.x);
   }
 }

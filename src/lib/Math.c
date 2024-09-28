@@ -52,3 +52,13 @@ u32 Math__urandom2(u32 a, u32 b) {
 f64 Math__triangleWave(f64 x, f64 period) {
   return 2.0 * fabs(2.0 * (x / period - floor(x / period + 0.5))) - 1.0;
 }
+
+f64 Math__fmod(f64 n, f64 max) {
+  while (n < 0.0f) {
+    n += max;
+  }
+  while (n >= max) {
+    n -= max;
+  }
+  return n;
+}

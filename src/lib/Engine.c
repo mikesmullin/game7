@@ -30,7 +30,6 @@ static Window_t window;
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime);
 static void renderCallback(const f64 currentTime, const f64 deltaTime);
-static void fingerCallback();
 
 static int check_load_logic() {
   char path[32] = "src/game/";
@@ -41,7 +40,7 @@ static int check_load_logic() {
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
     logic_onload(state);
-    logic_onreload();
+    logic_onreload(state);
     return r;
   }
   return 0;
@@ -77,7 +76,7 @@ int Engine__Loop() {
   }
   state->arena = &arena;
   logic_onload(state);
-  logic_oninit_data();
+  logic_oninit_data(state);
 
   VulkanWrapper__Init(&vulkan);
   Vulkan__InitDriver1(&vulkan);
@@ -93,9 +92,8 @@ int Engine__Loop() {
 
   state->Window__CaptureMouse = &Window__CaptureMouse;
 
-  state->inputState = Keyboard__Alloc(state->arena);
-  Finger__RegisterCallback(fingerCallback);
-  state->g_Finger__state = &g_Finger__state;
+  state->kbState = Keyboard__Alloc(state->arena);
+  state->mState = Finger__Alloc(state->arena);
 
   Gamepad_t gamePad1;
   Gamepad__New(&gamePad1, 0);
@@ -179,8 +177,8 @@ int Engine__Loop() {
 
   // setup scene
 
-  logic_oninit_compute();
-  logic_onreload();
+  logic_oninit_compute(state);
+  logic_onreload(state);
 
   // main loop
   Window__RenderLoop(
@@ -204,15 +202,11 @@ int Engine__Loop() {
   return 0;
 }
 
-static void fingerCallback() {
-  logic_onfinger();
-}
-
 static f64 accumulator1 = 0.0f;
 static const f32 FILE_CHECK_MONITOR_TIME_STEP = 1.0f / 4;  // 4 checks per second
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
-  Keyboard__Poll(state->inputState);
+  Keyboard__Poll(state->kbState);
 
   accumulator1 += deltaTime;
   if (accumulator1 >= FILE_CHECK_MONITOR_TIME_STEP) {
@@ -223,9 +217,13 @@ static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
     }
   }
 
-  logic_onfixedupdate(currentTime, deltaTime);
+  state->currentTime = currentTime;
+  state->deltaTime = deltaTime;
+  logic_onfixedupdate(state);
 }
 
 static void renderCallback(const f64 currentTime, const f64 deltaTime) {
-  logic_onupdate(currentTime, deltaTime);
+  state->currentTime = currentTime;
+  state->deltaTime = deltaTime;
+  logic_onupdate(state);
 }

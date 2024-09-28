@@ -66,27 +66,27 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
     state->Audio__StopAudio(AUDIO_TITLE);
     state->Audio__ResumeAudio(AUDIO_TITLE, false, 1.0f);
   }
-  if (state->inputState->fwd && self->selection > 0) {
+  if (state->kbState->fwd && self->selection > 0) {
     self->selection--;
     state->Audio__StopAudio(AUDIO_CLICK);
     state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);
   }
-  if (state->inputState->back && self->selection < self->optionsLength - 1) {
+  if (state->kbState->back && self->selection < self->optionsLength - 1) {
     self->selection++;
     state->Audio__StopAudio(AUDIO_CLICK);
     state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);
   }
-  if (state->inputState->use) {
-    state->inputState->use = false;
+  if (state->kbState->use) {
+    state->kbState->use = false;
     state->Audio__StopAudio(AUDIO_POWERUP);
     state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
 
     if (0 == self->selection) {
       logic->game->menu = NULL;
-      logic->game->currentLevel = Level__alloc(state->arena);
-      Level__init(state->arena, logic->game->currentLevel);
-      logic->game->currentLevel->wallCol = 0x330000ff;
-      Level__load(logic->game->currentLevel, state, "../assets/textures/level1.png");
+      logic->game->curLvl = Level__alloc(state->arena);
+      Level__init(state->arena, logic->game->curLvl);
+      logic->game->curLvl->wallCol = 0x330000ff;
+      Level__load(logic->game->curLvl, state, "../assets/textures/level1.png");
     } else if (1 == self->selection) {
       logic->game->menu = HelpMenu__alloc(state->arena);
       HelpMenu__init(logic->game->menu, state);
@@ -96,6 +96,6 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
     }
   }
 
-  state->inputState->fwd = false;
-  state->inputState->back = false;
+  state->kbState->fwd = false;
+  state->kbState->back = false;
 }

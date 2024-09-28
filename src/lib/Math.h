@@ -23,5 +23,6 @@ s32 Math__srandom(s32 a, s32 b);
 u32 Math__urandom();
 u32 Math__urandom2(u32 a, u32 b);
 f64 Math__triangleWave(f64 x, f64 period);
+f64 Math__fmod(f64 n, f64 max);
 
 #endif

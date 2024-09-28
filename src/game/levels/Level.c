@@ -84,4 +84,11 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
     block->tick(block, state);
     node = node->next;
   }
+
+  node = level->entities->head;
+  for (u32 i = 0; i < level->entities->len; i++) {
+    Entity_t* entity = node->data;
+    entity->tick(entity, state);
+    node = node->next;
+  }
 }
