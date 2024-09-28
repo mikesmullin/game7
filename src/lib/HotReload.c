@@ -73,7 +73,7 @@ int load_logic(const char* file) {
     DWORD errorCode = GetLastError();
 
     // Print the error code
-    printf("LoadLibrary failed with error code: %lu\n", errorCode);
+    LOG_DEBUGF("LoadLibrary failed with error code: %lu", errorCode);
 
     // Optionally, format the error message into a readable string
     LPVOID errorMessage;
@@ -87,7 +87,7 @@ int load_logic(const char* file) {
         NULL);
 
     // Print the formatted error message
-    printf("ERROR loading %s: %s\n", LOGIC_FILENAME, (char*)errorMessage);
+    LOG_DEBUGF("ERROR loading %s: %s", LOGIC_FILENAME, (char*)errorMessage);
 
     // Free the buffer allocated by FormatMessage
     LocalFree(errorMessage);
