@@ -7,13 +7,17 @@
 #include "../lib/Arena.h"
 #include "../lib/Base.h"
 #include "../lib/Bitmap.h"
+#include "../lib/String.h"
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
 };
 
 enum AUDIO_FILES {
-  AUDIO_PICKUP_COIN = 0,
+  AUDIO_TITLE = 0,
+  AUDIO_PICKUP_COIN = 1,
+  AUDIO_CLICK = 2,
+  AUDIO_POWERUP = 3,
 };
 
 typedef enum {
@@ -72,13 +76,25 @@ typedef struct {
 
 typedef struct Menu_t {
   void (*tick)(struct Menu_t* menu, void* state);
-  void (*render)(struct Menu_t* menu, Bitmap_t* target);
+  void (*render)(struct Menu_t* menu, void* state);
 } Menu_t;
 
 typedef struct {
   Menu_t base;
   Bitmap_t bmp;
+  String8Node* options;
+  u8 optionsLength;
+  s8 selection;
+  bool playedAudio;
 } TitleMenu_t;
+
+typedef struct {
+  Menu_t base;
+} AboutMenu_t;
+
+typedef struct {
+  Menu_t base;
+} HelpMenu_t;
 
 typedef struct {
   Menu_t* menu;
@@ -105,7 +121,7 @@ typedef struct {
   u16 CANVAS_WH;
   u16 PIXELS_PER_UNIT;
 
-  char* audioFiles[1];
+  char* audioFiles[4];
 
   Animation_t ANIM_VIKING_IDLE_FRONT;
   Animation_t ANIM_VIKING_IDLE_LEFT;

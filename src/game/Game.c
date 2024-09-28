@@ -14,8 +14,8 @@ Game_t* Game__alloc(Engine__State_t* game) {
 }
 
 void Game__init(Game_t* game, Engine__State_t* state) {
-  game->menu = TitleMenu__alloc(state);
-  TitleMenu__init((Menu_t*)game->menu, state);
+  game->menu = TitleMenu__alloc(state->arena);
+  TitleMenu__init(game->menu, state);
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {
@@ -26,10 +26,13 @@ void Game__tick(Game_t* game, Engine__State_t* state) {
 }
 
 void Game__render(Game_t* game, Engine__State_t* state) {
-  // TODO: need for polymorphism? vtables?
-  if (NULL != game->menu) {  // title screen
-    game->menu->render(game->menu, &state->local->screen);
-  } else {  // in-game
+  // menu system
+  if (NULL != game->menu) {
+    game->menu->render(game->menu, state);
+  }
+
+  // in-game
+  else {
     Bitmap3D__RenderHorizon(state);
     Level__Render(state);
     Bitmap3D__PostProcessing(state);

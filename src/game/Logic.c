@@ -93,7 +93,10 @@ __declspec(dllexport) void logic_oninit_data() {
   game->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
   game->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  game->local->audioFiles[0] = "../assets/audio/sfx/pickupCoin.wav";
+  game->local->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
+  game->local->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
+  game->local->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
+  game->local->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
 
   game->local->newTexId = 0;
 }
@@ -112,8 +115,9 @@ __declspec(dllexport) void logic_oninit_compute() {
 
   LoadTextures();
   Level__Load(game, 1);
-
-  game->Audio__LoadAudioFile(game->local->audioFiles[AUDIO_PICKUP_COIN]);
+  for (u32 i = 0; i < ARRAY_COUNT(game->local->audioFiles); i++) {
+    game->Audio__LoadAudioFile(game->local->audioFiles[i]);
+  }
 
   // setup scene
   glm_vec3_copy((vec3){0, 0, 1.5}, game->world.cam);
@@ -136,7 +140,13 @@ __declspec(dllexport) void logic_oninit_compute() {
 
 __declspec(dllexport) void logic_onreload() {
   LOG_DEBUGF("Logic dll loaded.");
-  game->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+
+  if (!game->dllLoadedOnce) {
+    game->dllLoadedOnce = true;
+    // doesn't play audio the first time proc runs
+  } else {
+    game->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+  }
 
   // compose brush
   // Bitmap__Alloc(&local->brush, 64, 64, 4 /*RGBA*/);
@@ -234,107 +244,105 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   //     game->inputState->reload,
   //     game->inputState->escape);
 
-  if (!game->mouseCaptured) {
-    return;
-  }
+  if (game->mouseCaptured) {
+    if (game->inputState->escape) {  // ESC
+      game->inputState->escape = false;
+      game->Window__CaptureMouse(false);
+      game->mouseCaptured = false;
+      // game->s_Window.quit = true;
+    }
 
-  if (game->inputState->escape) {  // ESC
-    game->inputState->escape = false;
-    game->Window__CaptureMouse(false);
-    game->mouseCaptured = false;
-    // game->s_Window.quit = true;
-  }
+    // TODO: do this on key up only, to avoid multiple calls at once!
+    if (true == game->inputState->reload) {  // R
+      game->inputState->reload = false;
+      LoadTextures();
+      Level__Load(game, 0);
+      // Player__Init(game->local);
+    }
 
-  // TODO: do this on key up only, to avoid multiple calls at once!
-  if (true == game->inputState->reload) {  // R
-    game->inputState->reload = false;
-    LoadTextures();
-    Level__Load(game, 0);
-    // Player__Init(game->local);
-  }
+    // W-S Forward/Backward axis
+    if (game->inputState->fwd && game->inputState->back) {
+      game->local->player.input.zAxis = 0.0f;
+    } else if (game->inputState->fwd) {
+      game->local->player.input.zAxis = 1.0f;
+    } else if (game->inputState->back) {
+      game->local->player.input.zAxis = -1.0f;
+    } else {
+      game->local->player.input.zAxis = 0.0f;
+    }
 
-  // W-S Forward/Backward axis
-  if (game->inputState->fwd && game->inputState->back) {
-    game->local->player.input.zAxis = 0.0f;
-  } else if (game->inputState->fwd) {
-    game->local->player.input.zAxis = 1.0f;
-  } else if (game->inputState->back) {
-    game->local->player.input.zAxis = -1.0f;
-  } else {
-    game->local->player.input.zAxis = 0.0f;
-  }
+    // A-D Left/Right axis
+    if (game->inputState->left && game->inputState->right) {
+      game->local->player.input.xAxis = 0.0f;
+    } else if (game->inputState->left) {
+      game->local->player.input.xAxis = 1.0f;
+    } else if (game->inputState->right) {
+      game->local->player.input.xAxis = -1.0f;
+    } else {
+      game->local->player.input.xAxis = 0.0f;
+    }
 
-  // A-D Left/Right axis
-  if (game->inputState->left && game->inputState->right) {
-    game->local->player.input.xAxis = 0.0f;
-  } else if (game->inputState->left) {
-    game->local->player.input.xAxis = 1.0f;
-  } else if (game->inputState->right) {
-    game->local->player.input.xAxis = -1.0f;
-  } else {
-    game->local->player.input.xAxis = 0.0f;
-  }
+    // Q-E Up/Down axis
+    if (game->inputState->up && game->inputState->down) {
+      game->local->player.input.yAxis = 0.0f;
+    } else if (game->inputState->up) {
+      game->local->player.input.yAxis = 1.0f;
+    } else if (game->inputState->down) {
+      game->local->player.input.yAxis = -1.0f;
+    } else {
+      game->local->player.input.yAxis = 0.0f;
+    }
 
-  // Q-E Up/Down axis
-  if (game->inputState->up && game->inputState->down) {
-    game->local->player.input.yAxis = 0.0f;
-  } else if (game->inputState->up) {
-    game->local->player.input.yAxis = 1.0f;
-  } else if (game->inputState->down) {
-    game->local->player.input.yAxis = -1.0f;
-  } else {
-    game->local->player.input.yAxis = 0.0f;
-  }
+    // Direction vectors for movement
+    vec3 forward, right, front;
 
-  // Direction vectors for movement
-  vec3 forward, right, front;
+    // Convert yaw to radians for direction calculation
+    float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
 
-  // Convert yaw to radians for direction calculation
-  float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
+    // Calculate the front vector based on yaw only (for movement along the XZ plane)
+    front[0] = cosf(yaw_radians);
+    front[1] = 0.0f;
+    front[2] = sinf(yaw_radians);
+    glm_vec3_normalize(front);
 
-  // Calculate the front vector based on yaw only (for movement along the XZ plane)
-  front[0] = cosf(yaw_radians);
-  front[1] = 0.0f;
-  front[2] = sinf(yaw_radians);
-  glm_vec3_normalize(front);
+    // Calculate the right vector (perpendicular to the front vector)
+    glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
+    glm_vec3_normalize(right);
 
-  // Calculate the right vector (perpendicular to the front vector)
-  glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
-  glm_vec3_normalize(right);
+    // apply forward/backward motion
+    if (0 != game->local->player.input.zAxis) {
+      glm_vec3_scale(
+          front,
+          game->local->player.input.zAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+          forward);
+      glm_vec3_add(
+          game->local->player.transform.position,
+          forward,
+          game->local->player.transform.position);
+    }
 
-  // apply forward/backward motion
-  if (0 != game->local->player.input.zAxis) {
-    glm_vec3_scale(
-        front,
-        game->local->player.input.zAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
-        forward);
-    glm_vec3_add(
-        game->local->player.transform.position,
-        forward,
-        game->local->player.transform.position);
-  }
+    // apply left/right motion
+    if (0 != game->local->player.input.xAxis) {
+      glm_vec3_scale(
+          right,
+          -game->local->player.input.xAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+          forward);
+      glm_vec3_add(
+          game->local->player.transform.position,
+          forward,
+          game->local->player.transform.position);
+    }
 
-  // apply left/right motion
-  if (0 != game->local->player.input.xAxis) {
-    glm_vec3_scale(
-        right,
-        -game->local->player.input.xAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
-        forward);
-    glm_vec3_add(
-        game->local->player.transform.position,
-        forward,
-        game->local->player.transform.position);
-  }
+    // apply up/down motion
+    if (0 != game->local->player.input.yAxis) {
+      game->local->player.transform.position[1] +=
+          game->local->player.input.yAxis * game->local->PLAYER_FLY_SPEED * deltaTime;
 
-  // apply up/down motion
-  if (0 != game->local->player.input.yAxis) {
-    game->local->player.transform.position[1] +=
-        game->local->player.input.yAxis * game->local->PLAYER_FLY_SPEED * deltaTime;
-
-    game->local->player.transform.position[1] = MATH_CLAMP(
-        0,
-        game->local->player.transform.position[1],
-        1.0f /*game->local->WORLD_HEIGHT*/);
+      game->local->player.transform.position[1] = MATH_CLAMP(
+          0,
+          game->local->player.transform.position[1],
+          1.0f /*game->local->WORLD_HEIGHT*/);
+    }
   }
 
   // state->isVBODirty = true;

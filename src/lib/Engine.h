@@ -79,6 +79,7 @@ typedef struct {
 
   InputState_t* inputState;
   FingerState_t* g_Finger__state;
+  bool dllLoadedOnce;
 } Engine__State_t;
 
 typedef void (*logic_onload_t)(Engine__State_t*);
