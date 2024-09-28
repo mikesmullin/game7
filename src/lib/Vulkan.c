@@ -8,7 +8,9 @@
 #define VOLK_IMPLEMENTATION
 #include <volk.h>
 
-#include "Base.h"
+#include "Bitmap.h"
+#include "Log.h"
+#include "Math.h"
 #include "Shader.h"
 
 void Vulkan__InitDriver1(Vulkan_t* self) {

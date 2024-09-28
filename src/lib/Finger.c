@@ -1,5 +1,7 @@
 #include "Finger.h"
 
+#include "Log.h"
+
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 

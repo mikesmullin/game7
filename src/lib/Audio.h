@@ -2,6 +2,8 @@
 #define AUDIO_H
 
 #include <stdbool.h>
+#include <stdint.h>
+typedef uint8_t u8;
 
 void Audio__Init();
 void Audio__Shutdown();

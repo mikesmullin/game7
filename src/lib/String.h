@@ -1,10 +1,14 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stdio.h>
+#include <stdint.h>
 
-#include "Arena.h"
-#include "Base.h"
+typedef struct _iobuf FILE;
+
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+typedef struct Arena_t Arena_t;
 
 // "Fat Pointer"
 typedef struct {

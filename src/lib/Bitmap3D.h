@@ -1,9 +1,12 @@
 #ifndef BITMAP3D_H
 #define BITMAP3D_H
 
-#include "Engine.h"
+#include <stdint.h>
+typedef uint32_t u32;
+typedef float f32;
+typedef double f64;
+typedef struct Engine__State_t Engine__State_t;
 
-void Bitmap3D__Perspective(f32 fov, f32 aspect, f32 nearZ, f32 farZ, mat4 result);
 void Bitmap3D__RenderHorizon(Engine__State_t* game);
 void Bitmap3D__RenderFloor(Engine__State_t* game);
 void Bitmap3D__PostProcessing(Engine__State_t* game);

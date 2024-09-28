@@ -1,13 +1,11 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 
-#define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
+#include <stdbool.h>
 
-#include "Arena.h"
-#include "Base.h"
+typedef struct Arena_t Arena_t;
 
-typedef struct {
+typedef struct KeyboardState_t {
   bool wKey;
   bool aKey;
   bool sKey;
@@ -23,7 +21,7 @@ typedef struct {
   bool escKey;
 } KeyboardState_t;
 
-typedef struct {
+typedef struct InputState_t {
   bool fwd;
   bool back;
   bool left;

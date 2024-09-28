@@ -5,6 +5,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 #include <stdbool.h>
+#include <stdint.h>
+typedef uint32_t u32;
 
 extern bool SDL__enableAudio;
 extern bool SDL__enableGamepad;

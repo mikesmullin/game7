@@ -1,9 +1,13 @@
 #ifndef FINGER_H
 #define FINGER_H
 
-#include "Base.h"
+#include <stdbool.h>
+#include <stdint.h>
+typedef int32_t s32;
+typedef uint8_t u8;
+typedef float f32;
 
-typedef enum {
+typedef enum FingerEvent {
   FINGER_NONE = 0,
   FINGER_MOVE = 1,
   FINGER_SCROLL = 2,
@@ -11,7 +15,7 @@ typedef enum {
   FINGER_DOWN = 4,
 } FingerEvent;
 
-typedef struct {
+typedef struct FingerState_t {
   FingerEvent event;
   u8 clicks;
   f32 pressure;

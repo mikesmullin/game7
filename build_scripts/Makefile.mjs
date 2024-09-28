@@ -24,7 +24,7 @@ const rel = (...args) =>
   path.relative(path.join(workspaceFolder, BUILD_PATH), path.join(...args));
 const DEBUG_COMPILER_ARGS = [
   '-O0',
-  '-gdwarf', // adds gdb support
+  // '-gdwarf', // adds gdb support
   // TODO: do we need to pass `-debug` to the linker? `-Xlinker -debug`?
 ];
 const C_COMPILER_ARGS = [];
@@ -47,7 +47,9 @@ const ENGINE_ONLY = [
   'src/lib/Shader.c',
   'src/lib/Time.c',
   'src/lib/Vulkan.c',
+  'src/lib/VulkanWrapper.c',
   'src/lib/Window.c',
+  'vendor/cmixer-076653c/include/cmixer.c',
 ];
 
 if (isWin) {
@@ -353,6 +355,7 @@ const compile_reload = async (outname) => {
   for (const u of COMPILER_TRANSLATION_UNITS) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (!ENGINE_ONLY.includes(nixPath(file))) {
+        // console.log("===", nixPath(file));
         dsts.push(rel(workspaceFolder, file));
       }
     }
@@ -366,19 +369,47 @@ const compile_reload = async (outname) => {
   const target = outname;
   const dst = rel(workspaceFolder, BUILD_PATH, target);
 
+  // for (const tu of dsts) {
+  //   const started = performance.now();
+  //   await child_spawn(C_COMPILER_PATH, [
+  //     ...DEBUG_COMPILER_ARGS,
+  //     // '-ftime-report', // display compile time stats
+  //     ...C_COMPILER_ARGS,
+  //     // ...C_COMPILER_INCLUDES,
+  //     // ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
+  //     // ...LINKER_LIBS,
+  //     // ...LINKER_LIB_PATHS,
+  //     // '-shared',
+  //     // ...dsts.filter(s => !s.includes('.pb.')),
+  //     '-c', tu
+  //     // '-o', dst,
+  //   ]);
+  //   const ended = performance.now();
+  //   console.log(`compile unit performance. file: ${tu}, elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
+  // }
+
+  const ANALYZE = false;
+  const ANALYZER = path.join(process.cwd(), 'ClangBuildAnalyzer.exe');
+  if (ANALYZE) await child_spawn(ANALYZER, ['--start', 'src/game']);
+
   const started = performance.now();
   await child_spawn(C_COMPILER_PATH, [
     ...DEBUG_COMPILER_ARGS,
+    '-ftime-trace', // display compile time stats
+    // '-fsyntax-only',
     ...C_COMPILER_ARGS,
-    ...C_COMPILER_INCLUDES,
-    ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
-    ...LINKER_LIBS,
-    ...LINKER_LIB_PATHS,
+    ...C_COMPILER_INCLUDES.filter(lib => lib.includes('glm')),
+    // ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
+    // ...LINKER_LIBS,
+    // ...LINKER_LIB_PATHS,
     '-shared',
     ...dsts.filter(s => !s.includes('.pb.')),
     '-o', dst,
   ]);
   const ended = performance.now();
+
+  if (ANALYZE) await child_spawn(ANALYZER, ['--stop', 'src/game', 'analysis.bin']);
+  if (ANALYZE) await child_spawn(ANALYZER, ['--analyze', 'analysis.bin']);
 
   // swap lib
   try {

@@ -1,6 +1,5 @@
 #include "Gamepad.h"
 
-#include "Base.h"
 #include "Math.h"
 
 #define SDL_MAIN_HANDLED

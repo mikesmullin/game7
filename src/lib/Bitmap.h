@@ -1,10 +1,14 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
-#include "Arena.h"
-#include "Base.h"
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint32_t u32;
+typedef uint64_t u64;
 
-typedef struct {
+typedef struct Arena_t Arena_t;
+
+typedef struct Bitmap_t {
   u32 w;
   u32 h;
   u64 len;

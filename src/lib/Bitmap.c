@@ -1,12 +1,14 @@
 #include "Bitmap.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 
 #include "Arena.h"
-#include "Base.h"
+#include "Log.h"
 
 void Bitmap__Alloc(Arena_t* a, Bitmap_t* bmp, u32 w, u32 h, u32 chan) {
   Bitmap__Init(bmp, w, h, chan);
+
   bmp->buf = Arena__Push(a, w * h * chan * sizeof(u32));
 }
 

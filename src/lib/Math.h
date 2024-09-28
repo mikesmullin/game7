@@ -1,9 +1,16 @@
 #ifndef MATH_H
 #define MATH_H
 
-#include "Base.h"
+#include <stdint.h>
+typedef int32_t s32;
+typedef uint32_t u32;
+typedef float f32;
+typedef double f64;
 
 #define Math__PI 3.14159265358979323846
+#define MATH_MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MATH_MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MATH_CLAMP(min, n, max) (((n) < (min)) ? (min) : ((max) < (n)) ? (max) : (n))
 
 f64 Math__sin(f64 n);
 f64 Math__cos(f64 n);

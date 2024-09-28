@@ -1,6 +1,10 @@
 #include "Bitmap3D.h"
 
-#include "Base.h"
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "../game/Logic.h"
 #include "Engine.h"
 #include "Math.h"
 
@@ -88,6 +92,8 @@ f32 deg2rad(f32 deg) {
 }
 
 void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, char* format, ...) {
+  Logic__State_t* logic = game->local;
+
   u32 len = 255;
   char buf[len];
   va_list args;
@@ -95,11 +101,12 @@ void Bitmap3D__DebugText(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, ch
   vsnprintf(buf, len, format, args);
   va_end(args);
 
-  Bitmap__SetText(&game->local->screen, &game->local->glyphs0, buf, x, y, fg, bg);
+  Bitmap__SetText(&logic->screen, &logic->glyphs0, buf, x, y, fg, bg);
 }
 
 void Bitmap3D__RenderWall2(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty) {
+  Logic__State_t* logic = game->local;
   f64 br = 0.5f;  // block radius
 
   f32 cX = -camX;
@@ -206,7 +213,7 @@ void Bitmap3D__RenderWall2(
     f64 pr = (x - xPixel0) * iw;
     f64 iz = iz0 + iza * pr;
 
-    if ((u32)x == game->local->CANVAS_DEBUG_X) {
+    if ((u32)x == logic->CANVAS_DEBUG_X) {
       Bitmap3D__DebugText(
           game,
           4,
@@ -215,19 +222,19 @@ void Bitmap3D__RenderWall2(
           0,
           "debugger x %+06.1f zbw %+08.3f iz %+08.3f",
           x,
-          game->local->zbufWall[(u32)x],
+          logic->zbufWall[(u32)x],
           iz);
     }
 
     if (x >= 0 && x < W) {
-      if (game->local->zbufWall[(u32)x] > iz) {
+      if (logic->zbufWall[(u32)x] > iz) {
         continue;
       }
-      game->local->zbufWall[(u32)x] = iz;
+      logic->zbufWall[(u32)x] = iz;
     }
 
     u32 xTex = (u32)((ixt0 + ixta * pr) / iz);
-    // u32 s = Math__map(Math__triangleWave(game->local->currentTime, 1000), -1, 1, -1.5, 22.5);
+    // u32 s = Math__map(Math__triangleWave(logic->currentTime, 1000), -1, 1, -1.5, 22.5);
 
     // Interpolates the projected y-coordinates of the wall's
     // top and bottom edges for the current x-position.
@@ -248,21 +255,21 @@ void Bitmap3D__RenderWall2(
       f64 pry = (y - yPixel0) * ih;
       u32 yTex = (u32)(8 * pry);
       u32 color2 = Bitmap__Get2DTiledPixel(
-          &game->local->atlas,
+          &logic->atlas,
           (xTex & 15) + ((u32)tx % 8),
           (yTex & 15) + ((u32)tx / 8),
-          game->local->ATLAS_TILE_SIZE,
+          logic->ATLAS_TILE_SIZE,
           tx,
           ty,
           color);
       color2 = alpha_blend(color2, color);  // apply tint
       // color = 0xff000000 | ((u8)y) << 8 | (u8)x;
 
-      Bitmap__Set2DPixel(&game->local->screen, x, y, color2);
+      Bitmap__Set2DPixel(&logic->screen, x, y, color2);
       f32 bright = (16.0 / (1.0 / iz)) / 8.0f;
-      game->local->zbuf[(u32)(x + y * W)] = bright;
+      logic->zbuf[(u32)(x + y * W)] = bright;
 
-      if ((u32)x == game->local->CANVAS_DEBUG_X && (u32)y == game->local->CANVAS_DEBUG_Y) {
+      if ((u32)x == logic->CANVAS_DEBUG_X && (u32)y == logic->CANVAS_DEBUG_Y) {
         dbd++;
         u32 row = 0;
 
@@ -371,7 +378,7 @@ void Bitmap3D__RenderWall2(
             "yP0 %+06.1f yP1 %+06.1f zbw %+06.1f xTex %03u ",
             yPixel0,
             yPixel1,
-            game->local->zbufWall[(u32)x],
+            logic->zbufWall[(u32)x],
             xTex);
 
         Bitmap3D__DebugText(
@@ -405,21 +412,22 @@ void Bitmap3D__RenderWall2(
 }
 
 void Bitmap3D__RenderHorizon(Engine__State_t* game) {
+  Logic__State_t* logic = game->local;
   W = game->CANVAS_WIDTH;
   H = game->CANVAS_HEIGHT;
-  Wh = game->local->WORLD_HEIGHT;
+  Wh = logic->WORLD_HEIGHT;
   u32 color = 0;
-  u32* buf = (u32*)game->local->screen.buf;
-  u32 len = game->local->screen.len;
+  u32* buf = (u32*)logic->screen.buf;
+  u32 len = logic->screen.len;
   f32 txs = 8.0f;  // texture scale (affects ceiling and floors; trying to match walls)
 
-  camX = game->local->player.transform.position[2];
-  camY = game->local->player.transform.position[0];
-  camZ = game->local->player.transform.position[1];
-  // camZ = -0.2 + Math__sin(game->local->player->bobPhase * 0.4) * 0.01 *
-  // game->local->player->bob
-  // - game->local->player->y;
-  rot = -game->local->player.transform.rotation[0];
+  camX = logic->player.transform.position[2];
+  camY = logic->player.transform.position[0];
+  camZ = logic->player.transform.position[1];
+  // camZ = -0.2 + Math__sin(logic->player->bobPhase * 0.4) * 0.01 *
+  // logic->player->bob
+  // - logic->player->y;
+  rot = -logic->player.transform.rotation[0];
   f32 rad = deg2rad(rot);
   rCos = Math__cos(rad);
   rSin = Math__sin(rad);
@@ -449,8 +457,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // y-axis = forward/backward(-)
   // z-axis = up/down
 
-  memset(game->local->zbuf, -1.0f, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
-  memset(game->local->zbufWall, 0, game->CANVAS_WIDTH * sizeof(f32));
+  memset(logic->zbuf, -1.0f, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
+  memset(logic->zbufWall, 0, game->CANVAS_WIDTH * sizeof(f32));
 
   if (true) {
     for (s32 Sy = 0; Sy < H; Sy++) {
@@ -486,22 +494,22 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
         f32 Wyo = Wr[1] + camY;
 
         color = Bitmap__Get2DTiledPixel(
-            &game->local->atlas,
+            &logic->atlas,
             Wxo * txs,
             Wyo * txs,
-            game->local->ATLAS_TILE_SIZE,
+            logic->ATLAS_TILE_SIZE,
             floor_tile_idxX,
             0,
             0xffff00ff);
-        // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, color);
+        // Bitmap__Set2DPixel(&logic->screen, Sx, Sy, color);
 
-        game->local->zbuf[(Sx + Sy * W) % len] = Syh;
+        logic->zbuf[(Sx + Sy * W) % len] = Syh;
         // uncomment to render all white, revealing zbuf
-        // Bitmap__Set2DPixel(&game->local->screen, Sx, Sy, 0xffffffff);
+        // Bitmap__Set2DPixel(&logic->screen, Sx, Sy, 0xffffffff);
       }
     }
   } else {
-    memset(game->local->screen.buf, 0, game->local->screen.len);
+    memset(logic->screen.buf, 0, logic->screen.len);
   }
 
   // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 3, 0x00ffffff, 3, 0);
@@ -513,13 +521,14 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
 }
 
 void Bitmap3D__RenderFloor(Engine__State_t* game) {
+  Logic__State_t* logic = game->local;
   s32 W = game->CANVAS_WIDTH;
   s32 H = game->CANVAS_HEIGHT;
   s32 x, y;
   u32 color = 0xffff00ff;
   u32 ts = 8;  // tile size
-  u32* buf = (u32*)game->local->screen.buf;
-  u32 len = game->local->screen.len;
+  u32* buf = (u32*)logic->screen.buf;
+  u32 len = logic->screen.len;
 
   for (y = 0; y < H; y++) {
     for (x = 0; x < W; x++) {
@@ -529,12 +538,13 @@ void Bitmap3D__RenderFloor(Engine__State_t* game) {
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* game) {
-  u32* buf = (u32*)game->local->screen.buf;
-  f32* zbuf = game->local->zbuf;
+  Logic__State_t* logic = game->local;
+  u32* buf = (u32*)logic->screen.buf;
+  f32* zbuf = logic->zbuf;
   for (u32 i = 0; i < W * H; i++) {
     f32 b1 = zbuf[i];  // +1 .. 0 .. +1
     b1 = 1.0f - b1;    // invert so that the horizon has most alpha
-    // f32 cutoff = Math__map(Math__sin(game->local->currentTime / 5000), -1, 1, 0.5, 1);  // 0 ..
+    // f32 cutoff = Math__map(Math__sin(logic->currentTime / 5000), -1, 1, 0.5, 1);  // 0 ..
     // 1
     f32 cutoff = 0.95f;  // higher number = further visibility distance
     b1 = Math__map(MATH_CLAMP(0, b1, cutoff), 0, cutoff, 0, 1);

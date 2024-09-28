@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "Base.h"
+#include "Log.h"
 
 static const char* READ = "rb";
 

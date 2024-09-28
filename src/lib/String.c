@@ -1,7 +1,10 @@
 #include "String.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "Arena.h"
 
 String8* str8_alloc(Arena_t* a, const char* str) {
   u64 len = strlen(str) + 1;

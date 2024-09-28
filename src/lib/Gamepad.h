@@ -1,10 +1,13 @@
 #ifndef GAMEPAD_H
 #define GAMEPAD_H
 
+#include <stdbool.h>
+#include <stdint.h>
+typedef uint8_t u8;
+typedef float f32;
+
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
-
-#include "Base.h"
 
 #define GAMEPAD__AXES_CAP 2
 #define GAMEPAD__BUTTON_CAP 4

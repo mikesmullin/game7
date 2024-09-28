@@ -1,9 +1,14 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
-#include "Base.h"
+#include <stdbool.h>
+#include <stdint.h>
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef double f64;
+
 typedef struct SDL_Window SDL_Window;
-#include "Vulkan.h"
+typedef struct Vulkan_t Vulkan_t;
 
 typedef struct {
   u32 width;

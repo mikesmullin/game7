@@ -178,6 +178,7 @@
     "pillarbox",
     "PINLIGHT",
     "POCL",
+    "POWERUP",
     "PREINITIALIZED",
     "protobuf",
     "PROTOC",
@@ -228,7 +229,8 @@
     "WINDOWPOS",
     "XLIB",
     "Xlinker",
-    "YCBCR"
+    "YCBCR",
+    "zbuf"
   ],
   "C_Cpp.default.includePath": [
     "C:/VulkanSDK/1.3.236.0/Include",

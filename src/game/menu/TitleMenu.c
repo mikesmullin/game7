@@ -3,6 +3,9 @@
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap.h"
 #include "../../lib/Engine.h"
+#include "../../lib/Keyboard.h"
+#include "../../lib/String.h"
+#include "../Logic.h"
 #include "AboutMenu.h"
 #include "HelpMenu.h"
 
@@ -28,9 +31,10 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
 
 void TitleMenu__render(struct Menu_t* menu, void* _state) {
   Engine__State_t* state = _state;
+  Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
-  Bitmap__Draw(&self->bmp, &state->local->screen, 0, 0);
+  Bitmap__Draw(&self->bmp, &logic->screen, 0, 0);
 
   u8 i;
   String8Node* c;
@@ -40,19 +44,12 @@ void TitleMenu__render(struct Menu_t* menu, void* _state) {
       color = 0xff80ffff;
     }
 
-    Bitmap__DebugText(
-        &state->local->screen,
-        &state->local->glyphs0,
-        20,
-        6 * i + 120,
-        color,
-        0,
-        c->string->str);
+    Bitmap__DebugText(&logic->screen, &logic->glyphs0, 20, 6 * i + 120, color, 0, c->string->str);
   }
 
   Bitmap__DebugText(
-      &state->local->screen,
-      &state->local->glyphs0,
+      &logic->screen,
+      &logic->glyphs0,
       4,
       6 * 29,
       0xffffffff,
@@ -62,6 +59,7 @@ void TitleMenu__render(struct Menu_t* menu, void* _state) {
 
 void TitleMenu__tick(struct Menu_t* menu, void* _state) {
   Engine__State_t* state = _state;
+  Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
   if (!self->playedAudio) {
@@ -85,13 +83,13 @@ void TitleMenu__tick(struct Menu_t* menu, void* _state) {
     state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
 
     if (0 == self->selection) {
-      state->local->game->menu = NULL;
+      logic->game->menu = NULL;
     } else if (1 == self->selection) {
-      state->local->game->menu = HelpMenu__alloc(state->arena);
-      HelpMenu__init(state->local->game->menu, state);
+      logic->game->menu = HelpMenu__alloc(state->arena);
+      HelpMenu__init(logic->game->menu, state);
     } else if (2 == self->selection) {
-      state->local->game->menu = AboutMenu__alloc(state->arena);
-      AboutMenu__init(state->local->game->menu, state);
+      logic->game->menu = AboutMenu__alloc(state->arena);
+      AboutMenu__init(logic->game->menu, state);
     }
   }
 

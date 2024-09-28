@@ -1,19 +1,24 @@
 #include "Logic.h"
 
+#include <string.h>
+
 #include "../lib/Arena.h"
+#include "../lib/Array.h"
 #include "../lib/Bitmap.h"
-#include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
+#include "../lib/Keyboard.h"
+#include "../lib/Log.h"
 #include "../lib/Math.h"
+// #include "../lib/Time.h"
 #include "Game.h"
 #include "Level.h"
-#include "Player.h"
 
 static Engine__State_t* game;
 
 static f32 PixelsToUnits(u32 pixels) {
-  return (f32)pixels / game->local->PIXELS_PER_UNIT;
+  Logic__State_t* logic = game->local;
+  return (f32)pixels / logic->PIXELS_PER_UNIT;
 }
 
 static u8 Animate(AnimationState_t* state, f64 deltaTime) {
@@ -25,23 +30,24 @@ static u8 Animate(AnimationState_t* state, f64 deltaTime) {
 }
 
 void LoadTextures() {
-  game->Vulkan__FReadImage(&game->local->atlas, "../assets/textures/atlas.png");
-  game->Vulkan__FReadImage(&game->local->glyphs0, "../assets/textures/glyphs0.png");
-  game->Vulkan__FReadImage(&game->local->level1, "../assets/textures/level1.png");
+  Logic__State_t* logic = game->local;
+
+  game->Vulkan__FReadImage(&logic->atlas, "../assets/textures/atlas.png");
+  game->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
+  game->Vulkan__FReadImage(&logic->level1, "../assets/textures/level1.png");
 }
 
 // on process start
 __declspec(dllexport) void logic_onload(Engine__State_t* _state) {
   game = _state;
-  LOG_DEBUGF("onload projection %p", game->local->player.camera.projection);
+  Logic__State_t* logic = game->local;
 }
 
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data() {
-  game->local = Arena__Push(game->arena, sizeof(Logic__State_t));
-  game->local->arena = game->arena;
-  Player__Init(game->local);
-  LOG_DEBUGF("oninit projection %p", game->local->player.camera.projection);
+  Logic__State_t* logic = Arena__Push(game->arena, sizeof(Logic__State_t));
+  game->local = logic;
+  Player__Init(logic);
 
   game->WINDOW_TITLE = "Retro";
   game->ENGINE_NAME = "MS2024";
@@ -51,27 +57,27 @@ __declspec(dllexport) void logic_oninit_data() {
   game->WINDOW_WIDTH = dim * 4;
   game->WINDOW_HEIGHT = dim * 4;
 
-  game->local->WORLD_HEIGHT = 4.0f;  // world height
-  game->local->ATLAS_TILE_SIZE = 8.0f;
+  logic->WORLD_HEIGHT = 4.0f;  // world height
+  logic->ATLAS_TILE_SIZE = 8.0f;
 
-  game->local->CANVAS_DEBUG_X = game->CANVAS_WIDTH / 2.0f;
-  game->local->CANVAS_DEBUG_Y = game->CANVAS_HEIGHT / 2.0f;
+  logic->CANVAS_DEBUG_X = game->CANVAS_WIDTH / 2.0f;
+  logic->CANVAS_DEBUG_Y = game->CANVAS_HEIGHT / 2.0f;
 
   game->PHYSICS_FPS = 50;
   game->RENDER_FPS = 60;
-  game->local->PLAYER_WALK_SPEED = 1.5f;  // per-second
-  game->local->PLAYER_FLY_SPEED = 0.5f;   // per-second
-  game->local->PLAYER_ZOOM_SPEED = 0.1f;  // per-second
-  game->local->PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
+  logic->PLAYER_WALK_SPEED = 1.5f;  // per-second
+  logic->PLAYER_FLY_SPEED = 0.5f;   // per-second
+  logic->PLAYER_ZOOM_SPEED = 0.1f;  // per-second
+  logic->PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 
-  game->local->isVBODirty = true;
-  game->local->isUBODirty[0] = true;
-  game->local->isUBODirty[1] = true;
-  game->local->VEC3_Y_UP[0] = 0;
-  game->local->VEC3_Y_UP[1] = 1;
-  game->local->VEC3_Y_UP[2] = 0;
-  game->local->CANVAS_WH = 100;
-  game->local->PIXELS_PER_UNIT = game->local->CANVAS_WH;
+  logic->isVBODirty = true;
+  logic->isUBODirty[0] = true;
+  logic->isUBODirty[1] = true;
+  logic->VEC3_Y_UP[0] = 0;
+  logic->VEC3_Y_UP[1] = 1;
+  logic->VEC3_Y_UP[2] = 0;
+  logic->CANVAS_WH = 100;
+  logic->PIXELS_PER_UNIT = logic->CANVAS_WH;
   game->instanceCount = 1;
 
   game->indices[0] = 0;
@@ -93,30 +99,26 @@ __declspec(dllexport) void logic_oninit_data() {
   game->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
   game->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  game->local->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
-  game->local->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
-  game->local->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
-  game->local->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
+  logic->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
+  logic->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
+  logic->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
+  logic->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
 
-  game->local->newTexId = 0;
+  logic->newTexId = 0;
 }
 
 __declspec(dllexport) void logic_oninit_compute() {
-  Bitmap__Alloc(
-      game->arena,
-      &game->local->screen,
-      game->CANVAS_WIDTH,
-      game->CANVAS_HEIGHT,
-      4 /*RGBA*/);
-  game->local->zbuf =
-      Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
-  game->local->zbufWall = Arena__Push(game->arena, game->CANVAS_WIDTH * sizeof(f32));
-  game->local->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
+  Logic__State_t* logic = game->local;
+
+  Bitmap__Alloc(game->arena, &logic->screen, game->CANVAS_WIDTH, game->CANVAS_HEIGHT, 4 /*RGBA*/);
+  logic->zbuf = Arena__Push(game->arena, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
+  logic->zbufWall = Arena__Push(game->arena, game->CANVAS_WIDTH * sizeof(f32));
+  logic->debugArena = Arena__SubAlloc(game->arena, 1024 * 50);  // MB
 
   LoadTextures();
   Level__Load(game, 1);
-  for (u32 i = 0; i < ARRAY_COUNT(game->local->audioFiles); i++) {
-    game->Audio__LoadAudioFile(game->local->audioFiles[i]);
+  for (u32 i = 0; i < ARRAY_COUNT(logic->audioFiles); i++) {
+    game->Audio__LoadAudioFile(logic->audioFiles[i]);
   }
 
   // setup scene
@@ -131,11 +133,11 @@ __declspec(dllexport) void logic_oninit_compute() {
   game->instances[INSTANCE_FLOOR_0].texId = 0;
   game->instanceCount = 1;
 
-  game->local->isUBODirty[0] = true;
-  game->local->isUBODirty[1] = true;
+  logic->isUBODirty[0] = true;
+  logic->isUBODirty[1] = true;
 
-  game->local->game = Game__alloc(game);
-  Game__init(game->local->game, game);
+  logic->game = Game__alloc(game->arena);
+  Game__init(logic->game, game);
 }
 
 __declspec(dllexport) void logic_onreload() {
@@ -162,6 +164,8 @@ __declspec(dllexport) void logic_onreload() {
 }
 
 __declspec(dllexport) void logic_onfinger() {
+  Logic__State_t* logic = game->local;
+
   // LOG_DEBUGF(`
   //     "SDL_FINGER state "
   //     "event %s "
@@ -191,10 +195,9 @@ __declspec(dllexport) void logic_onfinger() {
   if (FINGER_SCROLL == game->g_Finger__state->event) {
     // TODO: how to animate camera zoom with spring damping/smoothing?
     // TODO: how to move this into physics callback? or is it better not to?
-    game->world.cam[2] +=
-        -game->g_Finger__state->wheel_y * game->local->PLAYER_ZOOM_SPEED /* deltaTime*/;
-    game->local->isUBODirty[0] = true;
-    game->local->isUBODirty[1] = true;
+    game->world.cam[2] += -game->g_Finger__state->wheel_y * logic->PLAYER_ZOOM_SPEED /* deltaTime*/;
+    logic->isUBODirty[0] = true;
+    logic->isUBODirty[1] = true;
   }
 
   if (!game->mouseCaptured && FINGER_DOWN == game->g_Finger__state->event &&
@@ -204,31 +207,32 @@ __declspec(dllexport) void logic_onfinger() {
   }
 
   if (game->mouseCaptured) {
-    game->local->player.transform.rotation[0] =
-        game->local->player.transform.rotation[0] +
-        (game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
-    while (game->local->player.transform.rotation[0] < 0.0f) {
-      game->local->player.transform.rotation[0] += 360.0f;
+    logic->player.transform.rotation[0] = logic->player.transform.rotation[0] +
+                                          (logic->PLAYER_LOOK_SPEED * game->g_Finger__state->x_rel);
+    while (logic->player.transform.rotation[0] < 0.0f) {
+      logic->player.transform.rotation[0] += 360.0f;
     }
-    while (game->local->player.transform.rotation[0] >= 360.0f) {
-      game->local->player.transform.rotation[0] -= 360.0f;
+    while (logic->player.transform.rotation[0] >= 360.0f) {
+      logic->player.transform.rotation[0] -= 360.0f;
     }
-    game->local->player.transform.rotation[1] =
-        game->local->player.transform.rotation[1] +
-        (-game->local->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
-    while (game->local->player.transform.rotation[1] < 0.0f) {
-      game->local->player.transform.rotation[1] += 360.0f;
+    logic->player.transform.rotation[1] =
+        logic->player.transform.rotation[1] +
+        (-logic->PLAYER_LOOK_SPEED * game->g_Finger__state->y_rel);
+    while (logic->player.transform.rotation[1] < 0.0f) {
+      logic->player.transform.rotation[1] += 360.0f;
     }
-    while (game->local->player.transform.rotation[1] >= 360.0f) {
-      game->local->player.transform.rotation[1] -= 360.0f;
+    while (logic->player.transform.rotation[1] >= 360.0f) {
+      logic->player.transform.rotation[1] -= 360.0f;
     }
   }
 }
 
 // on physics
 __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 deltaTime) {
+  Logic__State_t* logic = game->local;
+
   // LOG_DEBUGF("Logic dll onfixedupdate.");
-  game->local->currentTime = currentTime;
+  logic->currentTime = currentTime;
 
   // LOG_DEBUGF(
   //     "SDL_KEY{UP,DOWN} state "
@@ -249,7 +253,6 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
       game->inputState->escape = false;
       game->Window__CaptureMouse(false);
       game->mouseCaptured = false;
-      // game->s_Window.quit = true;
     }
 
     // TODO: do this on key up only, to avoid multiple calls at once!
@@ -257,52 +260,52 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
       game->inputState->reload = false;
       LoadTextures();
       Level__Load(game, 0);
-      // Player__Init(game->local);
+      // Player__Init(logic);
     }
 
     // W-S Forward/Backward axis
     if (game->inputState->fwd && game->inputState->back) {
-      game->local->player.input.zAxis = 0.0f;
+      logic->player.input.zAxis = 0.0f;
     } else if (game->inputState->fwd) {
-      game->local->player.input.zAxis = 1.0f;
+      logic->player.input.zAxis = 1.0f;
     } else if (game->inputState->back) {
-      game->local->player.input.zAxis = -1.0f;
+      logic->player.input.zAxis = -1.0f;
     } else {
-      game->local->player.input.zAxis = 0.0f;
+      logic->player.input.zAxis = 0.0f;
     }
 
     // A-D Left/Right axis
     if (game->inputState->left && game->inputState->right) {
-      game->local->player.input.xAxis = 0.0f;
+      logic->player.input.xAxis = 0.0f;
     } else if (game->inputState->left) {
-      game->local->player.input.xAxis = 1.0f;
+      logic->player.input.xAxis = 1.0f;
     } else if (game->inputState->right) {
-      game->local->player.input.xAxis = -1.0f;
+      logic->player.input.xAxis = -1.0f;
     } else {
-      game->local->player.input.xAxis = 0.0f;
+      logic->player.input.xAxis = 0.0f;
     }
 
     // Q-E Up/Down axis
     if (game->inputState->up && game->inputState->down) {
-      game->local->player.input.yAxis = 0.0f;
+      logic->player.input.yAxis = 0.0f;
     } else if (game->inputState->up) {
-      game->local->player.input.yAxis = 1.0f;
+      logic->player.input.yAxis = 1.0f;
     } else if (game->inputState->down) {
-      game->local->player.input.yAxis = -1.0f;
+      logic->player.input.yAxis = -1.0f;
     } else {
-      game->local->player.input.yAxis = 0.0f;
+      logic->player.input.yAxis = 0.0f;
     }
 
     // Direction vectors for movement
     vec3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    float yaw_radians = glm_rad(game->local->player.transform.rotation[0]);
+    float yaw_radians = glm_rad(logic->player.transform.rotation[0]);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
-    front[0] = cosf(yaw_radians);
+    front[0] = Math__cos(yaw_radians);
     front[1] = 0.0f;
-    front[2] = sinf(yaw_radians);
+    front[2] = Math__sin(yaw_radians);
     glm_vec3_normalize(front);
 
     // Calculate the right vector (perpendicular to the front vector)
@@ -310,38 +313,30 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
     glm_vec3_normalize(right);
 
     // apply forward/backward motion
-    if (0 != game->local->player.input.zAxis) {
+    if (0 != logic->player.input.zAxis) {
       glm_vec3_scale(
           front,
-          game->local->player.input.zAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+          logic->player.input.zAxis * logic->PLAYER_WALK_SPEED * deltaTime,
           forward);
-      glm_vec3_add(
-          game->local->player.transform.position,
-          forward,
-          game->local->player.transform.position);
+      glm_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
     }
 
     // apply left/right motion
-    if (0 != game->local->player.input.xAxis) {
+    if (0 != logic->player.input.xAxis) {
       glm_vec3_scale(
           right,
-          -game->local->player.input.xAxis * game->local->PLAYER_WALK_SPEED * deltaTime,
+          -logic->player.input.xAxis * logic->PLAYER_WALK_SPEED * deltaTime,
           forward);
-      glm_vec3_add(
-          game->local->player.transform.position,
-          forward,
-          game->local->player.transform.position);
+      glm_vec3_add(logic->player.transform.position, forward, logic->player.transform.position);
     }
 
     // apply up/down motion
-    if (0 != game->local->player.input.yAxis) {
-      game->local->player.transform.position[1] +=
-          game->local->player.input.yAxis * game->local->PLAYER_FLY_SPEED * deltaTime;
+    if (0 != logic->player.input.yAxis) {
+      logic->player.transform.position[1] +=
+          logic->player.input.yAxis * logic->PLAYER_FLY_SPEED * deltaTime;
 
-      game->local->player.transform.position[1] = MATH_CLAMP(
-          0,
-          game->local->player.transform.position[1],
-          1.0f /*game->local->WORLD_HEIGHT*/);
+      logic->player.transform.position[1] =
+          MATH_CLAMP(0, logic->player.transform.position[1], 1.0f /*logic->WORLD_HEIGHT*/);
     }
   }
 
@@ -349,7 +344,7 @@ __declspec(dllexport) void logic_onfixedupdate(const f64 currentTime, const f64 
   // state->isUBODirty[0] = true;
   // state->isUBODirty[1] = true;
 
-  Game__tick(game->local->game, game);
+  Game__tick(logic->game, game);
 }
 
 static f64 accumulator2 = 0.0f;
@@ -365,8 +360,9 @@ s32 invert_endianness(s32 value) {
 
 // on draw
 __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 deltaTime) {
+  Logic__State_t* logic = game->local;
   // LOG_DEBUGF("Logic dll onupdate.");
-  game->local->currentTime = currentTime;
+  logic->currentTime = currentTime;
 
   bool onsecond = false;
   accumulator2 += deltaTime;
@@ -391,24 +387,24 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
     }
   }
 
-  if (game->local->isVBODirty) {
-    game->local->isVBODirty = false;
+  if (logic->isVBODirty) {
+    logic->isVBODirty = false;
 
-    game->s_Vulkan.m_instanceCount = game->instanceCount;
-    game->Vulkan__UpdateVertexBuffer(&game->s_Vulkan, 1, sizeof(game->instances), game->instances);
+    game->VulkanWrapper__SetInstanceCount(game->instanceCount);
+    game->VulkanWrapper__UpdateVertexBuffer(1, sizeof(game->instances), game->instances);
   }
 
-  if (game->local->isUBODirty[game->s_Vulkan.m_currentFrame]) {
-    game->local->isUBODirty[game->s_Vulkan.m_currentFrame] = false;
+  if (logic->isUBODirty[game->VulkanWrapper__GetCurrentFrame()]) {
+    logic->isUBODirty[game->VulkanWrapper__GetCurrentFrame()] = false;
 
     // 3d cam
     glm_lookat(
         game->world.cam,
         game->world.look,
-        game->local->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
+        logic->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
         game->ubo1.view);
 
-    game->s_Vulkan.m_aspectRatio = game->world.aspect;  // sync viewport
+    game->VulkanWrapper__SetAspectRatio(game->world.aspect);  // sync viewport
 
     glm_perspective(
         glm_rad(45.0f),  // half the actual 90deg fov
@@ -422,10 +418,10 @@ __declspec(dllexport) void logic_onupdate(const f64 currentTime, const f64 delta
     glm_vec2_copy(game->world.user2, game->ubo1.user2);
 
     // TODO: not sure i make use of one UBO per frame, really
-    game->Vulkan__UpdateUniformBuffer(&game->s_Vulkan, game->s_Vulkan.m_currentFrame, &game->ubo1);
+    game->VulkanWrapper__UpdateUniformBuffer(game->VulkanWrapper__GetCurrentFrame(), &game->ubo1);
   }
 
-  Game__render(game->local->game, game);
+  Game__render(logic->game, game);
 
-  game->Vulkan__UpdateTextureImage(&game->s_Vulkan, &game->local->screen);
+  game->VulkanWrapper__UpdateTextureImage(&logic->screen);
 }

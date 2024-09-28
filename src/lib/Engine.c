@@ -3,26 +3,30 @@
 
 #include "Engine.h"
 
-#define CGLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <cglm/cglm.h>
 #include <windows.h>
 
 #include "Arena.h"
+#include "Array.h"
 #include "Audio.h"
+#include "Bitmap.h"
 #include "File.h"
 #include "Finger.h"
 #include "Gamepad.h"
 #include "HotReload.h"
 #include "Keyboard.h"
+#include "Log.h"
 #include "SDL.h"
 #include "String.h"
 #include "Time.h"
 #include "Vulkan.h"
+#include "VulkanWrapper.h"
 #include "Window.h"
 
 static Engine__State_t* state;
 static FileMonitor_t* fm;
 static Arena_t arena;
+static Vulkan_t vulkan;
+static Window_t window;
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime);
 static void renderCallback(const f64 currentTime, const f64 deltaTime);
@@ -33,7 +37,7 @@ static int check_load_logic() {
   char file[31];
   if (2 == File__CheckMonitor(fm, file)) {
     LOG_DEBUGF("saw file %s", file);
-    strcat(path, file);
+    strcat_s(path, 32, file);
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
     logic_onload(state);
@@ -59,9 +63,12 @@ int Engine__Loop() {
 
   state->check_load_logic = &check_load_logic;
   state->Vulkan__FReadImage = &Vulkan__FReadImage;
-  state->Vulkan__UpdateVertexBuffer = &Vulkan__UpdateVertexBuffer;
-  state->Vulkan__UpdateUniformBuffer = &Vulkan__UpdateUniformBuffer;
-  state->Vulkan__UpdateTextureImage = &Vulkan__UpdateTextureImage;
+  state->VulkanWrapper__UpdateTextureImage = &VulkanWrapper__UpdateTextureImage;
+  state->VulkanWrapper__UpdateVertexBuffer = &VulkanWrapper__UpdateVertexBuffer;
+  state->VulkanWrapper__UpdateUniformBuffer = &VulkanWrapper__UpdateUniformBuffer;
+  state->VulkanWrapper__SetInstanceCount = &VulkanWrapper__SetInstanceCount;
+  state->VulkanWrapper__GetCurrentFrame = &VulkanWrapper__GetCurrentFrame;
+  state->VulkanWrapper__SetAspectRatio = &VulkanWrapper__SetAspectRatio;
 
   File__StartMonitor(fm);
 
@@ -72,14 +79,10 @@ int Engine__Loop() {
   logic_onload(state);
   logic_oninit_data();
 
-  Vulkan__InitDriver1(&state->s_Vulkan);
+  VulkanWrapper__Init(&vulkan);
+  Vulkan__InitDriver1(&vulkan);
 
-  Window__New(
-      &state->s_Window,
-      state->WINDOW_TITLE,
-      state->WINDOW_WIDTH,
-      state->WINDOW_HEIGHT,
-      &state->s_Vulkan);
+  Window__New(&window, state->WINDOW_TITLE, state->WINDOW_WIDTH, state->WINDOW_HEIGHT, &vulkan);
   SDL__Init();
   Audio__Init();
 
@@ -99,10 +102,10 @@ int Engine__Loop() {
   LOG_INFOF("Controller Id: %d, Name: %s", gamePad1.m_index, Gamepad__GetControllerName(&gamePad1));
   Gamepad__Open(&gamePad1);
 
-  Window__Begin(&state->s_Window);
+  Window__Begin(&window);
 
   // vulkan resource setup
-  Vulkan__AssertDriverValidationLayersSupported(&state->s_Vulkan);
+  Vulkan__AssertDriverValidationLayersSupported(&vulkan);
 
 #if OS_MAC == 1
   ASSERT(s_Vulkan.m_requiredDriverExtensionsCount < VULKAN_REQUIRED_DRIVER_EXTENSIONS_CAP)
@@ -110,29 +113,29 @@ int Engine__Loop() {
   s_Vulkan.m_requiredDriverExtensions[s_Vulkan.m_requiredDriverExtensionsCount++] =
       VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME;
 #endif
-  Vulkan__AssertDriverExtensionsSupported(&state->s_Vulkan);
+  Vulkan__AssertDriverExtensionsSupported(&vulkan);
 
-  Vulkan__CreateInstance(&state->s_Vulkan, state->WINDOW_TITLE, state->ENGINE_NAME, 1, 0, 0);
-  Vulkan__InitDriver2(&state->s_Vulkan);
+  Vulkan__CreateInstance(&vulkan, state->WINDOW_TITLE, state->ENGINE_NAME, 1, 0, 0);
+  Vulkan__InitDriver2(&vulkan);
 
-  Vulkan__UsePhysicalDevice(&state->s_Vulkan, 0);
-  Window__Bind(&state->s_Window);
+  Vulkan__UsePhysicalDevice(&vulkan, 0);
+  Window__Bind(&window);
 
   DrawableArea_t area = {0, 0};
-  Window__GetDrawableAreaExtentBounds(&state->s_Window, &area);
+  Window__GetDrawableAreaExtentBounds(&window, &area);
   state->world.aspect = ASPECT_SQUARE_1_1;
-  state->s_Vulkan.m_aspectRatio = state->world.aspect;
-  Window__KeepAspectRatio(&state->s_Window, area.width, area.height);
+  vulkan.m_aspectRatio = state->world.aspect;
+  Window__KeepAspectRatio(&window, area.width, area.height);
 
   // vulkan pipeline setup
-  Vulkan__AssertSwapChainSupported(&state->s_Vulkan);
-  Vulkan__CreateLogicalDeviceAndQueues(&state->s_Vulkan);
-  Vulkan__CreateSwapChain(&state->s_Vulkan, false);
-  Vulkan__CreateImageViews(&state->s_Vulkan);
-  Vulkan__CreateRenderPass(&state->s_Vulkan);
-  Vulkan__CreateDescriptorSetLayout(&state->s_Vulkan);
+  Vulkan__AssertSwapChainSupported(&vulkan);
+  Vulkan__CreateLogicalDeviceAndQueues(&vulkan);
+  Vulkan__CreateSwapChain(&vulkan, false);
+  Vulkan__CreateImageViews(&vulkan);
+  Vulkan__CreateRenderPass(&vulkan);
+  Vulkan__CreateDescriptorSetLayout(&vulkan);
   Vulkan__CreateGraphicsPipeline(
-      &state->s_Vulkan,
+      &vulkan,
       state->shaderFiles[0],
       state->shaderFiles[1],
       sizeof(Mesh_t),
@@ -152,8 +155,8 @@ int Engine__Loop() {
           offsetof(Instance_t, rot),
           offsetof(Instance_t, scale),
           offsetof(Instance_t, texId)});
-  Vulkan__CreateFrameBuffers(&state->s_Vulkan);
-  Vulkan__CreateCommandPool(&state->s_Vulkan);
+  Vulkan__CreateFrameBuffers(&vulkan);
+  Vulkan__CreateCommandPool(&vulkan);
   // create temporary base texture matching canvas dimensions
   Bitmap_t bmp;
   Bitmap__Init(&bmp, state->CANVAS_WIDTH, state->CANVAS_WIDTH, 4);
@@ -161,18 +164,18 @@ int Engine__Loop() {
   // fill with black
   memset(bmpbuf, 0, bmp.len);
   bmp.buf = bmpbuf;
-  Vulkan__CreateTextureImage(&state->s_Vulkan, &bmp);
-  Vulkan__CreateTextureImageView(&state->s_Vulkan);
-  Vulkan__CreateTextureSampler(&state->s_Vulkan);
-  Vulkan__CreateVertexBuffer(&state->s_Vulkan, 0, sizeof(state->vertices), state->vertices);
-  Vulkan__CreateVertexBuffer(&state->s_Vulkan, 1, sizeof(state->instances), state->instances);
-  Vulkan__CreateIndexBuffer(&state->s_Vulkan, sizeof(state->indices), state->indices);
-  Vulkan__CreateUniformBuffers(&state->s_Vulkan, sizeof(state->ubo1));
-  Vulkan__CreateDescriptorPool(&state->s_Vulkan);
-  Vulkan__CreateDescriptorSets(&state->s_Vulkan);
-  Vulkan__CreateCommandBuffers(&state->s_Vulkan);
-  Vulkan__CreateSyncObjects(&state->s_Vulkan);
-  state->s_Vulkan.m_drawIndexCount = ARRAY_COUNT(state->indices);
+  Vulkan__CreateTextureImage(&vulkan, &bmp);
+  Vulkan__CreateTextureImageView(&vulkan);
+  Vulkan__CreateTextureSampler(&vulkan);
+  Vulkan__CreateVertexBuffer(&vulkan, 0, sizeof(state->vertices), state->vertices);
+  Vulkan__CreateVertexBuffer(&vulkan, 1, sizeof(state->instances), state->instances);
+  Vulkan__CreateIndexBuffer(&vulkan, sizeof(state->indices), state->indices);
+  Vulkan__CreateUniformBuffers(&vulkan, sizeof(state->ubo1));
+  Vulkan__CreateDescriptorPool(&vulkan);
+  Vulkan__CreateDescriptorSets(&vulkan);
+  Vulkan__CreateCommandBuffers(&vulkan);
+  Vulkan__CreateSyncObjects(&vulkan);
+  vulkan.m_drawIndexCount = ARRAY_COUNT(state->indices);
 
   // setup scene
 
@@ -181,7 +184,7 @@ int Engine__Loop() {
 
   // main loop
   Window__RenderLoop(
-      &state->s_Window,
+      &window,
       state->PHYSICS_FPS,
       state->RENDER_FPS,
       &physicsCallback,
@@ -191,11 +194,11 @@ int Engine__Loop() {
   LOG_INFOF("shutdown engine.");
   File__EndMonitor(fm);
   unload_logic();
-  Vulkan__DeviceWaitIdle(&state->s_Vulkan);
+  Vulkan__DeviceWaitIdle(&vulkan);
   Gamepad__Shutdown(&gamePad1);
-  Vulkan__Cleanup(&state->s_Vulkan);
+  Vulkan__Cleanup(&vulkan);
   Audio__Shutdown();
-  Window__Shutdown(&state->s_Window);
+  Window__Shutdown(&window);
   Arena__Free(&arena);
   LOG_INFOF("end engine.");
   return 0;

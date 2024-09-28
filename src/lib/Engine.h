@@ -1,32 +1,37 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#define CGLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <cglm/cglm.h>
-#include <windows.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "../game/Logic.h"
-#include "Arena.h"
-#include "Base.h"
-#include "Bitmap.h"
-#include "Finger.h"
-#include "Keyboard.h"
-#include "Window.h"
+#include "GLMShim.h"
+
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef float f32;
+typedef double f64;
+
+typedef struct Arena_t Arena_t;
+typedef struct InputState_t InputState_t;
+typedef struct FingerState_t FingerState_t;
+typedef struct Bitmap_t Bitmap_t;
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit
 
-typedef struct {
+typedef struct Mesh_t {
   vec2 vertex;
 } Mesh_t;
 
-typedef struct {
+typedef struct Instance_t {
   vec3 pos;
   vec3 rot;
   vec3 scale;
   u32 texId;
 } Instance_t;
 
-typedef struct {
+typedef struct World_t {
   vec3 cam;
   vec3 look;
   vec2 user1;
@@ -34,18 +39,16 @@ typedef struct {
   f32 aspect;
 } World_t;
 
-typedef struct {
+typedef struct ubo_ProjView_t {
   mat4 proj;
   mat4 view;
   vec2 user1;
   vec2 user2;
 } ubo_ProjView_t;
 
-typedef struct {
+typedef struct Engine__State_t {
   Arena_t* arena;
-  Logic__State_t* local;
-  Vulkan_t s_Vulkan;
-  Window_t s_Window;
+  void* local;
   char* WINDOW_TITLE;
   char* ENGINE_NAME;
   u16 WINDOW_WIDTH;
@@ -65,9 +68,12 @@ typedef struct {
   int (*check_load_logic)();
 
   void (*Vulkan__FReadImage)(Bitmap_t* bmp, const char* filePath);
-  void (*Vulkan__UpdateTextureImage)(Vulkan_t* self, const Bitmap_t* bmp);
-  void (*Vulkan__UpdateVertexBuffer)(Vulkan_t* self, u8 idx, u64 size, const void* indata);
-  void (*Vulkan__UpdateUniformBuffer)(Vulkan_t* self, u8 frame, void* ubo);
+  void (*VulkanWrapper__UpdateTextureImage)(const Bitmap_t* bmp);
+  void (*VulkanWrapper__UpdateVertexBuffer)(u8 idx, u64 size, const void* indata);
+  void (*VulkanWrapper__UpdateUniformBuffer)(u8 frame, void* ubo);
+  void (*VulkanWrapper__SetInstanceCount)(u32 instanceCount);
+  u8 (*VulkanWrapper__GetCurrentFrame)();
+  void (*VulkanWrapper__SetAspectRatio)(f32 aspectRatio);
 
   void (*Audio__LoadAudioFile)(const char* path);
   void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);

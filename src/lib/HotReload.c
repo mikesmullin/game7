@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 
+#include "Log.h"
+#include "OS.h"
+
 #define LOGIC_FILENAME "src\\game\\Logic.c.dll"
 
 static void* logic = NULL;

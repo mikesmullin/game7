@@ -1,6 +1,6 @@
 #include "SDL.h"
 
-#include "Base.h"
+#include "Log.h"
 
 void SDL__Init() {
   u32 flags;

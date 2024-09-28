@@ -1,21 +1,24 @@
 #include "Level.h"
 
-#include "../lib/Base.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
+#include "../lib/Log.h"
 #include "../lib/Math.h"
+#include "Logic.h"
 
 void Level__Load(Engine__State_t* game, u8 id) {
-  game->local->currentLevel = 0 == id ? game->local->currentLevel : id;
-  game->local->levelLoaded = false;
+  Logic__State_t* logic = game->local;
+  logic->currentLevel = 0 == id ? logic->currentLevel : id;
+  logic->levelLoaded = false;
 }
 
 void Level__Render(Engine__State_t* game) {
-  if (1 == game->local->currentLevel) {
-    for (s32 y = 0; y < game->local->level1.h; y++) {
-      for (s32 x = 0; x < game->local->level1.w; x++) {
-        u32 color = Bitmap__Get2DPixel(&game->local->level1, x, y, 0x00000000);
+  Logic__State_t* logic = game->local;
+  if (1 == logic->currentLevel) {
+    for (s32 y = 0; y < logic->level1.h; y++) {
+      for (s32 x = 0; x < logic->level1.w; x++) {
+        u32 color = Bitmap__Get2DPixel(&logic->level1, x, y, 0x00000000);
 
         if (0xff000000 == color) {         // black; empty space
         } else if (0xffffffff == color) {  // white; wall
@@ -25,16 +28,16 @@ void Level__Render(Engine__State_t* game) {
           Bitmap3D__RenderWall2(game, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 3, 0x00ffffff, 3, 0);
           Bitmap3D__RenderWall2(game, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 4, 0x00ffffff, 4, 0);
         } else if (0xff00f2ff == color) {  // yellow; player spawn
-          if (!game->local->levelLoaded) {
-            game->local->levelLoaded = true;
+          if (!logic->levelLoaded) {
+            logic->levelLoaded = true;
             // TODO: fix the coords being rendered out of order and flipped
-            game->local->player.transform.position[0] = y + 0.8f;
-            game->local->player.transform.position[2] = -x + 0.8f;
-            game->local->player.transform.rotation[0] = 180.0f;
+            logic->player.transform.position[0] = y + 0.8f;
+            logic->player.transform.position[2] = -x + 0.8f;
+            logic->player.transform.rotation[0] = 180.0f;
             LOG_DEBUGF(
                 "Teleport player to %+03i %+03i",
-                (s32)game->local->player.transform.position[0],
-                (s32)game->local->player.transform.position[2]);
+                (s32)logic->player.transform.position[0],
+                (s32)logic->player.transform.position[2]);
           }
         } else {
           LOG_DEBUGF("Unrecognized Level pixel color %08x", color);

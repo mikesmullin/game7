@@ -1,11 +1,17 @@
 #ifndef VULKAN_H
 #define VULKAN_H
 
+#include <stdbool.h>
+#include <stdint.h>
+typedef uint8_t u8;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef float f32;
+
+typedef struct Bitmap_t Bitmap_t;
+
 #define VK_NO_PROTOTYPES
 #include <volk.h>
-
-#include "Base.h"
-#include "Bitmap.h"
 
 #define DEBUG_VULKAN
 
@@ -33,7 +39,7 @@ typedef struct {
   VkQueue present__queue;
 } Vulkan__PhysicalDeviceQueue_t;
 
-typedef struct {
+typedef struct Vulkan_t {
   unsigned int m_requiredDriverExtensionsCount;
   const char* m_requiredDriverExtensions[VULKAN_REQUIRED_DRIVER_EXTENSIONS_CAP];
   unsigned int m_requiredValidationLayersCount;

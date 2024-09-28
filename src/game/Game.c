@@ -6,10 +6,11 @@
 #include "../lib/Engine.h"
 #include "../lib/Math.h"
 #include "Level.h"
+#include "Logic.h"
 #include "menu/TitleMenu.h"
 
-Game_t* Game__alloc(Engine__State_t* game) {
-  Game_t* g = Arena__Push(game->arena, sizeof(Game_t));
+Game_t* Game__alloc(Arena_t* arena) {
+  Game_t* g = Arena__Push(arena, sizeof(Game_t));
   return g;
 }
 
@@ -26,6 +27,8 @@ void Game__tick(Game_t* game, Engine__State_t* state) {
 }
 
 void Game__render(Game_t* game, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+
   // menu system
   if (NULL != game->menu) {
     game->menu->render(game->menu, state);
@@ -42,22 +45,22 @@ void Game__render(Game_t* game, Engine__State_t* state) {
 
     // draw debug cursor
     Bitmap__Set2DPixel(
-        &state->local->screen,
-        state->local->CANVAS_DEBUG_X,
-        state->local->CANVAS_DEBUG_Y,
+        &logic->screen,
+        logic->CANVAS_DEBUG_X,
+        logic->CANVAS_DEBUG_Y,
         Math__urandom() | 0xffff0000 + 0xff993399);
 
     Bitmap__DebugText(
-        &state->local->screen,
-        &state->local->glyphs0,
+        &logic->screen,
+        &logic->glyphs0,
         4,
         6 * 29,
         0xffffffff,
         0,
         "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-        state->local->player.transform.position[0],
-        state->local->player.transform.position[1],
-        state->local->player.transform.position[2],
-        state->local->player.transform.rotation[0]);
+        logic->player.transform.position[0],
+        logic->player.transform.position[1],
+        logic->player.transform.position[2],
+        logic->player.transform.rotation[0]);
   }
 }

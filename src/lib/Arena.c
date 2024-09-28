@@ -1,5 +1,9 @@
 #include "Arena.h"
 
+#include <stdlib.h>
+
+#include "Log.h"
+
 void Arena__Alloc(Arena_t* a, u64 sz) {
   // LOG_DEBUGF("arena malloc %llu", sz);
   void* p = malloc(sz);

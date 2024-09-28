@@ -1,13 +1,29 @@
 #ifndef LOGIC_H
 #define LOGIC_H
 
-#define CGLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <cglm/cglm.h>
+#include <stdbool.h>
+#include <stdint.h>
 
-#include "../lib/Arena.h"
-#include "../lib/Base.h"
 #include "../lib/Bitmap.h"
-#include "../lib/String.h"
+#include "../lib/GLMShim.h"
+
+typedef int8_t s8;
+typedef int16_t s16;
+typedef int32_t s32;
+typedef int64_t s64;
+typedef uint8_t u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef s8 b8;
+typedef s16 b16;
+typedef s32 b32;
+typedef s64 b64;
+typedef float f32;
+typedef double f64;
+
+typedef struct String8Node String8Node;
+typedef struct Arena_t Arena_t;
 
 enum INSTANCES {
   INSTANCE_FLOOR_0 = 0,
@@ -20,25 +36,25 @@ enum AUDIO_FILES {
   AUDIO_POWERUP = 3,
 };
 
-typedef enum {
+typedef enum PlayerFacing_t {
   FRONT = 0,
   LEFT = 1,
   RIGHT = 2,
   BACK = 4,
 } PlayerFacing_t;
 
-typedef enum {
+typedef enum PlayerAnimState_t {
   IDLE = 0,
   WALK = 1,
 } PlayerAnimState_t;
 
-typedef struct {
+typedef struct Animation_t {
   f32 duration;
   u8 frameCount;
   u8 frames[10];
 } Animation_t;
 
-typedef struct {
+typedef struct AnimationState_t {
   PlayerFacing_t facing;
   PlayerAnimState_t state;
   u8 frame;
@@ -46,7 +62,7 @@ typedef struct {
   Animation_t* anim;
 } AnimationState_t;
 
-typedef struct {
+typedef struct Camera_t {
   f32 fov;  // field of view
   // TODO: remove all but my game logic .h from the dll, which is delaying compile times
   // TODO: incl. the windows.h > minwindef.h which is overriding `near` keyword
@@ -57,18 +73,18 @@ typedef struct {
   mat4 view;        // view (camera) matrix
 } Camera_t;
 
-typedef struct {
+typedef struct Transform_t {
   vec3 position;  // (x, y, z)
   vec4 rotation;  // (yaw, pitch, roll)
 } Transform_t;
 
-typedef struct {
+typedef struct VirtualJoystick_t {
   f32 xAxis;
   f32 yAxis;
   f32 zAxis;
 } VirtualJoystick_t;
 
-typedef struct {
+typedef struct Player_t {
   Transform_t transform;
   Camera_t camera;
   VirtualJoystick_t input;
@@ -79,7 +95,7 @@ typedef struct Menu_t {
   void (*render)(struct Menu_t* menu, void* state);
 } Menu_t;
 
-typedef struct {
+typedef struct TitleMenu_t {
   Menu_t base;
   Bitmap_t bmp;
   String8Node* options;
@@ -88,20 +104,19 @@ typedef struct {
   bool playedAudio;
 } TitleMenu_t;
 
-typedef struct {
+typedef struct AboutMenu_t {
   Menu_t base;
 } AboutMenu_t;
 
-typedef struct {
+typedef struct HelpMenu_t {
   Menu_t base;
 } HelpMenu_t;
 
-typedef struct {
+typedef struct Game_t {
   Menu_t* menu;
 } Game_t;
 
-typedef struct {
-  Arena_t* arena;
+typedef struct Logic__State_t {
   f64 currentTime;
 
   Bitmap_t screen;
