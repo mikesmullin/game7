@@ -7,6 +7,10 @@
 #include "../../lib/Math.h"
 #include "../Logic.h"
 
+static const f32 PLAYER_WALK_SPEED = 1.5f;  // per-second
+static const f32 PLAYER_FLY_SPEED = 0.5f;   // per-second
+static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
+
 Entity_t* Player__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Player_t));
 }
@@ -53,14 +57,14 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
     if (state->mouseCaptured) {
       if (0 != state->mState->x) {
-        logic->game->curPlyr->transform.rotation.x += state->mState->x * logic->PLAYER_LOOK_SPEED;
+        logic->game->curPlyr->transform.rotation.x += state->mState->x * PLAYER_LOOK_SPEED;
         logic->game->curPlyr->transform.rotation.x =
             Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
         state->mState->x = 0;
       }
 
       if (0 != state->mState->y) {
-        logic->game->curPlyr->transform.rotation.y += -state->mState->y * logic->PLAYER_LOOK_SPEED;
+        logic->game->curPlyr->transform.rotation.y += -state->mState->y * PLAYER_LOOK_SPEED;
         logic->game->curPlyr->transform.rotation.y =
             Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
         state->mState->y = 0;
@@ -118,26 +122,19 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
     // apply forward/backward motion
     if (0 != self->input.zAxis) {
-      glms_v3_scale(
-          front,
-          self->input.zAxis * logic->PLAYER_WALK_SPEED * state->deltaTime,
-          &forward);
+      glms_v3_scale(front, self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
       glms_v3_add(entity->transform.position, forward, &entity->transform.position);
     }
 
     // apply left/right motion
     if (0 != self->input.xAxis) {
-      glms_v3_scale(
-          right,
-          -self->input.xAxis * logic->PLAYER_WALK_SPEED * state->deltaTime,
-          &forward);
+      glms_v3_scale(right, -self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
       glms_v3_add(entity->transform.position, forward, &entity->transform.position);
     }
 
     // apply up/down motion
     if (0 != self->input.yAxis) {
-      entity->transform.position.y +=
-          self->input.yAxis * logic->PLAYER_FLY_SPEED * state->deltaTime;
+      entity->transform.position.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
 
       entity->transform.position.y =
           MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);

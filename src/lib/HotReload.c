@@ -9,7 +9,6 @@
 
 static void* logic = NULL;
 
-logic_onload_t logic_onload;
 logic_oninit_data_t logic_oninit_data;
 logic_oninit_compute_t logic_oninit_compute;
 logic_onreload_t logic_onreload;
@@ -40,8 +39,6 @@ int load_logic(void) {
     fprintf(stderr, "ERROR loading %s: %s\n", LOGIC_FILENAME, dlerror());
     return 1;
   }
-
-  LOAD_SYMBOL(logic_onload);
 
   return 0;
 }
@@ -94,7 +91,6 @@ int load_logic(const char* file) {
     return 0;
   }
 
-  logic_onload = (logic_onload_t)GetProcAddress(logic, "logic_onload");
   logic_oninit_data = (logic_oninit_data_t)GetProcAddress(logic, "logic_oninit_data");
   logic_oninit_compute = (logic_oninit_compute_t)GetProcAddress(logic, "logic_oninit_compute");
   logic_onreload = (logic_onreload_t)GetProcAddress(logic, "logic_onreload");

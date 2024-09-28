@@ -55,6 +55,7 @@ typedef struct Engine__State_t {
   f64 deltaTime;
   char* WINDOW_TITLE;
   char* ENGINE_NAME;
+  u16 DIMS;
   u16 WINDOW_WIDTH;
   u16 WINDOW_HEIGHT;
   u16 CANVAS_WIDTH;

@@ -39,7 +39,6 @@ static int check_load_logic() {
     strcat_s(path, 32, file);
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
-    logic_onload(state);
     logic_onreload(state);
     return r;
   }
@@ -75,7 +74,6 @@ int Engine__Loop() {
     return 1;
   }
   state->arena = &arena;
-  logic_onload(state);
   logic_oninit_data(state);
 
   VulkanWrapper__Init(&vulkan);

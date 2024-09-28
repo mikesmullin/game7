@@ -18,11 +18,24 @@ Game_t* Game__alloc(Arena_t* arena) {
 }
 
 void Game__init(Game_t* game, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
   game->curLvl = NULL;
   game->curPlyr = NULL;
   game->lastUid = 0;
+
+  // window
+  state->WINDOW_TITLE = "Retro";
+  state->CANVAS_WIDTH = state->DIMS;
+  state->CANVAS_HEIGHT = state->DIMS;
+  state->PHYSICS_FPS = 50;
+  state->RENDER_FPS = 60;
+
+  // debug
+  logic->CANVAS_DEBUG_X = state->CANVAS_WIDTH / 2.0f;
+  logic->CANVAS_DEBUG_Y = state->CANVAS_HEIGHT / 2.0f;
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {

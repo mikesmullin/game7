@@ -15,7 +15,6 @@ typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
 
-typedef void (*logic_onload_t)(Engine__State_t* state);
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
 typedef void (*logic_onreload_t)(Engine__State_t* state);
@@ -23,7 +22,7 @@ typedef void (*logic_onfixedupdate_t)(Engine__State_t* state);
 typedef void (*logic_onupdate_t)(Engine__State_t* state);
 
 enum INSTANCES {
-  INSTANCE_FLOOR_0 = 0,
+  INSTANCE_QUAD1 = 0,
 };
 
 enum AUDIO_FILES {
@@ -168,42 +167,25 @@ typedef struct Game_t {
 } Game_t;
 
 typedef struct Logic__State_t {
+  Game_t* game;
   Bitmap_t screen;
   f32* zbuf;
   f32* zbufWall;
   Bitmap_t atlas;
   Bitmap_t glyphs0;
+  char* audioFiles[4];
 
+  vec3 VEC3_Y_UP;
   bool isVBODirty;
   bool isUBODirty[2];
 
-  vec3 VEC3_Y_UP;
-
   u16 PIXELS_PER_UNIT;
-
-  char* audioFiles[4];
-
-  Animation_t ANIM_VIKING_IDLE_FRONT;
-  Animation_t ANIM_VIKING_IDLE_LEFT;
-  Animation_t ANIM_VIKING_WALK_LEFT;
-  Animation_t ANIM_VIKING_WALK_FRONT;
-  AnimationState_t playerAnimationState;
-
-  f32 PLAYER_WALK_SPEED;
-  f32 PLAYER_FLY_SPEED;
   f32 PLAYER_ZOOM_SPEED;
-  f32 PLAYER_LOOK_SPEED;
-
-  u8 newTexId;
-
-  Arena_t* debugArena;
 
   f32 WORLD_HEIGHT;
   f32 ATLAS_TILE_SIZE;
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
-
-  Game_t* game;
 } Logic__State_t;
 
 #endif  // LOGIC_H

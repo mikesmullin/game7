@@ -9,36 +9,17 @@
 #include "../lib/Math.h"
 #include "Game.h"
 
-// on process start
-__declspec(dllexport) void logic_onload(Engine__State_t* state) {
-}
-
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
   state->local = Arena__Push(state->arena, sizeof(Logic__State_t));
   Logic__State_t* logic = state->local;
 
-  state->WINDOW_TITLE = "Retro";
   state->ENGINE_NAME = "MS2024";
-  u32 dim = 180;
-  state->CANVAS_WIDTH = dim;
-  state->CANVAS_HEIGHT = dim;
-  state->WINDOW_WIDTH = dim * 4;
-  state->WINDOW_HEIGHT = dim * 4;
+  state->DIMS = 180;
+  state->WINDOW_WIDTH = state->DIMS * 4;
+  state->WINDOW_HEIGHT = state->DIMS * 4;
   logic->PIXELS_PER_UNIT = 100;
-
-  logic->WORLD_HEIGHT = 4.0f;  // world height
-  logic->ATLAS_TILE_SIZE = 8.0f;
-
-  logic->CANVAS_DEBUG_X = state->CANVAS_WIDTH / 2.0f;
-  logic->CANVAS_DEBUG_Y = state->CANVAS_HEIGHT / 2.0f;
-
-  state->PHYSICS_FPS = 50;
-  state->RENDER_FPS = 60;
-  logic->PLAYER_WALK_SPEED = 1.5f;  // per-second
-  logic->PLAYER_FLY_SPEED = 0.5f;   // per-second
   logic->PLAYER_ZOOM_SPEED = 0.1f;  // per-second
-  logic->PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 
   logic->isVBODirty = true;
   logic->isUBODirty[0] = true;
@@ -67,17 +48,14 @@ __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
   state->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
   state->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
 
-  logic->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
-  logic->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
-  logic->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
-  logic->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
-
-  logic->newTexId = 0;
+  logic->game = Game__alloc(state->arena);
+  Game__init(logic->game, state);
 }
 
 __declspec(dllexport) void logic_oninit_compute(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
+  // TODO: move to Game
   Bitmap__Alloc(
       state->arena,
       &logic->screen,
@@ -86,34 +64,33 @@ __declspec(dllexport) void logic_oninit_compute(Engine__State_t* state) {
       4 /*RGBA*/);
   logic->zbuf = Arena__Push(state->arena, state->CANVAS_WIDTH * state->CANVAS_HEIGHT * sizeof(f32));
   logic->zbufWall = Arena__Push(state->arena, state->CANVAS_WIDTH * sizeof(f32));
-  logic->debugArena = Arena__SubAlloc(state->arena, 1024 * 50);  // MB
 
   // load textures
   state->Vulkan__FReadImage(&logic->atlas, "../assets/textures/atlas.png");
   state->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
 
   // load audio
+  logic->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
+  logic->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
+  logic->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
+  logic->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
   for (u32 i = 0; i < ARRAY_COUNT(logic->audioFiles); i++) {
     state->Audio__LoadAudioFile(logic->audioFiles[i]);
   }
 
-  // setup scene
+  // Vulkan scene
   glms_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
   glms_vec3_copy((vec3){0, 0, 0}, state->world.look);
 
-  glms_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].pos);
-  glms_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_FLOOR_0].rot);
-  glms_vec3_copy(
-      (vec3){100 / logic->PIXELS_PER_UNIT, 100 / logic->PIXELS_PER_UNIT, 1},  // ABGR
-      state->instances[INSTANCE_FLOOR_0].scale);
-  state->instances[INSTANCE_FLOOR_0].texId = 0;
+  glms_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_QUAD1].pos);
+  glms_vec3_copy((vec3){0, 0, 0}, state->instances[INSTANCE_QUAD1].rot);
+  f32 n = 100.0f / logic->PIXELS_PER_UNIT;
+  glms_vec3_copy((vec3){n, n, 1}, state->instances[INSTANCE_QUAD1].scale);
+  state->instances[INSTANCE_QUAD1].texId = 0;
   state->instanceCount = 1;
 
   logic->isUBODirty[0] = true;
   logic->isUBODirty[1] = true;
-
-  logic->game = Game__alloc(state->arena);
-  Game__init(logic->game, state);
 }
 
 __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
