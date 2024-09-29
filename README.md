@@ -68,3 +68,9 @@ C:\> node build_scripts/Makefile.mjs watch
   - https://www.youtube.com/watch?v=JC5IMfK7Yfw
   - https://www.youtube.com/watch?v=rs4B8-qoY1I
   - https://chatgpt.com/share/66f4c8ea-db3c-8009-b897-c56886dd3b3b
+
+## Cool Tools
+
+- [jsfxr](https://sfxr.me/) 8-bit audio generator
+- [raylib](https://www.raylib.com/) all-in-one cross-platform lib (replaces several I'm using now; will try next time)
+- [kenney](https://www.kenney.nl/assets) affordable game art
