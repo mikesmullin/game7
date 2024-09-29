@@ -10,7 +10,7 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 BAT_FLY_SPEED = 0.003f;  // per-second
+static const f32 BAT_FLY_SPEED = 0.02f;  // per-second
 
 Entity_t* BatEntity__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(BatEntity_t));
