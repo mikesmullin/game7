@@ -19,6 +19,7 @@ typedef struct Bitmap_t {
 Bitmap_t* Bitmap__Prealloc(Arena_t* a);
 void Bitmap__Alloc(Arena_t* a, Bitmap_t* bmp, u32 w, u32 h, u32 chan);
 void Bitmap__Init(Bitmap_t* bmp, u32 w, u32 h, u32 chan);
+void Bitmap__Fill(Bitmap_t* bmp, u32 x0, u32 y0, u32 x1, u32 y1, u32 color);
 void Bitmap__Set2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 color);
 u32 Bitmap__Get2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 def);
 u32 Bitmap__Get2DTiledPixel(Bitmap_t* bmp, u32 x, u32 y, u32 ts, u32 tx, u32 ty, u32 def);

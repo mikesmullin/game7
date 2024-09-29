@@ -36,6 +36,7 @@ void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
+  Bitmap__Fill(&logic->screen, 0, 0, logic->screen.w, logic->screen.h, 0xff000000);  // wipe black
   Bitmap__Draw(&self->bmp, &logic->screen, 0, 0);
 
   List__Node_t* c = self->options->head;
