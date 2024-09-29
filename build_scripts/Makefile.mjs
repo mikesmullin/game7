@@ -24,8 +24,8 @@ const rel = (...args) =>
   path.relative(path.join(workspaceFolder, BUILD_PATH), path.join(...args));
 const DEBUG_COMPILER_ARGS = [
   '-O0',
-  // export debug symbols (x86dbg understands both)
-  '-gdwarf', // DWARF (GDB / Linux compatible)
+  // export debug symbols (x86dbg understands both; turn these on when debugging, leave off for faster compile)
+  // '-gdwarf', // DWARF (GDB / Linux compatible)
   //'-g', '-gcodeview', // CodeView (PDB / windbg / Windows compatible)
 
   // ignore specific warnings
@@ -398,7 +398,7 @@ const compile_reload = async (outname) => {
   const started = performance.now();
   await child_spawn(C_COMPILER_PATH, [
     ...DEBUG_COMPILER_ARGS,
-    '-ftime-trace', // display compile time stats
+    ...(ANALYZE ? ['-ftime-trace'] : []), // display compile time stats
     // '-fsyntax-only',
     ...C_COMPILER_ARGS,
     // ...C_COMPILER_INCLUDES.filter(lib => lib.includes('glm')),
