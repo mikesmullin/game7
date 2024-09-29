@@ -27,13 +27,14 @@ const DEBUG_COMPILER_ARGS = [
   // export debug symbols (x86dbg understands both; turn these on when debugging, leave off for faster compile)
   // '-gdwarf', // DWARF (GDB / Linux compatible)
   //'-g', '-gcodeview', // CodeView (PDB / windbg / Windows compatible)
+];
+const C_COMPILER_ARGS = [
+  '-m64', // generate 64-bit executable 
 
   // ignore specific warnings
   '-Wno-microsoft-enum-forward-reference',
   '-Wno-deprecated-non-prototype',
 ];
-const C_COMPILER_ARGS = [];
-C_COMPILER_ARGS.push('-m64');
 const CPP_COMPILER_ARGS = [];
 CPP_COMPILER_ARGS.push('-m64');
 const C_COMPILER_INCLUDES = [];
@@ -508,7 +509,7 @@ const idea = async () => {
       case 'protobuf':
         await protobuf();
         break;
-      case 'compile_commands':
+      case 'clang':
         await generate_clangd_compile_commands();
         break;
       case 'main':
@@ -528,27 +529,19 @@ const idea = async () => {
         console.log(`
 Mike's hand-rolled build system.
 
-  USAGE:
-  node build_scripts\\Makefile.mjs < SUBCOMMAND >
+USAGE:
+node build_scripts\\Makefile.mjs < SUBCOMMAND >
 
-    SUBCOMMANDS:
-  all
-  Clean, rebuild, and launch the default app.
-    clean
-    Delete all build output.
-    copy_dlls
-    Copy dynamic libraries to build directory.
-    shaders
-    Compile SPIRV shaders with GLSLC.
-    protobuf
-    Compile protobuf.cc code and.bin data files.
-    compile_commands
-    Generate the.json file needed for clangd for vscode extension.
-    main
-    Compile and run the main app
-    idea
-    Surprise generator
-    `);
+SUBCOMMANDS:
+  all        Clean, rebuild, and launch the default app.
+  clean      Delete all build output.
+  copy_dlls  Copy dynamic libraries to build directory.
+  shaders    Compile SPIRV shaders with GLSLC.
+  protobuf   Compile protobuf.cc code and.bin data files.
+  clang      Generate the.json file needed for clangd for vscode extension.
+  main       Compile and run the main app
+  idea       Surprise generator
+  `);
         break loop;
     }
   }
