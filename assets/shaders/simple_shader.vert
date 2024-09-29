@@ -65,64 +65,11 @@ mat4 generateModelMatrix(vec3 position, vec3 rotation, vec3 scale) {
     return modelMatrix;
 }
 
-uint ATLAS_W = 180;
-uint ATLAS_H = 180;
-
-vec2 TEXTURE_WH = vec2(ATLAS_W,ATLAS_H);
-float pixelsToUnitsX(uint pixels) {
-    return pixels / TEXTURE_WH.x;
-}
-float pixelsToUnitsY(uint pixels) {
-    return pixels / TEXTURE_WH.y;
-}
-
-// uint SPRITE_X = 0;
-// uint SPRITE_Y = 0;
-// uint SPRITE_W = 48;
-// uint SPRITE_H = 48;
-// uint SPRITE_IDX_OFFSET = 3;
-// uint SPRITE_ROW_LEN = 8;
-// uint WOOD_WALL_W = 48;
-// uint WOOD_WALL_H = 48;
-
 void main() {
     mat4 model = generateModelMatrix(pos, rot, scale);
     gl_Position = ubo1.proj * ubo1.view * model * vec4(-xy.x, xy.y, 0.0, 1.0);
 
-    // hard-coded map of texId to uvwh coords in texture atlas
-    vec4 uvwh;
-    if (0 == texId) { // background 0x0 180x180
-        uvwh = vec4(pixelsToUnitsX(0),pixelsToUnitsY(0),pixelsToUnitsX(ATLAS_W),pixelsToUnitsY(ATLAS_H));
-    }
-    // else if (1 == texId) { // wood-wall 1 1580x0 350x420
-    //     uvwh = vec4(pixelsToUnitsX(1580),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
-    // }
-    // else if (2 == texId) { // wood-wall 1 1580x0 350x420
-    //     uvwh = vec4(pixelsToUnitsX(1580 + WOOD_WALL_W),pixelsToUnitsY(0),pixelsToUnitsX(WOOD_WALL_W),pixelsToUnitsY(WOOD_WALL_H));
-    // }
-
-    // sprites
-    // else if (texId >= SPRITE_IDX_OFFSET) {
-    //     uint x = (texId - SPRITE_IDX_OFFSET);
-    //     uint y = (x / SPRITE_ROW_LEN);
-    //     x = x % SPRITE_ROW_LEN;
-    //     uvwh = vec4(
-    //         pixelsToUnitsX(SPRITE_X + (SPRITE_W * x)),
-    //         pixelsToUnitsY(SPRITE_Y + (SPRITE_H * y)),
-    //         pixelsToUnitsX(SPRITE_W),
-    //         pixelsToUnitsY(SPRITE_H));
-    // }
-
-    if (xy.x == 0.5 && xy.y == -0.5) {
-        fragTexCoord = vec2(uvwh.x, uvwh.y); // top-left
-    }
-    else if (xy.x == -0.5 && xy.y == -0.5) {
-        fragTexCoord = vec2(uvwh.x+uvwh.z, uvwh.y); // top-right
-    }
-    else if (xy.x == -0.5 && xy.y == 0.5) {
-        fragTexCoord = vec2(uvwh.x+uvwh.z, uvwh.y+uvwh.w); // bottom-right
-    }
-    else if (xy.x == 0.5 && xy.y == 0.5) {
-        fragTexCoord = vec2(uvwh.x, uvwh.y+uvwh.w); // bottom-left
-    }
+    // geometry x is flipped
+    // geometry range -0.5..0.5 maps to UV range 0..1
+    fragTexCoord = vec2(-xy.x+0.5, xy.y+0.5);
 }
