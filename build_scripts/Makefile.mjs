@@ -30,6 +30,7 @@ const DEBUG_COMPILER_ARGS = [
 
   // ignore specific warnings
   '-Wno-microsoft-enum-forward-reference',
+  '-Wno-deprecated-non-prototype',
 ];
 const C_COMPILER_ARGS = [];
 C_COMPILER_ARGS.push('-m64');
