@@ -1,4 +1,4 @@
-#include "BatEntity.h"
+#include "CatEntity.h"
 
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap3D.h"
@@ -10,20 +10,20 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 BAT_FLY_SPEED = 0.02f;  // per-second
+static const f32 CAT_FLY_SPEED = 0.02f;  // per-second
 
-Entity_t* BatEntity__alloc(Arena_t* arena) {
-  return Arena__Push(arena, sizeof(BatEntity_t));
+Entity_t* CatEntity__alloc(Arena_t* arena) {
+  return Arena__Push(arena, sizeof(CatEntity_t));
 }
 
-void BatEntity__init(Entity_t* entity, Engine__State_t* state) {
+void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
-  BatEntity_t* self = (BatEntity_t*)entity;
+  CatEntity_t* self = (CatEntity_t*)entity;
 
   Entity__init(entity, state);
 
-  entity->tick = BAT_ENTITY__TICK;
-  entity->render = BAT_ENTITY__RENDER;
+  entity->tick = CAT_ENTITY__TICK;
+  entity->render = CAT_ENTITY__RENDER;
 
   entity->transform.position.x = 0.0f;
   entity->transform.position.y = 0.0f;
@@ -39,9 +39,9 @@ void BatEntity__init(Entity_t* entity, Engine__State_t* state) {
   self->za = Math__random(-1, 1);
 }
 
-void BatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
+void CatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
-  BatEntity_t* self = (BatEntity_t*)entity;
+  CatEntity_t* self = (CatEntity_t*)entity;
 
   Bitmap3D__RenderSprite(
       state,
@@ -52,11 +52,11 @@ void BatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
       0xff000000);
 }
 
-void BatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
+void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
-  BatEntity_t* self = (BatEntity_t*)entity;
+  CatEntity_t* self = (CatEntity_t*)entity;
 
-  entity->transform.position.x += self->xa * BAT_FLY_SPEED;
-  entity->transform.position.y += self->ya * BAT_FLY_SPEED;
-  entity->transform.position.z += self->za * BAT_FLY_SPEED;
+  entity->transform.position.x += self->xa * CAT_FLY_SPEED;
+  entity->transform.position.y += self->ya * CAT_FLY_SPEED;
+  entity->transform.position.z += self->za * CAT_FLY_SPEED;
 }

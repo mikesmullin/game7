@@ -9,7 +9,7 @@
 #include "../../lib/Math.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
-#include "../blocks/BatSpawnBlock.h"
+#include "../blocks/CatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"
 #include "../blocks/WallBlock.h"
 
@@ -52,8 +52,8 @@ Block_t* Level__makeBlock(Engine__State_t* state, u32 col, f32 x, f32 y) {
     return block;
   }
   if (0xff241ced == col) {  // red
-    Block_t* block = BatSpawnBlock__alloc(state->arena);
-    BatSpawnBlock__init(block, state, x, y);
+    Block_t* block = CatSpawnBlock__alloc(state->arena);
+    CatSpawnBlock__init(block, state, x, y);
     return block;
   }
 

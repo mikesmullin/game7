@@ -117,10 +117,10 @@ typedef struct Player_t {
   VirtualJoystick_t input;
 } Player_t;
 
-typedef struct BatEntity_t {
+typedef struct CatEntity_t {
   Entity_t base;
   f32 xa, ya, za;
-} BatEntity_t;
+} CatEntity_t;
 
 typedef struct Sprite_t {
   DispatchFnId tick;
@@ -149,14 +149,14 @@ typedef struct SpawnBlock_t {
   bool firstTick;
 } SpawnBlock_t;
 
-typedef struct BatSpawnBlock_t {
+typedef struct CatSpawnBlock_t {
   Block_t base;
   bool firstTick;
   u32 spawnCount;
   f32 spawnInterval;
   f32 animTime;
   u32 spawnedCount;
-} BatSpawnBlock_t;
+} CatSpawnBlock_t;
 
 typedef struct Level_t {
   Bitmap_t* bmp;
