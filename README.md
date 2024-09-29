@@ -74,3 +74,4 @@ C:\> node build_scripts/Makefile.mjs watch
 - [jsfxr](https://sfxr.me/) 8-bit audio generator
 - [raylib](https://www.raylib.com/) all-in-one cross-platform lib (replaces several I'm using now; will try next time)
 - [kenney](https://www.kenney.nl/assets) affordable game art
+- [x64dbg](https://x64dbg.com/) catches breakpoints on memory access violation
