@@ -10,7 +10,6 @@ typedef double f64;
 #include "../lib/Bitmap.h"
 #include "../lib/GLMShim.h"
 
-typedef struct String8Node String8Node;
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
@@ -88,8 +87,7 @@ typedef struct Menu_t {
 typedef struct TitleMenu_t {
   Menu_t base;
   Bitmap_t bmp;
-  String8Node* options;
-  u8 optionsLength;
+  List_t* options;
   s8 selection;
   bool playedAudio;
 } TitleMenu_t;

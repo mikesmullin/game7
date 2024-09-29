@@ -19,7 +19,7 @@ typedef struct FingerState_t FingerState_t;
 typedef struct KbInputState_t KbInputState_t;
 typedef struct Logic__State_t Logic__State_t;
 typedef struct PointerInputState_t PointerInputState_t;
-typedef struct String8 String8;
+typedef struct String_t String_t;
 typedef struct List_t List_t;
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit

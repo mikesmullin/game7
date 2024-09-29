@@ -4,6 +4,7 @@
 #include "../../lib/Bitmap.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Keyboard.h"
+#include "../../lib/List.h"
 #include "../../lib/String.h"
 #include "../Logic.h"
 #include "../levels/Level.h"
@@ -22,10 +23,10 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
 
   state->Vulkan__FReadImage(&self->bmp, "../assets/textures/title.png");
 
-  self->options = str8n__allocf(state->arena, NULL, "New game", 9);
-  self->options = str8n__allocf(state->arena, self->options, "Help", 5);
-  self->options = str8n__allocf(state->arena, self->options, "About", 6);
-  self->optionsLength = 3;
+  self->options = List__alloc(state->arena);
+  List__append(state->arena, self->options, "New game");
+  List__append(state->arena, self->options, "Help");
+  List__append(state->arena, self->options, "About");
   self->selection = 0;
   self->playedAudio = false;
 }
@@ -36,15 +37,15 @@ void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state) {
 
   Bitmap__Draw(&self->bmp, &logic->screen, 0, 0);
 
-  u8 i;
-  String8Node* c;
-  for (i = 0, c = self->options; i < self->optionsLength; i++, c = c->next) {
+  List__Node_t* c = self->options->head;
+  for (u8 i = 0; i < self->options->len; i++) {
     u32 color = 0xff909090;
     if (self->selection == i) {
       color = 0xff80ffff;
     }
 
-    Bitmap__DebugText(&logic->screen, &logic->glyphs0, 20, 6 * i + 120, color, 0, c->string->str);
+    Bitmap__DebugText(&logic->screen, &logic->glyphs0, 20, 6 * i + 120, color, 0, c->data);
+    c = c->next;
   }
 
   Bitmap__DebugText(
@@ -71,7 +72,7 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
     state->Audio__StopAudio(AUDIO_CLICK);
     state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);
   }
-  if (state->kbState->back && self->selection < self->optionsLength - 1) {
+  if (state->kbState->back && self->selection < self->options->len - 1) {
     self->selection++;
     state->Audio__StopAudio(AUDIO_CLICK);
     state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);

@@ -55,8 +55,8 @@ int Engine__Loop() {
   fm = Arena__Push(&arena, sizeof(FileMonitor_t));
   Time__MeasureCycles();
   char* DLL_PATH = "src/game/Logic.c.dll";
-  fm->directory = str8_alloc(&arena, "src/game")->str;
-  fm->fileName = str8_alloc(&arena, "Logic.c.dll")->str;
+  fm->directory = String__alloc(&arena, "src/game")->str;
+  fm->fileName = String__alloc(&arena, "Logic.c.dll")->str;
 
   // initialize random seed using current time
   srand(Time__Now());
