@@ -12,8 +12,8 @@ void Sprite__init(Sprite_t* sprite, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Sprite_t* self = (Sprite_t*)sprite;
 
-  sprite->tick = &Sprite__tick;
-  sprite->render = &Sprite__render;
+  sprite->tick = SPRITE__TICK;
+  sprite->render = SPRITE__RENDER;
   sprite->transform.position.x = 0.0f;
   sprite->transform.position.y = 0.0f;
   sprite->transform.position.z = 0.0f;

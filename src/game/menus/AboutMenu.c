@@ -14,8 +14,8 @@ Menu_t* AboutMenu__alloc(Arena_t* arena) {
 }
 
 void AboutMenu__init(Menu_t* menu, Engine__State_t* state) {
-  menu->tick = &AboutMenu__tick;
-  menu->render = &AboutMenu__render;
+  menu->tick = ABOUT_MENU__TICK;
+  menu->render = ABOUT_MENU__RENDER;
 }
 
 void AboutMenu__render(struct Menu_t* menu, Engine__State_t* state) {

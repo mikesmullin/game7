@@ -18,8 +18,8 @@ void SpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   SpawnBlock_t* self = (SpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
-  block->tick = &SpawnBlock__tick;
-  block->render = &SpawnBlock__render;
+  block->tick = SPAWN_BLOCK__TICK;
+  block->render = SPAWN_BLOCK__RENDER;
   self->firstTick = true;
   logic->game->curLvl->spawner = self;
 }

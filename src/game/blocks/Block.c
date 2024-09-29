@@ -10,8 +10,8 @@ Block_t* Block__alloc(Arena_t* arena) {
 
 void Block__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   Logic__State_t* logic = state->local;
-  block->tick = &Block__tick;
-  block->render = &Block__render;
+  block->tick = BLOCK__TICK;
+  block->render = BLOCK__RENDER;
   block->id = ++logic->game->lastUid;
   block->blocking = false;
   block->masked = false;

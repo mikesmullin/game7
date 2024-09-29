@@ -11,8 +11,7 @@ This prototype explores 8-bit/retro style gaming.
 - Metaprogramming (via [mikesmullin/metacode](https://github.com/mikesmullin/metacode/))
 - Modular
 - Object-Oriented (ie. `Class__Method` naming convention)
-- Inheritance (via Struct Composition)
-- Polymorphism (ie. for Generics/Subclass invocation)
+- Inheritance (via Struct Composition) w/ method overriding (via [Dispatcher](src/game/Dispatcher.c))
 - Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints)
 
 ## Building

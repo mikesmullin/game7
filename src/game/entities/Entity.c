@@ -9,8 +9,8 @@ Entity_t* Entity__alloc(Arena_t* arena) {
 }
 
 void Entity__init(Entity_t* entity, Engine__State_t* state) {
-  entity->tick = &Entity__tick;
-  entity->render = &Entity__render;
+  entity->tick = ENTITY__TICK;
+  entity->render = ENTITY__RENDER;
 }
 
 void Entity__render(struct Entity_t* entity, Engine__State_t* state) {

@@ -9,6 +9,7 @@ typedef double f64;
 
 #include "../lib/Bitmap.h"
 #include "../lib/GLMShim.h"
+#include "Dispatcher.h"
 
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
@@ -78,8 +79,8 @@ typedef struct VirtualJoystick_t {
 } VirtualJoystick_t;
 
 typedef struct Menu_t {
-  void (*tick)(struct Menu_t* menu, Engine__State_t* state);
-  void (*render)(struct Menu_t* menu, Engine__State_t* state);
+  DispatchFnId tick;
+  DispatchFnId render;
 } Menu_t;
 
 typedef struct TitleMenu_t {
@@ -100,8 +101,8 @@ typedef struct HelpMenu_t {
 } HelpMenu_t;
 
 typedef struct Entity_t {
-  void (*tick)(struct Entity_t* menu, Engine__State_t* state);
-  void (*render)(struct Entity_t* menu, Engine__State_t* state);
+  DispatchFnId tick;
+  DispatchFnId render;
   u32 id;
   Transform_t transform;
   Level_t* level;
@@ -121,8 +122,8 @@ typedef struct BatEntity_t {
 } BatEntity_t;
 
 typedef struct Sprite_t {
-  void (*tick)(struct Sprite_t* sprite, Engine__State_t* state);
-  void (*render)(struct Sprite_t* sprite, Engine__State_t* state);
+  DispatchFnId tick;
+  DispatchFnId render;
   Transform_t transform;
   u32 tex;
   u32 color;
@@ -130,8 +131,8 @@ typedef struct Sprite_t {
 } Sprite_t;
 
 typedef struct Block_t {
-  void (*tick)(struct Block_t* block, Engine__State_t* state);
-  void (*render)(struct Block_t* block, Engine__State_t* state);
+  DispatchFnId tick;
+  DispatchFnId render;
   u32 id;
   bool blocking;
   bool masked;

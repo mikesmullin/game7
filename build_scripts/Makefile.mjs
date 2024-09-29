@@ -24,8 +24,9 @@ const rel = (...args) =>
   path.relative(path.join(workspaceFolder, BUILD_PATH), path.join(...args));
 const DEBUG_COMPILER_ARGS = [
   '-O0',
-  // '-gdwarf', // adds gdb support
-  // TODO: do we need to pass `-debug` to the linker? `-Xlinker -debug`?
+  // export debug symbols (x86dbg understands both)
+  '-gdwarf', // DWARF (GDB / Linux compatible)
+  //'-g', '-gcodeview', // CodeView (PDB / windbg / Windows compatible)
 ];
 const C_COMPILER_ARGS = [];
 C_COMPILER_ARGS.push('-m64');
@@ -151,7 +152,7 @@ const generate_clangd_compile_commands = async () => {
 const child_spawn = async (cmd, args = [], opts = {}) => {
   const cwd = path.relative(process.cwd(), path.join(workspaceFolder, BUILD_PATH));
   // console.log(`cd ${cwd}`);
-  // console.log(`${opts.stdin ? `type ${opts.stdin} | ` : ''}${cmd} ${args.join(' ')}${opts.stdout ? ` > ${opts.stdout}` : ''}`);
+  console.log(`${opts.stdin ? `type ${opts.stdin} | ` : ''}${cmd} ${args.join(' ')}${opts.stdout ? ` > ${opts.stdout}` : ''}`);
   let stdin, stdout;
   const stdio = ['inherit', 'inherit', 'inherit'];
   if (opts.stdin) {

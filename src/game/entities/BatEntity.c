@@ -21,8 +21,8 @@ void BatEntity__init(Entity_t* entity, Engine__State_t* state) {
 
   Entity__init(entity, state);
 
-  entity->tick = &BatEntity__tick;
-  entity->render = &BatEntity__render;
+  entity->tick = BAT_ENTITY__TICK;
+  entity->render = BAT_ENTITY__RENDER;
 
   entity->transform.position.x = 0.0f;
   entity->transform.position.y = 0.0f;

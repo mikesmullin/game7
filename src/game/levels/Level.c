@@ -82,14 +82,14 @@ void Level__render(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
-    block->render(block, state);
+    Dispatcher__call(block->render, block, state);
     node = node->next;
   }
 
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    entity->render(entity, state);
+    Dispatcher__call(entity->render, entity, state);
     node = node->next;
   }
 }
@@ -100,14 +100,14 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
-    block->tick(block, state);
+    Dispatcher__call(block->tick, block, state);
     node = node->next;
   }
 
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    entity->tick(entity, state);
+    Dispatcher__call(entity->tick, entity, state);
     node = node->next;
   }
 }

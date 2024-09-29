@@ -20,8 +20,8 @@ void BatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   BatSpawnBlock_t* self = (BatSpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
-  block->tick = &BatSpawnBlock__tick;
-  block->render = &BatSpawnBlock__render;
+  block->tick = BAT_SPAWN_BLOCK__TICK;
+  block->render = BAT_SPAWN_BLOCK__RENDER;
   self->firstTick = true;
 }
 

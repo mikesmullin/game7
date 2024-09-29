@@ -19,8 +19,8 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
 
-  entity->tick = &Player__tick;
-  entity->render = &Player__render;
+  entity->tick = PLAYER_ENTITY__TICK;
+  entity->render = PLAYER_ENTITY__RENDER;
 
   self->input.xAxis = 0.0f;
   self->input.yAxis = 0.0f;

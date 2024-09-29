@@ -18,8 +18,8 @@ Menu_t* TitleMenu__alloc(Arena_t* arena) {
 void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
-  menu->tick = &TitleMenu__tick;
-  menu->render = &TitleMenu__render;
+  menu->tick = TITLE_MENU__TICK;
+  menu->render = TITLE_MENU__RENDER;
 
   state->Vulkan__FReadImage(&self->bmp, "../assets/textures/title.png");
 

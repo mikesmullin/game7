@@ -13,8 +13,8 @@ Block_t* WallBlock__alloc(Arena_t* arena) {
 void WallBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   WallBlock_t* self = (WallBlock_t*)block;
   Block__init(block, state, x, y);
-  block->tick = &WallBlock__tick;
-  block->render = &WallBlock__render;
+  block->tick = WALL_BLOCK__TICK;
+  block->render = WALL_BLOCK__RENDER;
 }
 
 void WallBlock__render(Block_t* block, Engine__State_t* state) {

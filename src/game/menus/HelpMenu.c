@@ -14,8 +14,8 @@ Menu_t* HelpMenu__alloc(Arena_t* arena) {
 }
 
 void HelpMenu__init(Menu_t* menu, Engine__State_t* state) {
-  menu->tick = &HelpMenu__tick;
-  menu->render = &HelpMenu__render;
+  menu->tick = HELP_MENU__TICK;
+  menu->render = HELP_MENU__RENDER;
 }
 
 void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state) {
