@@ -5,6 +5,9 @@
 #include "../Dispatcher.h"
 #include "../Logic.h"
 
+// blocks are like Unity Behaviors,
+// except they are instantiated from RGB pixel data
+
 Block_t* Block__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Block_t));
 }
