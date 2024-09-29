@@ -2,6 +2,10 @@
 
 This prototype explores 8-bit/retro style gaming.
 
+#### Title Screen
+
+![title screen](assets/textures/title.png)
+
 ### Features include:
 - Stateful Hot-reloading (via .DLL + file watcher)
 - Metaprogramming (via [mikesmullin/metacode](https://github.com/mikesmullin/metacode/))
