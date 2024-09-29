@@ -6,6 +6,7 @@
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
 #include "../../lib/Math.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "Entity.h"
 

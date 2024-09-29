@@ -2,6 +2,7 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 
 Block_t* Block__alloc(Arena_t* arena) {

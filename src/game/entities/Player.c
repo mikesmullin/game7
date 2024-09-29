@@ -5,6 +5,7 @@
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
 #include "../../lib/Math.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 
 static const f32 PLAYER_WALK_SPEED = 1.5f;  // per-second

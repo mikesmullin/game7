@@ -9,12 +9,12 @@ typedef double f64;
 
 #include "../lib/Bitmap.h"
 #include "../lib/GLMShim.h"
-#include "Dispatcher.h"
 
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
 typedef struct Level_t Level_t;
+typedef enum DispatchFnId DispatchFnId;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);

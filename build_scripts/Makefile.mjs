@@ -27,6 +27,9 @@ const DEBUG_COMPILER_ARGS = [
   // export debug symbols (x86dbg understands both)
   '-gdwarf', // DWARF (GDB / Linux compatible)
   //'-g', '-gcodeview', // CodeView (PDB / windbg / Windows compatible)
+
+  // ignore specific warnings
+  '-Wno-microsoft-enum-forward-reference',
 ];
 const C_COMPILER_ARGS = [];
 C_COMPILER_ARGS.push('-m64');

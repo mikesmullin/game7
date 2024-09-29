@@ -8,6 +8,7 @@
 #include "../lib/Keyboard.h"
 #include "../lib/List.h"
 #include "../lib/Math.h"
+#include "Dispatcher.h"
 #include "Logic.h"
 #include "entities/Player.h"
 #include "levels/Level.h"

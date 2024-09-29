@@ -6,6 +6,7 @@
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
 #include "../../lib/List.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../entities/BatEntity.h"
 #include "Block.h"

@@ -6,6 +6,7 @@
 #include "../../lib/Bitmap.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Keyboard.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "TitleMenu.h"
 

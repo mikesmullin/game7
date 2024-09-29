@@ -7,6 +7,7 @@
 #include "../../lib/List.h"
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../blocks/BatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"

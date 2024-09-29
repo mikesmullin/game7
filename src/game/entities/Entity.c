@@ -2,6 +2,7 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
+#include "../Dispatcher.h"
 #include "../Logic.h"
 
 Entity_t* Entity__alloc(Arena_t* arena) {
