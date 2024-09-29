@@ -122,7 +122,16 @@ void Window__RenderLoop(
   u32 elapsedRender = 0;
   u32 costPhysics = 0;
   u32 costRender = 0;
+  u32 costThrottle = 0;
+  u32 costTotal = 0;
   f64 deltaTime = 0.0f;
+  u64 mavgWindow[renderFps];
+  for (u32 i = 0; i < renderFps; i++) {
+    mavgWindow[i] = 0.0f;
+  }
+  u64 mavgCursor = 0;
+  f64 mavgLastSum = 0;
+  f64 mavgLastAvg = 0;
   SDL_Event e;
   while (!self->quit) {
     // input handling
@@ -180,22 +189,44 @@ void Window__RenderLoop(
       currentTime = Time__Now();
       elapsedRender = currentTime - lastRender;
       if (elapsedRender > renderInterval) {
-        Vulkan__AwaitNextFrame(self->vulkan);
+        // drop frames while avg perf is low
+        if (mavgLastAvg > 1000.0 / 16) {
+          // enough of these will bring the average back down
+          costThrottle -= 1;  // -1 brings it down slowly
 
-        currentTime = Time__Now();
-        deltaTime = (currentTime - lastRender) / 1000.0f;
-        lastRender = currentTime;
+          LOG_DEBUGF(
+              "DROPPED FRAME. mavgLastAvg %6.3f costThrottled %u",
+              mavgLastAvg,
+              costThrottle);
+        } else {
+          Vulkan__AwaitNextFrame(self->vulkan);
 
-        renderCallback(currentTime, deltaTime, costPhysics, costRender);
-        Vulkan__DrawFrame(self->vulkan);
+          currentTime = Time__Now();
+          deltaTime = (currentTime - lastRender) / 1000.0f;
+          lastRender = currentTime;
 
-        currentTime = Time__Now();
-        costRender = currentTime - lastRender;
+          renderCallback(currentTime, deltaTime, costPhysics, costRender);
+          Vulkan__DrawFrame(self->vulkan);
+
+          // LOG_DEBUGF("mavgLastAvg %6.3f ", mavgLastAvg);
+
+          currentTime = Time__Now();
+          costRender = currentTime - lastRender;
+
+          costThrottle = costPhysics + costRender;
+        }
+      }
+
+      costTotal = costPhysics + costRender;
+
+      // calc average cost (over past second)
+      mavgLastAvg = Math__mavg(mavgWindow, renderFps, costThrottle, &mavgCursor, &mavgLastSum);
+
+      if (costTotal < 1) {
+        // sleep to prevent hot loop
+        SLEEP(1);
       }
     }
-
-    // sleep to control the frame rate
-    SLEEP(1);
   }
 }
 

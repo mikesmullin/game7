@@ -62,3 +62,17 @@ f64 Math__fmod(f64 n, f64 max) {
   }
   return n;
 }
+
+// moving average over (requires array)
+f64 Math__mavg(u64 arr[], const u64 len, const u64 n, u64* idx, f64* sum) {
+  // subtract the oldest value from the sum
+  *sum -= arr[*idx];
+  // add the new value to the sum
+  *sum += n;
+  // replace the oldest value with the new value
+  arr[*idx] = n;
+  // update the index
+  *idx = (*idx + 1) % len;
+  // return the new average
+  return *sum / len;
+}

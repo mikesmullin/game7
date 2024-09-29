@@ -24,9 +24,9 @@ void BatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->tick = BAT_SPAWN_BLOCK__TICK;
   block->render = BAT_SPAWN_BLOCK__RENDER;
   self->firstTick = true;
-  self->spawnCount = 1;              // instances
-  self->spawnInterval = 1.0f / 100;  // per sec
-  self->animTime = 0;                // counter
+  self->spawnCount = 1;               // instances
+  self->spawnInterval = 1.0f / 1000;  // per sec
+  self->animTime = 0;                 // counter
   self->spawnedCount = 0;
 }
 
