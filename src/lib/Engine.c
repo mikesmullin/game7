@@ -52,6 +52,7 @@ int Engine__Loop() {
 
   Arena__Alloc(&arena, 1024 * 1024 * 50);  // MB
   state = Arena__Push(&arena, sizeof(Engine__State_t));
+  state->arena = &arena;
   fm = Arena__Push(&arena, sizeof(FileMonitor_t));
   Time__MeasureCycles();
   char* DLL_PATH = "src/game/Logic.c.dll";
@@ -70,28 +71,24 @@ int Engine__Loop() {
   state->VulkanWrapper__GetCurrentFrame = &VulkanWrapper__GetCurrentFrame;
   state->VulkanWrapper__SetAspectRatio = &VulkanWrapper__SetAspectRatio;
 
-  File__StartMonitor(fm);
+  SDL__Init();
+  state->audio = Audio__Alloc(state->arena);
+  state->Audio__LoadAudioFile = &Audio__LoadAudioFile;
+  state->Audio__PlayAudio = &Audio__PlayAudio;
+  state->Audio__ResumeAudio = &Audio__ResumeAudio;
+  state->Audio__StopAudio = &Audio__StopAudio;
 
+  File__StartMonitor(fm);
   if (!load_logic(DLL_PATH)) {
     return 1;
   }
-  state->arena = &arena;
   logic_oninit_data(state);
 
   VulkanWrapper__Init(&vulkan);
   Vulkan__InitDriver1(&vulkan);
 
   Window__New(&window, state->WINDOW_TITLE, state->WINDOW_WIDTH, state->WINDOW_HEIGHT, &vulkan);
-  SDL__Init();
-  Audio__Init();
-
-  state->Audio__LoadAudioFile = &Audio__LoadAudioFile;
-  state->Audio__PlayAudio = &Audio__PlayAudio;
-  state->Audio__ResumeAudio = &Audio__ResumeAudio;
-  state->Audio__StopAudio = &Audio__StopAudio;
-
   state->Window__CaptureMouse = &Window__CaptureMouse;
-
   state->kbState = Keyboard__Alloc(state->arena);
   state->mState = Finger__Alloc(state->arena);
 
@@ -196,7 +193,7 @@ int Engine__Loop() {
   Vulkan__DeviceWaitIdle(&vulkan);
   Gamepad__Shutdown(&gamePad1);
   Vulkan__Cleanup(&vulkan);
-  Audio__Shutdown();
+  Audio__Shutdown(state->audio);
   Window__Shutdown(&window);
   Arena__Free(&arena);
   LOG_INFOF("end engine.");

@@ -52,11 +52,10 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   state->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
 
   // preload audio
-  logic->audioFiles = List__alloc(state->arena);
-  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/title.wav");
-  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/pickupCoin.wav");
-  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/click.wav");
-  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/powerUp.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/title.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/pickupCoin.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/click.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/powerUp.wav");
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {

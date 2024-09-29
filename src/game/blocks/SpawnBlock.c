@@ -37,8 +37,8 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
   if (self->firstTick) {
     self->firstTick = false;
 
-    state->Audio__StopAudio(AUDIO_POWERUP);
-    state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
+    state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
+    state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
     // TODO: fix the coords being rendered out of order and flipped
     logic->game->curPlyr->transform.position.x = block->y + 0.8f;

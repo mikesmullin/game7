@@ -64,23 +64,23 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
 
   if (!self->playedAudio) {
     self->playedAudio = true;
-    state->Audio__StopAudio(AUDIO_TITLE);
-    state->Audio__ResumeAudio(AUDIO_TITLE, false, 1.0f);
+    state->Audio__StopAudio(state->audio, AUDIO_TITLE);
+    state->Audio__ResumeAudio(state->audio, AUDIO_TITLE, false, 1.0f);
   }
   if (state->kbState->fwd && self->selection > 0) {
     self->selection--;
-    state->Audio__StopAudio(AUDIO_CLICK);
-    state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);
+    state->Audio__StopAudio(state->audio, AUDIO_CLICK);
+    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
   }
   if (state->kbState->back && self->selection < self->options->len - 1) {
     self->selection++;
-    state->Audio__StopAudio(AUDIO_CLICK);
-    state->Audio__ResumeAudio(AUDIO_CLICK, false, 1.0f);
+    state->Audio__StopAudio(state->audio, AUDIO_CLICK);
+    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
   }
   if (state->kbState->use) {
     state->kbState->use = false;
-    state->Audio__StopAudio(AUDIO_POWERUP);
-    state->Audio__ResumeAudio(AUDIO_POWERUP, false, 1.0f);
+    state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
+    state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
     if (0 == self->selection) {
       logic->game->menu = NULL;

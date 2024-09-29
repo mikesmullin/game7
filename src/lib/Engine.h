@@ -14,6 +14,7 @@ typedef float f32;
 typedef double f64;
 
 typedef struct Arena_t Arena_t;
+typedef struct Audio_t Audio_t;
 typedef struct Bitmap_t Bitmap_t;
 typedef struct FingerState_t FingerState_t;
 typedef struct KbInputState_t KbInputState_t;
@@ -49,6 +50,7 @@ typedef struct ubo_ProjView_t {
 typedef struct Engine__State_t {
   Arena_t* arena;
   Logic__State_t* local;
+  Audio_t* audio;
   f64 currentTime;
   f64 deltaTime;
   char* WINDOW_TITLE;
@@ -78,10 +80,10 @@ typedef struct Engine__State_t {
   u8 (*VulkanWrapper__GetCurrentFrame)();
   void (*VulkanWrapper__SetAspectRatio)(f32 aspectRatio);
 
-  void (*Audio__LoadAudioFile)(const char* path);
-  void (*Audio__PlayAudio)(const int id, const bool loop, const double gain);
-  void (*Audio__ResumeAudio)(const int id, const bool loop, const double gain);
-  void (*Audio__StopAudio)(const int id);
+  void (*Audio__LoadAudioFile)(Arena_t* arena, Audio_t* self, const char* path);
+  void (*Audio__PlayAudio)(Audio_t* self, const int id, const bool loop, const double gain);
+  void (*Audio__ResumeAudio)(Audio_t* self, const int id, const bool loop, const double gain);
+  void (*Audio__StopAudio)(Audio_t* self, const int id);
 
   void (*Window__CaptureMouse)(const bool state);
   bool mouseCaptured;

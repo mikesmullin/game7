@@ -171,7 +171,6 @@ typedef struct Logic__State_t {
   f32* zbufWall;
   Bitmap_t atlas;
   Bitmap_t glyphs0;
-  List_t* audioFiles;
 
   bool isVBODirty;
   bool isUBODirty[2];

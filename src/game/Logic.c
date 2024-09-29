@@ -43,13 +43,6 @@ __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
 __declspec(dllexport) void logic_oninit_compute(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
-  // preload audio assets
-  List__Node_t* node = logic->audioFiles->head;
-  for (u32 i = 0; i < logic->audioFiles->len; i++) {
-    state->Audio__LoadAudioFile(node->data);
-    node = node->next;
-  }
-
   // Vulkan scene
   glms_vec3_copy((vec3){0, 0, 1.5}, state->world.cam);
   glms_vec3_copy((vec3){0, 0, 0}, state->world.look);
@@ -72,7 +65,7 @@ __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
     state->dllLoadedOnce = true;
     // doesn't play audio the first time proc runs
   } else {
-    state->Audio__ResumeAudio(AUDIO_PICKUP_COIN, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_PICKUP_COIN, false, 1.0f);
   }
 }
 
