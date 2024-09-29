@@ -25,9 +25,9 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
   state->Vulkan__FReadImage(&self->bmp, "../assets/textures/title.png");
 
   self->options = List__alloc(state->arena);
-  List__append(state->arena, self->options, "New game");
-  List__append(state->arena, self->options, "Help");
-  List__append(state->arena, self->options, "About");
+  List__append(state->arena, self->options, String__alloc(state->arena, "New game"));
+  List__append(state->arena, self->options, String__alloc(state->arena, "Help"));
+  List__append(state->arena, self->options, String__alloc(state->arena, "About"));
   self->selection = 0;
   self->playedAudio = false;
 }
@@ -45,7 +45,8 @@ void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state) {
       color = 0xff80ffff;
     }
 
-    Bitmap__DebugText(&logic->screen, &logic->glyphs0, 20, 6 * i + 120, color, 0, c->data);
+    String_t* str = c->data;
+    Bitmap__DebugText(&logic->screen, &logic->glyphs0, 20, 6 * i + 120, color, 0, str->str);
     c = c->next;
   }
 
