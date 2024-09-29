@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "../../lib/Arena.h"
-#include "../../lib/Array.h"
 #include "../../lib/Bitmap.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Keyboard.h"
@@ -34,7 +33,7 @@ void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state) {
       "",
       "Space uses items",
   };
-  for (u8 i = 0; i < ARRAY_COUNT(lines); i++) {
+  for (u8 i = 0; i < 7; i++) {
     Bitmap__DebugText(&logic->screen, &logic->glyphs0, 4, 6 * i + 4, 0xffffffff, 0, lines[i]);
   }
 }

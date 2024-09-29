@@ -6,7 +6,6 @@
 #include <windows.h>
 
 #include "Arena.h"
-#include "Array.h"
 #include "Audio.h"
 #include "Bitmap.h"
 #include "File.h"
@@ -167,14 +166,15 @@ int Engine__Loop() {
   Vulkan__CreateTextureImageView(&vulkan);
   Vulkan__CreateTextureSampler(&vulkan);
   Vulkan__CreateVertexBuffer(&vulkan, 0, sizeof(state->vertices), state->vertices);
+  u8 indicesCount = 6;
   Vulkan__CreateVertexBuffer(&vulkan, 1, sizeof(state->instances), state->instances);
-  Vulkan__CreateIndexBuffer(&vulkan, sizeof(state->indices), state->indices);
+  Vulkan__CreateIndexBuffer(&vulkan, sizeof(u16) * indicesCount, state->indices);
   Vulkan__CreateUniformBuffers(&vulkan, sizeof(state->ubo1));
   Vulkan__CreateDescriptorPool(&vulkan);
   Vulkan__CreateDescriptorSets(&vulkan);
   Vulkan__CreateCommandBuffers(&vulkan);
   Vulkan__CreateSyncObjects(&vulkan);
-  vulkan.m_drawIndexCount = ARRAY_COUNT(state->indices);
+  vulkan.m_drawIndexCount = indicesCount;
 
   // setup scene
 

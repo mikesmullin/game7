@@ -3,7 +3,6 @@
 #include <string.h>
 
 #include "../lib/Arena.h"
-#include "../lib/Array.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"

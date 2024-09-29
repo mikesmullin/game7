@@ -1,7 +1,6 @@
 #include "Game.h"
 
 #include "../lib/Arena.h"
-#include "../lib/Array.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
