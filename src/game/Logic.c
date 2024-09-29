@@ -1,9 +1,9 @@
 #include "Logic.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "../lib/Arena.h"
-#include "../lib/Bitmap.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/List.h"
@@ -88,8 +88,6 @@ __declspec(dllexport) void logic_onfixedupdate(Engine__State_t* state) {
 
 static f64 accumulator2 = 0.0f;
 static const f32 FPS_LOG_TIME_STEP = 1.0f;  // every second
-static f64 accumulator3 = 0.0f;
-static const f32 DEBUG_LOG_TIME_STEP = 1 * 60.0f;  // every 5sec
 static u16 frames = 0;
 
 // on draw
@@ -101,21 +99,14 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
   frames++;
   if (accumulator2 >= FPS_LOG_TIME_STEP) {
     onsecond = true;
-    // LOG_DEBUGF("%dfps", frames);
+
+    char title[100];
+    sprintf(title, "%s | FPS: %u", state->WINDOW_TITLE, frames);
+    state->Window__SetTitle(state->window, title);
     frames = 0;
 
     while (accumulator2 >= FPS_LOG_TIME_STEP) {
       accumulator2 -= FPS_LOG_TIME_STEP;
-    }
-  }
-
-  bool on5sec = false;
-  accumulator3 += state->deltaTime;
-  if (accumulator3 >= DEBUG_LOG_TIME_STEP) {
-    on5sec = true;
-
-    while (accumulator3 >= DEBUG_LOG_TIME_STEP) {
-      accumulator3 -= DEBUG_LOG_TIME_STEP;
     }
   }
 

@@ -1,6 +1,3 @@
-// the job of this file is to load all persistent systems
-// and then forward a fn pointer interface to the ephemeral game (script) logic
-
 #include "Engine.h"
 
 #include <windows.h>
@@ -22,11 +19,9 @@
 #include "VulkanWrapper.h"
 #include "Window.h"
 
-typedef f32 vec2[2];
-
+static Arena_t arena;
 static Engine__State_t* state;
 static FileMonitor_t* fm;
-static Arena_t arena;
 static Vulkan_t vulkan;
 static Window_t window;
 
@@ -88,7 +83,9 @@ int Engine__Loop() {
   Vulkan__InitDriver1(&vulkan);
 
   Window__New(&window, state->WINDOW_TITLE, state->WINDOW_WIDTH, state->WINDOW_HEIGHT, &vulkan);
+  state->window = &window;
   state->Window__CaptureMouse = &Window__CaptureMouse;
+  state->Window__SetTitle = &Window__SetTitle;
   state->kbState = Keyboard__Alloc(state->arena);
   state->mState = Finger__Alloc(state->arena);
 

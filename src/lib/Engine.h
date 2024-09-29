@@ -12,16 +12,18 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 typedef float f32;
 typedef double f64;
+typedef f32 vec2[2];
 
 typedef struct Arena_t Arena_t;
 typedef struct Audio_t Audio_t;
 typedef struct Bitmap_t Bitmap_t;
 typedef struct FingerState_t FingerState_t;
 typedef struct KbInputState_t KbInputState_t;
+typedef struct List_t List_t;
 typedef struct Logic__State_t Logic__State_t;
 typedef struct PointerInputState_t PointerInputState_t;
 typedef struct String_t String_t;
-typedef struct List_t List_t;
+typedef struct Window_t Window_t;
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit
 
@@ -50,6 +52,7 @@ typedef struct ubo_ProjView_t {
 typedef struct Engine__State_t {
   Arena_t* arena;
   Logic__State_t* local;
+  Window_t* window;
   Audio_t* audio;
   f64 currentTime;
   f64 deltaTime;
@@ -85,8 +88,9 @@ typedef struct Engine__State_t {
   void (*Audio__ResumeAudio)(Audio_t* self, const int id, const bool loop, const double gain);
   void (*Audio__StopAudio)(Audio_t* self, const int id);
 
-  void (*Window__CaptureMouse)(const bool state);
   bool mouseCaptured;
+  void (*Window__CaptureMouse)(const bool state);
+  void (*Window__SetTitle)(Window_t* window, const char* title);
 
   KbInputState_t* kbState;
   PointerInputState_t* mState;

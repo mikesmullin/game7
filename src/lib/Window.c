@@ -121,9 +121,6 @@ void Window__RenderLoop(
   u16 elapsedPhysics = 0;
   u16 elapsedRender = 0;
   f64 deltaTime = 0.0f;
-  u8 frameCount = 0;
-  u8 fpsAvg = 0;
-  char title[100];
   SDL_Event e;
   while (!self->quit) {
     // input handling
@@ -186,20 +183,14 @@ void Window__RenderLoop(
 
         renderCallback(currentTime, deltaTime);
         Vulkan__DrawFrame(self->vulkan);
-
-        frameCount++;
-        if (frameCount >= renderFps) {
-          fpsAvg = 1 / (deltaTime / frameCount);
-          // if titlebar updates are tracking with the wall clock seconds hand, then loop is on-time
-          // the value shown is potential frames (ie. accounts for spare cycles)
-          sprintf(title, "%s | pFPS: %u", self->title, fpsAvg);
-          SDL_SetWindowTitle(self->window, title);
-          frameCount = 0;
-        }
       }
     }
 
     // sleep to control the frame rate
     SLEEP(1);
   }
+}
+
+void Window__SetTitle(Window_t* window, const char* title) {
+  SDL_SetWindowTitle(window->window, title);
 }

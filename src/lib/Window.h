@@ -10,12 +10,12 @@ typedef double f64;
 typedef struct SDL_Window SDL_Window;
 typedef struct Vulkan_t Vulkan_t;
 
-typedef struct {
+typedef struct DrawableArea_t {
   u32 width;
   u32 height;
 } DrawableArea_t;
 
-typedef struct {
+typedef struct Window_t {
   bool quit;
   SDL_Window* window;
   char* title;
@@ -37,5 +37,6 @@ void Window__RenderLoop(
     const int renderFps,
     void (*physicsCallback)(const f64, const f64),
     void (*renderCallback)(const f64, const f64));
+void Window__SetTitle(Window_t* window, const char* title);
 
 #endif
