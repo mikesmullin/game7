@@ -8,6 +8,7 @@
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
+#include "../blocks/BatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"
 #include "../blocks/WallBlock.h"
 
@@ -49,6 +50,11 @@ Block_t* Level__makeBlock(Engine__State_t* state, u32 col, f32 x, f32 y) {
     SpawnBlock__init(block, state, x, y);
     return block;
   }
+  if (0xff241ced == col) {  // red
+    Block_t* block = BatSpawnBlock__alloc(state->arena);
+    BatSpawnBlock__init(block, state, x, y);
+    return block;
+  }
 
   LOG_DEBUGF("Unimplemented Level Block pixel color %08x", col);
   return NULL;
@@ -77,6 +83,13 @@ void Level__render(Level_t* level, Engine__State_t* state) {
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
     block->render(block, state);
+    node = node->next;
+  }
+
+  node = level->entities->head;
+  for (u32 i = 0; i < level->entities->len; i++) {
+    Entity_t* entity = node->data;
+    entity->render(entity, state);
     node = node->next;
   }
 }

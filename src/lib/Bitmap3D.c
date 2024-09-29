@@ -1,5 +1,6 @@
 #include "Bitmap3D.h"
 
+#include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -457,7 +458,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
   // y-axis = forward/backward(-)
   // z-axis = up/down
 
-  memset(logic->zbuf, -1.0f, game->CANVAS_WIDTH * game->CANVAS_HEIGHT * sizeof(f32));
+  for (u32 i = 0; i < game->CANVAS_WIDTH * game->CANVAS_HEIGHT; i++) {
+    logic->zbuf[i] = -1.0f;
+  }
+
   memset(logic->zbufWall, 0, game->CANVAS_WIDTH * sizeof(f32));
 
   if (true) {
@@ -512,12 +516,167 @@ void Bitmap3D__RenderHorizon(Engine__State_t* game) {
     memset(logic->screen.buf, 0, logic->screen.len);
   }
 
-  // Bitmap3D__RenderWall2(game, 2, 2, 2, 1, 3, 0x00ffffff, 3, 0);
-  // Bitmap3D__RenderWall2(game, 0, 2, 2, 2, 2, 0x00ffffff, 2, 0);
-  // Bitmap3D__RenderWall2(game, 0, 1, 0, 2, 1, 0x00ffffff, 1, 0);
-  // Bitmap3D__RenderWall2(game, 2, 1, 0, 1, 4, 0x00ffffff, 4, 0);
+  // Bitmap3D__RenderSprite(game, 37, 0, -22, 1, 0xff0000ff);
 
   // Bitmap3D__RenderFloor(game);
+}
+
+void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex, u32 color) {
+  Logic__State_t* logic = state->local;
+
+  f64 t = x;
+  x = -z;
+  z = t;
+
+  f32 cX = -camX;
+  f32 cY = camY;
+  f32 cZ = -camZ + 0.5f;
+  f32 rS = rSin;
+  f32 rC = rCos;
+
+  f64 xc = (x - cX) * 2 - rSin * 0.2;
+  f64 yc = (y - cZ) * 2;
+  f64 zc = (z - cY) * 2 - rCos * 0.2;
+
+  f64 xx = xc * rCos - zc * rSin;
+  f64 yy = yc;
+  f64 zz = zc * rCos + xc * rSin;
+
+  // xx = 0.2f;
+  // yy = 0.2f;
+  // zz = 0.2f;
+
+  if (zz < 0.1) return;
+
+  f64 xCenter = W / 2.0f;
+  f64 yCenter = H / 2.0f;
+  f64 xPixel = xCenter - (xx / zz * fov);
+  f64 yPixel = (yy / zz * fov + yCenter);
+
+  f64 xPixel0 = xPixel - H / zz;
+  f64 xPixel1 = xPixel + H / zz;
+
+  f64 yPixel0 = yPixel - H / zz;
+  f64 yPixel1 = yPixel + H / zz;
+
+  s32 xp0 = (s32)ceil(xPixel0);
+  s32 xp1 = (s32)ceil(xPixel1);
+  s32 yp0 = (s32)ceil(yPixel0);
+  s32 yp1 = (s32)ceil(yPixel1);
+
+  if (xp0 < 0) xp0 = 0;
+  if (xp1 > W) xp1 = W;
+  if (yp0 < 0) yp0 = 0;
+  if (yp1 > H) yp1 = H;
+  zz *= 4;
+
+  Bitmap3D__DebugText(
+      state,
+      4,
+      6 * 0,
+      0xffffffff,
+      0,
+      "x %+03.1f y %+03.1f z %+03.1f cX %+03.1f cY %+03.1f cZ %+03.1f",
+      x,
+      y,
+      z,
+      camX,
+      camY,
+      camZ);
+
+  Bitmap3D__DebugText(
+      state,
+      4,
+      6 * 1,
+      0xffffffff,
+      0,
+      "xc %+06.1f yc %+06.1f zc %+06.1f",
+      xc,
+      yc,
+      zc);
+
+  Bitmap3D__DebugText(
+      state,
+      4,
+      6 * 2,
+      0xffffffff,
+      0,
+      "xx %+06.1f yy %+06.1f zz %+06.1f",
+      xx,
+      yy,
+      zz);
+
+  Bitmap3D__DebugText(
+      state,
+      4,
+      6 * 3,
+      0xffffffff,
+      0,
+      "xP %+06.1f yP %+06.1f xP0 %+06.1f xP1 %+06.1f",
+      xPixel,
+      yPixel,
+      xPixel0,
+      xPixel1);
+
+  Bitmap3D__DebugText(
+      state,
+      4,
+      6 * 4,
+      0xffffffff,
+      0,
+      "yP0 %+06.1f yP1 %+06.1f xp0 %d xp1 %d yp0 %d yp1 %d",
+      yPixel0,
+      yPixel1,
+      xp0,
+      xp1,
+      yp0,
+      yp1);
+
+  for (s32 yp = yp0; yp < yp1; yp++) {
+    f64 ypr = (yp - yPixel0) / (yPixel1 - yPixel0);
+    s32 yt = (s32)(ypr * 16);
+    if (yp == logic->CANVAS_DEBUG_Y) {
+      Bitmap3D__DebugText(state, 4, 6 * 5, 0xffffffff, 0, "ypr %+06.1f yt %d yp %d", ypr, yt, yp);
+    }
+
+    // zz = Math__map(zz, 0, 50.0f, -1.0f, 1.0f);
+
+    for (s32 xp = xp0; xp < xp1; xp++) {
+      f64 xpr = (xp - xPixel0) / (xPixel1 - xPixel0);
+      s32 xt = (s32)(xpr * 16);
+
+      if (yp == logic->CANVAS_DEBUG_Y && xp == logic->CANVAS_DEBUG_X) {
+        Bitmap3D__DebugText(
+            state,
+            4,
+            6 * 6,
+            0xffffffff,
+            0,
+            "xpr %+06.1f xt %d zb %+06.1f zz %+06.1f xp %d",
+            xpr,
+            xt,
+            logic->zbuf[xp + yp * W],
+            zz,
+            xp);
+      }
+      if (logic->zbuf[xp + yp * W] < zz) {
+        u32 col = Bitmap__Get2DTiledPixel(
+            &logic->atlas,
+            xt / 2,
+            yt / 2,
+            logic->ATLAS_TILE_SIZE,
+            tex,
+            0,
+            0xffff00ff);
+        if (col != 0xff000000) {
+          Bitmap__Set2DPixel(&logic->screen, xp, yp, col /* * color*/);
+          logic->zbuf[(s32)(xp + yp * W)] = zz;
+
+          Bitmap3D__DebugText(state, 4, 6 * 7, 0xffffff00, 0, "debugger");
+        }
+      }
+    }
+  }
 }
 
 void Bitmap3D__RenderFloor(Engine__State_t* game) {

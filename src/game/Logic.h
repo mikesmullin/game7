@@ -13,6 +13,7 @@ typedef double f64;
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
+typedef struct Level_t Level_t;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
@@ -87,6 +88,7 @@ typedef struct TitleMenu_t {
   List_t* options;
   s8 selection;
   bool playedAudio;
+  bool skip;
 } TitleMenu_t;
 
 typedef struct AboutMenu_t {
@@ -102,8 +104,8 @@ typedef struct Entity_t {
   void (*render)(struct Entity_t* menu, Engine__State_t* state);
   u32 id;
   Transform_t transform;
-  void* level;
-  void* sprites;
+  Level_t* level;
+  List_t* sprites;
   bool flying;
   bool removed;
 } Entity_t;
@@ -113,6 +115,10 @@ typedef struct Player_t {
   Camera_t camera;
   VirtualJoystick_t input;
 } Player_t;
+
+typedef struct BatEntity_t {
+  Entity_t base;
+} BatEntity_t;
 
 typedef struct Sprite_t {
   void (*tick)(struct Sprite_t* sprite, Engine__State_t* state);
@@ -140,6 +146,11 @@ typedef struct SpawnBlock_t {
   Block_t base;
   bool firstTick;
 } SpawnBlock_t;
+
+typedef struct BatSpawnBlock_t {
+  Block_t base;
+  bool firstTick;
+} BatSpawnBlock_t;
 
 typedef struct Level_t {
   Bitmap_t* bmp;

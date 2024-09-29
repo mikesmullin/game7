@@ -77,12 +77,12 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
     state->Audio__StopAudio(state->audio, AUDIO_CLICK);
     state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
   }
-  if (state->kbState->use) {
+  if (self->skip || state->kbState->use) {
     state->kbState->use = false;
     state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
     state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
-    if (0 == self->selection) {
+    if (self->skip || 0 == self->selection) {
       logic->game->menu = NULL;
       logic->game->curLvl = Level__alloc(state->arena);
       Level__init(state->arena, logic->game->curLvl, state);

@@ -8,6 +8,7 @@ typedef double f64;
 typedef struct Engine__State_t Engine__State_t;
 
 void Bitmap3D__RenderHorizon(Engine__State_t* game);
+void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex, u32 color);
 void Bitmap3D__RenderFloor(Engine__State_t* game);
 void Bitmap3D__PostProcessing(Engine__State_t* game);
 void Bitmap3D__RenderWall2(

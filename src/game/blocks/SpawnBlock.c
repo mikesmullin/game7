@@ -5,7 +5,6 @@
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
-#include "../../lib/Log.h"
 #include "../Logic.h"
 #include "Block.h"
 
