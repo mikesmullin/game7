@@ -49,26 +49,27 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
 
-  if (state->mouseCaptured) {
+  if (!state->mouseCaptured) {
+    state->mState->x = 0;
+    state->mState->y = 0;
+  } else {
+    if (0 != state->mState->x) {
+      logic->game->curPlyr->transform.rotation.x += state->mState->x * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.x =
+          Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
+      state->mState->x = 0;
+    }
+
+    if (0 != state->mState->y) {
+      logic->game->curPlyr->transform.rotation.y += -state->mState->y * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.y =
+          Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
+      state->mState->y = 0;
+    }
+
     if (true == state->kbState->reload) {  // R
       state->kbState->reload = false;
       logic->game->curLvl->spawner->firstTick = true;  // tp to spawn
-    }
-
-    if (state->mouseCaptured) {
-      if (0 != state->mState->x) {
-        logic->game->curPlyr->transform.rotation.x += state->mState->x * PLAYER_LOOK_SPEED;
-        logic->game->curPlyr->transform.rotation.x =
-            Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
-        state->mState->x = 0;
-      }
-
-      if (0 != state->mState->y) {
-        logic->game->curPlyr->transform.rotation.y += -state->mState->y * PLAYER_LOOK_SPEED;
-        logic->game->curPlyr->transform.rotation.y =
-            Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
-        state->mState->y = 0;
-      }
     }
 
     // W-S Forward/Backward axis
