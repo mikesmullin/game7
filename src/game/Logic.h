@@ -119,6 +119,7 @@ typedef struct Player_t {
 
 typedef struct BatEntity_t {
   Entity_t base;
+  f32 xa, ya, za;
 } BatEntity_t;
 
 typedef struct Sprite_t {
@@ -151,6 +152,10 @@ typedef struct SpawnBlock_t {
 typedef struct BatSpawnBlock_t {
   Block_t base;
   bool firstTick;
+  u32 spawnCount;
+  f32 spawnInterval;
+  f32 animTime;
+  u32 spawnedCount;
 } BatSpawnBlock_t;
 
 typedef struct Level_t {

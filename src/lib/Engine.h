@@ -56,7 +56,9 @@ typedef struct Engine__State_t {
   Audio_t* audio;
   f64 currentTime;
   f64 deltaTime;
-  char* WINDOW_TITLE;
+  u32 costPhysics;
+  u32 costRender;
+  String_t* WINDOW_TITLE;
   char* ENGINE_NAME;
   u16 DIMS;
   u16 WINDOW_WIDTH;

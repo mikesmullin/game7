@@ -10,7 +10,7 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 BAT_FLY_SPEED = 0.5f;  // per-second
+static const f32 BAT_FLY_SPEED = 0.003f;  // per-second
 
 Entity_t* BatEntity__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(BatEntity_t));
@@ -33,6 +33,10 @@ void BatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->transform.rotation.y = 0.0f;
   entity->transform.rotation.z = 0.0f;
   entity->transform.rotation.w = 0.0f;
+
+  self->xa = Math__random(-1, 1);
+  self->ya = Math__random(-1, 1);
+  self->za = Math__random(-1, 1);
 }
 
 void BatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
@@ -51,4 +55,8 @@ void BatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
 void BatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   BatEntity_t* self = (BatEntity_t*)entity;
+
+  entity->transform.position.x += self->xa * BAT_FLY_SPEED;
+  entity->transform.position.y += self->ya * BAT_FLY_SPEED;
+  entity->transform.position.z += self->za * BAT_FLY_SPEED;
 }

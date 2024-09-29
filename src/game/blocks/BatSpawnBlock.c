@@ -24,6 +24,10 @@ void BatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->tick = BAT_SPAWN_BLOCK__TICK;
   block->render = BAT_SPAWN_BLOCK__RENDER;
   self->firstTick = true;
+  self->spawnCount = 1;              // instances
+  self->spawnInterval = 1.0f / 100;  // per sec
+  self->animTime = 0;                // counter
+  self->spawnedCount = 0;
 }
 
 void BatSpawnBlock__render(Block_t* block, Engine__State_t* state) {
@@ -37,15 +41,34 @@ void BatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
 
   if (self->firstTick) {
     self->firstTick = false;
-
-    // spawn entity
-    Entity_t* entity = BatEntity__alloc(state->arena);
-    BatEntity__init(entity, state);
-    // TODO: fix the coords being rendered out of order and flipped
-    entity->transform.position.x = block->y;
-    entity->transform.position.y = 0.370f;
-    entity->transform.position.z = -block->x;
-    entity->flying = true;
-    List__append(state->arena, state->local->game->curLvl->entities, entity);
   }
+
+  self->animTime += state->deltaTime;
+  while (self->animTime > self->spawnInterval) {
+    self->animTime -= self->spawnInterval;
+
+    // spawn entities (like a particle emitter)
+    for (u32 i = 0; i < self->spawnCount; i++) {
+      // TODO: associate spawned entities with spawning block?
+      Entity_t* entity = BatEntity__alloc(state->arena);
+      BatEntity__init(entity, state);
+      // TODO: fix the coords being rendered out of order and flipped
+      entity->transform.position.x = block->y;
+      entity->transform.position.y = 0.370f;
+      entity->transform.position.z = -block->x;
+      entity->flying = true;
+      List__append(state->arena, state->local->game->curLvl->entities, entity);
+      self->spawnedCount++;
+    }
+  }
+
+  Bitmap__DebugText(
+      &logic->screen,
+      &logic->glyphs0,
+      4,
+      6 * 20,
+      0xff00ff00,
+      0,
+      "cats %u",
+      self->spawnedCount);
 }

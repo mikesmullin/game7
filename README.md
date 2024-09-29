@@ -12,7 +12,7 @@ This prototype explores 8-bit/retro style gaming.
 - Modular
 - Object-Oriented (ie. `Class__Method` naming convention)
 - Inheritance (via Struct Composition) w/ method overriding (via [Dispatcher](src/game/Dispatcher.c))
-- Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints)
+- Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints, perf timers)
 
 ## Building
 

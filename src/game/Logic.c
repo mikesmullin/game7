@@ -9,6 +9,7 @@
 #include "../lib/List.h"
 #include "../lib/Log.h"
 #include "../lib/Math.h"
+#include "../lib/String.h"
 #include "Game.h"
 
 // on init (data only)
@@ -101,8 +102,16 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
   if (accumulator2 >= FPS_LOG_TIME_STEP) {
     onsecond = true;
 
-    char title[100];
-    sprintf(title, "%s | FPS: %u", state->WINDOW_TITLE, frames);
+    static char title[100];
+    sprintf(
+        title,
+        "%s | FPS %u P %u R %u pFPS %u",
+        state->WINDOW_TITLE->str,
+        frames,              // FPS = measured/counted frames per second
+        state->costPhysics,  // P = cost of last physics in ms
+        state->costRender,   // R = cost of last render in ms
+        // pFPS = potential frames per second (if it wasn't fixed)
+        1000 / (state->costPhysics + state->costRender + 1));  // +1 avoids div/0
     state->Window__SetTitle(state->window, title);
     frames = 0;
 

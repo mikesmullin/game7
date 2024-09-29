@@ -112,14 +112,16 @@ void Window__RenderLoop(
     const int physicsFps,
     const int renderFps,
     void (*physicsCallback)(const f64, const f64),
-    void (*renderCallback)(const f64, const f64)) {
+    void (*renderCallback)(const f64, const f64, const u32, const u32)) {
   const u8 physicsInterval = 1000 / physicsFps;
   const u8 renderInterval = 1000 / renderFps;
   u64 currentTime = Time__Now();
   u64 lastPhysics = currentTime - physicsInterval;
   u64 lastRender = currentTime - renderInterval;
-  u16 elapsedPhysics = 0;
-  u16 elapsedRender = 0;
+  u32 elapsedPhysics = 0;
+  u32 elapsedRender = 0;
+  u32 costPhysics = 0;
+  u32 costRender = 0;
   f64 deltaTime = 0.0f;
   SDL_Event e;
   while (!self->quit) {
@@ -165,10 +167,13 @@ void Window__RenderLoop(
       currentTime = Time__Now();
       elapsedPhysics = currentTime - lastPhysics;
       if (elapsedPhysics > physicsInterval) {
-        deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastPhysics));
+        deltaTime = (currentTime - lastPhysics) / 1000.0f;
         lastPhysics = currentTime;
 
         physicsCallback(currentTime, deltaTime);
+
+        currentTime = Time__Now();
+        costPhysics = currentTime - lastPhysics;
       }
 
       // Render update
@@ -178,11 +183,14 @@ void Window__RenderLoop(
         Vulkan__AwaitNextFrame(self->vulkan);
 
         currentTime = Time__Now();
-        deltaTime = 1.0f / MATH_MAX(1, (currentTime - lastRender));
+        deltaTime = (currentTime - lastRender) / 1000.0f;
         lastRender = currentTime;
 
-        renderCallback(currentTime, deltaTime);
+        renderCallback(currentTime, deltaTime, costPhysics, costRender);
         Vulkan__DrawFrame(self->vulkan);
+
+        currentTime = Time__Now();
+        costRender = currentTime - lastRender;
       }
     }
 

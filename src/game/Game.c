@@ -8,6 +8,7 @@
 #include "../lib/Keyboard.h"
 #include "../lib/List.h"
 #include "../lib/Math.h"
+#include "../lib/String.h"
 #include "Dispatcher.h"
 #include "Logic.h"
 #include "entities/Player.h"
@@ -30,7 +31,7 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   game->lastUid = 0;
 
   // window
-  state->WINDOW_TITLE = "Retro";
+  state->WINDOW_TITLE = String__alloc(state->arena, "Retro");
   state->CANVAS_WIDTH = state->DIMS;
   state->CANVAS_HEIGHT = state->DIMS;
   state->PHYSICS_FPS = 50;

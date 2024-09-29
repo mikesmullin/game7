@@ -26,7 +26,7 @@ static Vulkan_t vulkan;
 static Window_t window;
 
 static void physicsCallback(const f64 currentTime, const f64 deltaTime);
-static void renderCallback(const f64 currentTime, const f64 deltaTime);
+static void renderCallback(const f64, const f64, const u32, const u32);
 
 static int check_load_logic() {
   char path[32] = "src/game/";
@@ -82,7 +82,12 @@ int Engine__Loop() {
   VulkanWrapper__Init(&vulkan);
   Vulkan__InitDriver1(&vulkan);
 
-  Window__New(&window, state->WINDOW_TITLE, state->WINDOW_WIDTH, state->WINDOW_HEIGHT, &vulkan);
+  Window__New(
+      &window,
+      state->WINDOW_TITLE->str,
+      state->WINDOW_WIDTH,
+      state->WINDOW_HEIGHT,
+      &vulkan);
   state->window = &window;
   state->Window__CaptureMouse = &Window__CaptureMouse;
   state->Window__SetTitle = &Window__SetTitle;
@@ -107,7 +112,7 @@ int Engine__Loop() {
 #endif
   Vulkan__AssertDriverExtensionsSupported(&vulkan);
 
-  Vulkan__CreateInstance(&vulkan, state->WINDOW_TITLE, state->ENGINE_NAME, 1, 0, 0);
+  Vulkan__CreateInstance(&vulkan, state->WINDOW_TITLE->str, state->ENGINE_NAME, 1, 0, 0);
   Vulkan__InitDriver2(&vulkan);
 
   Vulkan__UsePhysicalDevice(&vulkan, 0);
@@ -217,8 +222,11 @@ static void physicsCallback(const f64 currentTime, const f64 deltaTime) {
   logic_onfixedupdate(state);
 }
 
-static void renderCallback(const f64 currentTime, const f64 deltaTime) {
+static void renderCallback(
+    const f64 currentTime, const f64 deltaTime, const u32 costPhysics, const u32 costRender) {
   state->currentTime = currentTime;
   state->deltaTime = deltaTime;
+  state->costPhysics = costPhysics;
+  state->costRender = costRender;
   logic_onupdate(state);
 }

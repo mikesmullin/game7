@@ -36,7 +36,7 @@ void Window__RenderLoop(
     const int physicsFps,
     const int renderFps,
     void (*physicsCallback)(const f64, const f64),
-    void (*renderCallback)(const f64, const f64));
+    void (*renderCallback)(const f64, const f64, const u32, const u32));
 void Window__SetTitle(Window_t* window, const char* title);
 
 #endif
