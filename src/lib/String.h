@@ -11,7 +11,7 @@ typedef uint64_t u64;
 typedef struct Arena_t Arena_t;
 
 // "Fat Pointer"
-typedef struct {
+typedef struct String8 {
   u32 size;
   char* str;
 } String8;
@@ -23,7 +23,7 @@ typedef struct String8Node {
   String8* string;
 } String8Node;
 
-typedef struct {
+typedef struct String8List {
   String8Node* first;
   String8Node* last;
   u64 node_count;

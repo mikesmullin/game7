@@ -22,6 +22,6 @@ List__Node_t* List__Node__alloc(Arena_t* arena);
 void List__init(List_t* list);
 void List__Node__init(List__Node_t* node, void* data);
 void List__append(Arena_t* arena, List_t* list, void* data);
-void* List__getOne(List_t* list, u32 index);
+void* List__get(List_t* list, u32 index);
 
 #endif  // LIST_H

@@ -14,17 +14,15 @@ typedef float f32;
 typedef double f64;
 
 typedef struct Arena_t Arena_t;
-typedef struct KbInputState_t KbInputState_t;
-typedef struct PointerInputState_t PointerInputState_t;
-typedef struct FingerState_t FingerState_t;
 typedef struct Bitmap_t Bitmap_t;
+typedef struct FingerState_t FingerState_t;
+typedef struct KbInputState_t KbInputState_t;
 typedef struct Logic__State_t Logic__State_t;
+typedef struct PointerInputState_t PointerInputState_t;
+typedef struct String8 String8;
+typedef struct List_t List_t;
 
 #define MAX_INSTANCES 255  // TODO: find out how to exceed this limit
-
-typedef struct Mesh_t {
-  vec2 vertex;
-} Mesh_t;
 
 typedef struct Instance_t {
   vec3 pos;
@@ -62,12 +60,12 @@ typedef struct Engine__State_t {
   u16 CANVAS_HEIGHT;
   u8 PHYSICS_FPS;
   u8 RENDER_FPS;
-  char* shaderFiles[2];
+  List_t* shaderFiles;
   World_t world;
   u16 instanceCount;
   Instance_t instances[MAX_INSTANCES];
   u16 indices[6];
-  Mesh_t vertices[4];
+  vec2 vertices[4];
   ubo_ProjView_t ubo1;  // projection x view matrices
 
   int (*check_load_logic)();

@@ -1,11 +1,13 @@
 #include "Game.h"
 
 #include "../lib/Arena.h"
+#include "../lib/Array.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Keyboard.h"
+#include "../lib/List.h"
 #include "../lib/Math.h"
 #include "Logic.h"
 #include "entities/Player.h"
@@ -36,6 +38,26 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   // debug
   logic->CANVAS_DEBUG_X = state->CANVAS_WIDTH / 2.0f;
   logic->CANVAS_DEBUG_Y = state->CANVAS_HEIGHT / 2.0f;
+
+  Bitmap__Alloc(
+      state->arena,
+      &logic->screen,
+      state->CANVAS_WIDTH,
+      state->CANVAS_HEIGHT,
+      4 /*RGBA*/);
+  logic->zbuf = Arena__Push(state->arena, state->CANVAS_WIDTH * state->CANVAS_HEIGHT * sizeof(f32));
+  logic->zbufWall = Arena__Push(state->arena, state->CANVAS_WIDTH * sizeof(f32));
+
+  // preload textures
+  state->Vulkan__FReadImage(&logic->atlas, "../assets/textures/atlas.png");
+  state->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
+
+  // preload audio
+  logic->audioFiles = List__alloc(state->arena);
+  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/title.wav");
+  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/pickupCoin.wav");
+  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/click.wav");
+  List__append(state->arena, logic->audioFiles, "../assets/audio/sfx/powerUp.wav");
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {

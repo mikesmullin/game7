@@ -14,6 +14,7 @@
 #include "Gamepad.h"
 #include "HotReload.h"
 #include "Keyboard.h"
+#include "List.h"
 #include "Log.h"
 #include "SDL.h"
 #include "String.h"
@@ -21,6 +22,8 @@
 #include "Vulkan.h"
 #include "VulkanWrapper.h"
 #include "Window.h"
+
+typedef f32 vec2[2];
 
 static Engine__State_t* state;
 static FileMonitor_t* fm;
@@ -132,9 +135,9 @@ int Engine__Loop() {
   Vulkan__CreateDescriptorSetLayout(&vulkan);
   Vulkan__CreateGraphicsPipeline(
       &vulkan,
-      state->shaderFiles[0],
-      state->shaderFiles[1],
-      sizeof(Mesh_t),
+      List__get(state->shaderFiles, 0),
+      List__get(state->shaderFiles, 1),
+      sizeof(vec2),
       sizeof(Instance_t),
       5,
       (u32[5]){0, 1, 1, 1, 1},
@@ -146,7 +149,7 @@ int Engine__Loop() {
           VK_FORMAT_R32G32B32_SFLOAT,
           VK_FORMAT_R32_UINT},
       (u32[5]){
-          offsetof(Mesh_t, vertex),
+          0,
           offsetof(Instance_t, pos),
           offsetof(Instance_t, rot),
           offsetof(Instance_t, scale),

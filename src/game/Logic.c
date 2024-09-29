@@ -1,10 +1,13 @@
 #include "Logic.h"
 
+#include <string.h>
+
 #include "../lib/Arena.h"
 #include "../lib/Array.h"
 #include "../lib/Bitmap.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
+#include "../lib/List.h"
 #include "../lib/Log.h"
 #include "../lib/Math.h"
 #include "Game.h"
@@ -24,29 +27,15 @@ __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
   logic->isVBODirty = true;
   logic->isUBODirty[0] = true;
   logic->isUBODirty[1] = true;
-  logic->VEC3_Y_UP[0] = 0;
-  logic->VEC3_Y_UP[1] = 1;
-  logic->VEC3_Y_UP[2] = 0;
   state->instanceCount = 1;
 
-  state->indices[0] = 0;
-  state->indices[1] = 1;
-  state->indices[2] = 2;
-  state->indices[3] = 2;
-  state->indices[4] = 3;
-  state->indices[5] = 0;
+  memcpy(state->indices, (u16[]){0, 1, 2, 2, 3, 0}, sizeof(u16) * 6);
+  f32 u = 1.0f / 2;  // half a unit square
+  memcpy(state->vertices, (vec2[]){{-u, -u}, {u, -u}, {u, u}, {-u, u}}, sizeof(vec2) * 4);
 
-  state->vertices[0].vertex[0] = -0.5f;
-  state->vertices[0].vertex[1] = -0.5f;
-  state->vertices[1].vertex[0] = 0.5f;
-  state->vertices[1].vertex[1] = -0.5f;
-  state->vertices[2].vertex[0] = 0.5f;
-  state->vertices[2].vertex[1] = 0.5f;
-  state->vertices[3].vertex[0] = -0.5f;
-  state->vertices[3].vertex[1] = 0.5f;
-
-  state->shaderFiles[0] = "../assets/shaders/simple_shader.frag.spv";
-  state->shaderFiles[1] = "../assets/shaders/simple_shader.vert.spv";
+  state->shaderFiles = List__alloc(state->arena);
+  List__append(state->arena, state->shaderFiles, "../assets/shaders/simple_shader.frag.spv");
+  List__append(state->arena, state->shaderFiles, "../assets/shaders/simple_shader.vert.spv");
 
   logic->game = Game__alloc(state->arena);
   Game__init(logic->game, state);
@@ -55,27 +44,11 @@ __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
 __declspec(dllexport) void logic_oninit_compute(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
-  // TODO: move to Game
-  Bitmap__Alloc(
-      state->arena,
-      &logic->screen,
-      state->CANVAS_WIDTH,
-      state->CANVAS_HEIGHT,
-      4 /*RGBA*/);
-  logic->zbuf = Arena__Push(state->arena, state->CANVAS_WIDTH * state->CANVAS_HEIGHT * sizeof(f32));
-  logic->zbufWall = Arena__Push(state->arena, state->CANVAS_WIDTH * sizeof(f32));
-
-  // load textures
-  state->Vulkan__FReadImage(&logic->atlas, "../assets/textures/atlas.png");
-  state->Vulkan__FReadImage(&logic->glyphs0, "../assets/textures/glyphs0.png");
-
-  // load audio
-  logic->audioFiles[AUDIO_TITLE] = "../assets/audio/sfx/title.wav";
-  logic->audioFiles[AUDIO_PICKUP_COIN] = "../assets/audio/sfx/pickupCoin.wav";
-  logic->audioFiles[AUDIO_CLICK] = "../assets/audio/sfx/click.wav";
-  logic->audioFiles[AUDIO_POWERUP] = "../assets/audio/sfx/powerUp.wav";
-  for (u32 i = 0; i < ARRAY_COUNT(logic->audioFiles); i++) {
-    state->Audio__LoadAudioFile(logic->audioFiles[i]);
+  // preload audio assets
+  List__Node_t* node = logic->audioFiles->head;
+  for (u32 i = 0; i < logic->audioFiles->len; i++) {
+    state->Audio__LoadAudioFile(node->data);
+    node = node->next;
   }
 
   // Vulkan scene
@@ -112,8 +85,8 @@ __declspec(dllexport) void logic_onfixedupdate(Engine__State_t* state) {
     // TODO: how to animate camera zoom with spring damping/smoothing?
     // TODO: how to move this into physics callback? or is it better not to?
     state->world.cam[2] += -state->mState->wheely * logic->PLAYER_ZOOM_SPEED /* deltaTime*/;
-
     state->mState->wheely = 0;
+
     logic->isUBODirty[0] = true;
     logic->isUBODirty[1] = true;
   }
@@ -168,7 +141,7 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
     glms_lookat(
         state->world.cam,
         state->world.look,
-        logic->VEC3_Y_UP,  // Y-axis points upwards (GLM default)
+        (vec3){0, 1, 0},  // Y-axis points upwards (GLM default)
         state->ubo1.view);
 
     state->VulkanWrapper__SetAspectRatio(state->world.aspect);  // sync viewport
