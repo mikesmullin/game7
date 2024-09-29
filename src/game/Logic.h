@@ -58,10 +58,7 @@ typedef struct AnimationState_t {
 } AnimationState_t;
 
 typedef struct Camera_t {
-  f32 fov;  // field of view
-  // TODO: remove all but my game logic .h from the dll, which is delaying compile times
-  // TODO: incl. the windows.h > minwindef.h which is overriding `near` keyword
-  // f32 near;
+  f32 fov;          // field of view
   f32 nearZ;        // near plane
   f32 farZ;         // far plane
   mat4 projection;  // projection matrix

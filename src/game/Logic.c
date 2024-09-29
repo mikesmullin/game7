@@ -32,6 +32,7 @@ __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
   f32 u = 1.0f / 2;  // half a unit square
   memcpy(state->vertices, (vec2[]){{-u, -u}, {u, -u}, {u, u}, {-u, u}}, sizeof(vec2) * 4);
 
+  // vulkan
   state->shaderFiles = List__alloc(state->arena);
   List__append(state->arena, state->shaderFiles, "../assets/shaders/simple_shader.frag.spv");
   List__append(state->arena, state->shaderFiles, "../assets/shaders/simple_shader.vert.spv");
@@ -117,8 +118,9 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
     state->VulkanWrapper__UpdateVertexBuffer(1, sizeof(state->instances), state->instances);
   }
 
-  if (logic->isUBODirty[state->VulkanWrapper__GetCurrentFrame()]) {
-    logic->isUBODirty[state->VulkanWrapper__GetCurrentFrame()] = false;
+  u8 frame = state->VulkanWrapper__GetCurrentFrame();
+  if (logic->isUBODirty[frame]) {
+    logic->isUBODirty[frame] = false;
 
     // 3d cam
     glms_lookat(
@@ -140,10 +142,8 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
     glms_vec2_copy(state->world.user1, state->ubo1.user1);
     glms_vec2_copy(state->world.user2, state->ubo1.user2);
 
-    // TODO: not sure i make use of one UBO per frame, really
-    state->VulkanWrapper__UpdateUniformBuffer(
-        state->VulkanWrapper__GetCurrentFrame(),
-        &state->ubo1);
+    // TODO: not sure i need one UBO per frame, really
+    state->VulkanWrapper__UpdateUniformBuffer(frame, &state->ubo1);
   }
 
   Game__render(logic->game, state);
