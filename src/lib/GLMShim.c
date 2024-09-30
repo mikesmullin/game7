@@ -148,7 +148,7 @@ void glms_perspective(f32 fovy, f32 aspect, f32 nearZ, f32 farZ, mat4 dest) {
   dest[2][0] = 0;
   dest[2][1] = 0;
   dest[2][2] = (nearZ + farZ) * fn;
-  dest[2][3] = -1.0f;
+  dest[2][3] = 1.0f;
   dest[3][0] = 0;
   dest[3][1] = 0;
   dest[3][2] = 2.0f * nearZ * farZ * fn;
