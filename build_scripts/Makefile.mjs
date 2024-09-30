@@ -437,10 +437,11 @@ const compile_reload = async (outname) => {
 
 const watch = async () => {
   console.log(`watching...`);
-  const watcher = fs.watch(path.join(workspaceFolder, 'src', 'game', 'Logic.c'));
+  const watcher = fs.watch(path.join(workspaceFolder, 'src'), { recursive: true });
   let timer;
   let wait = false;
   for await (const event of watcher) {
+    console.debug('event', event);
     clearTimeout(timer);
     if (!wait) {
       timer = setTimeout(async () => {
