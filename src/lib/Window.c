@@ -27,7 +27,7 @@ void Window__Begin(Window_t* self) {
       SDL_WINDOWPOS_CENTERED,
       self->width,
       self->height,
-      SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE /* | SDL_WINDOW_SHOWN*/);
+      SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE /*| SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SHOWN*/);
   ASSERT_CONTEXT(NULL != self->window, "SDL_CreateWindow() failed. SDL Error: %s", SDL_GetError())
 
   // list required extensions, according to SDL window manager
