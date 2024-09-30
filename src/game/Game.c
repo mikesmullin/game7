@@ -25,7 +25,7 @@ void Game__init(Game_t* game, Engine__State_t* state) {
 
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
-  // ((TitleMenu_t*)game->menu)->skip = true;  // debug: skip title screen
+  ((TitleMenu_t*)game->menu)->skip = true;  // debug: skip title screen
   game->curLvl = NULL;
   game->curPlyr = NULL;
   game->lastUid = 0;
