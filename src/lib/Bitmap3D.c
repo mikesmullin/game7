@@ -87,8 +87,8 @@ void mat4_rotx(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
       {0, -s, c, 0},  //
       {0, 0, 0, 1},   //
   };
-  print_mat4(state, 16, rot1);
-  print_mat4(state, 16 + 4, rot2);
+  // print_mat4(state, 16, rot1);
+  // print_mat4(state, 16 + 4, rot2);
   glms_mat4_mulv(rot2, vc, dest);
 }
 
@@ -113,13 +113,15 @@ void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   f32 s = Math__sin(glms_rad(deg));
   f32 c = Math__cos(glms_rad(deg));
   vec4 vc = (vec4){v[0], v[1], v[2], v[3]};
-  mat4 rot1 = {
+  mat4 rot1;
+  glm_rotate_z((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
+  mat4 rot2 = {
       {c, -s, 0, 0},  //
       {s, c, 0, 0},   //
       {0, 0, 1, 0},   //
       {0, 0, 0, 1},   //
   };
-  glms_mat4_mulv(rot1, vc, dest);
+  glms_mat4_mulv(rot2, vc, dest);
 }
 
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
@@ -188,8 +190,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         vec4 model_point = {x, y, z, 1.0f};
 
         f32 deg = Math__map(Math__sin(state->currentTime / (1000 * 1)), -1, 1, 0, 180);
-        mat4_rotx(state, model_point, deg, model_point);
-        mat4_roty(state, model_point, deg, model_point);
+        // mat4_rotx(state, model_point, deg, model_point);
+        // mat4_roty(state, model_point, deg, model_point);
+        mat4_rotz(state, model_point, deg, model_point);
 
         // Transform the point by the model matrix (from model space to world space)
         vec4 world_point;
