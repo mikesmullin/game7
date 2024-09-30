@@ -1,10 +1,10 @@
 #ifndef GLM_SHIM
 #define GLM_SHIM
 
-// #define CGLM_FORCE_DEPTH_ZERO_TO_ONE
-// #include <cglm/cglm.h>
-
+#define CGLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <cglm/cglm.h>
 #include <stdint.h>
+
 typedef uint8_t u8;
 typedef float f32;
 typedef f32 vec2[2];

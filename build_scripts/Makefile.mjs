@@ -403,10 +403,10 @@ const compile_reload = async (outname) => {
     ...(ANALYZE ? ['-ftime-trace'] : []), // display compile time stats
     // '-fsyntax-only',
     ...C_COMPILER_ARGS,
-    // ...C_COMPILER_INCLUDES.filter(lib => lib.includes('glm')),
+    ...C_COMPILER_INCLUDES.filter(lib => lib.includes('glm')),
     // ...C_CONDITIONAL_COMPILER_ARGS(dsts.join(',')),
-    // ...LINKER_LIBS,
-    // ...LINKER_LIB_PATHS,
+    ...LINKER_LIBS,
+    ...LINKER_LIB_PATHS,
     '-shared',
     ...dsts.filter(s => !s.includes('.pb.')),
     '-o', dst,
