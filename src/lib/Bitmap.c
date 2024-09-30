@@ -3,8 +3,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 
+#include "../game/Logic.h"
 #include "Arena.h"
-#include "Log.h"
+#include "Engine.h"
 
 // TODO: rename to Alloc
 Bitmap_t* Bitmap__Prealloc(Arena_t* a) {
@@ -140,4 +141,17 @@ void Bitmap__DebugText(
   va_end(args);
 
   Bitmap__SetText(dst, src, buf, x, y, fg, bg);
+}
+
+void Bitmap__DebugText2(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, char* format, ...) {
+  Logic__State_t* logic = game->local;
+
+  u32 len = 255;
+  char buf[len];
+  va_list args;
+  va_start(args, format);
+  vsnprintf(buf, len, format, args);
+  va_end(args);
+
+  Bitmap__SetText(&logic->screen, &logic->glyphs0, buf, x, y, fg, bg);
 }

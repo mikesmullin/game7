@@ -7,6 +7,7 @@ typedef uint32_t u32;
 typedef uint64_t u64;
 
 typedef struct Arena_t Arena_t;
+typedef struct Engine__State_t Engine__State_t;
 
 typedef struct Bitmap_t {
   u32 w;
@@ -27,5 +28,6 @@ void Bitmap__Draw(Bitmap_t* src, Bitmap_t* dst, u32 dstX, u32 dstY);
 void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y, u32 fg, u32 bg);
 void Bitmap__DebugText(
     Bitmap_t* dst, Bitmap_t* src, u32 x, u32 y, u32 fg, u32 bg, char* format, ...);
+void Bitmap__DebugText2(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, char* format, ...);
 
 #endif  // BITMAP_H

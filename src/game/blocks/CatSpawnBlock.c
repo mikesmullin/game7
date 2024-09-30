@@ -42,6 +42,7 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
   if (self->firstTick) {
     self->firstTick = false;
   }
+  return;
 
   self->animTime += state->deltaTime;
   while (self->animTime > self->spawnInterval) {

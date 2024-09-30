@@ -9,9 +9,8 @@ typedef struct Engine__State_t Engine__State_t;
 
 void Bitmap3D__RenderHorizon(Engine__State_t* game);
 void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex, u32 color);
-void Bitmap3D__RenderFloor(Engine__State_t* game);
 void Bitmap3D__PostProcessing(Engine__State_t* game);
-void Bitmap3D__RenderWall2(
+void Bitmap3D__RenderWall(
     Engine__State_t* game, f64 x0, f64 y0, f64 x1, f64 y1, u32 tex, u32 color, f64 tx, f64 ty);
 
 #endif  // BITMAP3D_H
