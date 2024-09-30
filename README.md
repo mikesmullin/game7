@@ -75,3 +75,4 @@ C:\> node build_scripts/Makefile.mjs watch
 - [victor.js](http://victorjs.org/) 2d vector math lib (may translate to c)
 - [kenney](https://www.kenney.nl/assets) affordable game art
 - [x64dbg](https://x64dbg.com/) catches breakpoints on memory access violation
+- [fantasy namegen](http://rinkworks.com/namegen/) surprisingly nuanced
