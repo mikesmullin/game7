@@ -156,6 +156,13 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Bitmap_t* screen = &state->local->screen;
   Player_t* player = (Player_t*)state->local->game->curPlyr;
   W = screen->w, H = screen->h;
+  f32 cX = 0, cY = 0, cZ = 0;
+  cX = player->base.transform.position.z;
+  cY = player->base.transform.position.y;
+  cZ = player->base.transform.position.x;
+  f32 cRX = -player->base.transform.rotation.x;
+  logic->game->curLvl->spawner->base.x = 0.0f;
+  logic->game->curLvl->spawner->base.y = 0.0f;
 
   Bitmap__Fill(screen, 0, 0, W, H, BLACK);  // wipe
 
@@ -178,12 +185,12 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   f32 c2 = Math__cos(state->currentTime / (1000 * 1));
   f32 xa = 0, ya = 0, za = -3;
   // xa = Math__map(s1, -1, 1, -1, 1);
-  ya = Math__map(c1, -1, 1, -1, 1);
+  // ya = Math__map(c1, -1, 1, -1, 1);
   // za = Math__map(c2, -1, 1, -10, 0);
   mat4 view = {
-      {1, 0, 0, xa},  //
-      {0, 1, 0, ya},  //
-      {0, 0, 1, za},  //
+      {1, 0, 0, cX},  //
+      {0, 1, 0, cY},  //
+      {0, 0, 1, cZ},  //
       {0, 0, 0, 1},   //
   };
   mat4 translate1 = {
@@ -227,12 +234,26 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         // Create a vec4 for the point in model space (homogeneous coordinates)
         vec4 model_point = {x, y, z, 1.0f};
 
+        //                            BGR
+        // 80ff80 = Green -+-  80ff80 -+- +Y_UP
+        // 80ffff = Teal -++   ffff80 ++- +Z_FWD
+        // 808080 = Grey ---   808080 --- -X_RIGHT
+        // 8080ff = Purple --+ ff8080 -++
+        // ff8080 = Red +--    8080ff --+
+        // ff80ff = Pink +-+   ff80ff +-+
+        // ffff80 = Yellow ++  80ffff -++
+        // ffffff = White +++  ffffff +++
+        //                            ZYX
+        // FRONT   BACK
+        // Yw Gn   Wh Tl
+        // Rd Gy   Pk Pr
+
         // test: translate
         // vec4 mp0;
         // glm_vec4_copy(model_point, mp0);
         // glms_mat4_mulv(translate1, mp0, model_point);
 
-        f32 deg = Math__map(Math__sin(state->currentTime / (1000 * 1)), -1, 1, 0, 180);
+        // f32 deg = Math__map(Math__sin(state->currentTime / (1000 * 1)), -1, 1, 0, 180);
         // mat4_rotx(state, model_point, deg, model_point);
         // mat4_roty(state, model_point, deg, model_point);
         // mat4_rotz(state, model_point, deg, model_point);
@@ -244,6 +265,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         // Transform the point by the view (camera) matrix (from world space to camera space)
         vec4 camera_point;
         glms_mat4_mulv(view, world_point, camera_point);
+        mat4_roty(state, camera_point, cRX, camera_point);
 
         // Apply perspective projection (from camera space to clip space)
         vec4 clip_point;
