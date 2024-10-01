@@ -44,6 +44,6 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     logic->game->curPlyr->transform.position.x = block->y + 0.8f;
     logic->game->curPlyr->transform.position.y = 0.370f;
     logic->game->curPlyr->transform.position.z = -block->x + 0.8f;
-    logic->game->curPlyr->transform.rotation.x = 180.0f;
+    // logic->game->curPlyr->transform.rotation.x = 180.0f;
   }
 }

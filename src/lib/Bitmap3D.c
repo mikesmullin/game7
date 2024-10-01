@@ -125,29 +125,31 @@ void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
 }
 
 void mat4_proj(Engine__State_t* state, f32 aspect, f32 fovy, f32 nearZ, f32 farZ, mat4 dest) {
-  // fovy should be given in radians!
-  f32 f = 1.0f / tanf(fovy * 0.5f);
-  f32 fn = 1.0f / (nearZ - farZ);
-
-  dest[0][0] = f / aspect;
   dest[0][1] = 0.0f;
   dest[0][2] = 0.0f;
   dest[0][3] = 0.0f;
-
   dest[1][0] = 0.0f;
-  dest[1][1] = f;
   dest[1][2] = 0.0f;
   dest[1][3] = 0.0f;
-
   dest[2][0] = 0.0f;
   dest[2][1] = 0.0f;
-  dest[2][2] = (nearZ + farZ) * fn;
-  dest[2][3] = -1.0f;
-
   dest[3][0] = 0.0f;
   dest[3][1] = 0.0f;
-  dest[3][2] = 2.0f * nearZ * farZ * fn;
   dest[3][3] = 0.0f;
+
+  // fovy should be given in radians!
+  f32 t = tanf(fovy / 2.0f);
+  f32 top = nearZ * t;
+  f32 right = top * aspect;
+
+  dest[0][0] = nearZ / right;
+  dest[1][1] = nearZ / top;
+
+  // produces a right-handed coordinate system (OpenGL-compatible)
+  // at 0deg, -Z_FWD, +Y_UP, +X_RIGHT
+  dest[2][2] = -(farZ + nearZ) / (farZ - nearZ);
+  dest[2][3] = -(2 * farZ * nearZ) / (farZ - nearZ);
+  dest[3][2] = -1.0f;
 }
 
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
@@ -157,10 +159,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Player_t* player = (Player_t*)state->local->game->curPlyr;
   W = screen->w, H = screen->h;
   f32 cX = 0, cY = 0, cZ = 0;
-  cX = player->base.transform.position.z;
+  cX = player->base.transform.position.x;
   cY = player->base.transform.position.y;
-  cZ = player->base.transform.position.x;
-  f32 cRX = -player->base.transform.rotation.x;
+  cZ = player->base.transform.position.z;
+  f32 cRX = player->base.transform.rotation.x;
   logic->game->curLvl->spawner->base.x = 0.0f;
   logic->game->curLvl->spawner->base.y = 0.0f;
 
@@ -214,11 +216,11 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   mat4 projection;
   float fovy = glms_rad(90.0f);
   float aspect = W / H;
-  float nearZ = 1.0f;
-  float farZ = 10.0f;
+  float nearZ = 10.0f;
+  float farZ = 1.0f;
   // glm_perspective(fovy, aspect, nearZ, farZ, projection);
   mat4_proj(state, aspect, fovy, nearZ, farZ, projection);
-  print_mat4(state, 16 + 8, projection);
+  // print_mat4(state, 16 + 8, projection);
 
   // +x/right +y/up -z/fwd
   f32 step = 2.0f;
@@ -230,10 +232,17 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         u32 g = Math__map(y, -1, 1, 128, 255);
         u32 b = Math__map(z, -1, 1, 128, 255);
         u32 color = (u32)0xff000000 | b << 16 | g << 8 | r;
+        if (color == WHITE) {
+          color = (u32)(state->currentTime / (1000.0f / 8)) % 2 ? WHITE : BLACK;
+          // color =
+          // (u32)0xff000000 | Math__urandom(128, 255) << 16 | 128 << 8 | Math__urandom(128, 255);
+        }
 
         // Create a vec4 for the point in model space (homogeneous coordinates)
         vec4 model_point = {x, y, z, 1.0f};
 
+        // correct orientation will have: White Top-Right-Front(toward your eye) corner
+        //
         //                            BGR
         // 80ff80 = Green -+-  80ff80 -+- +Y_UP
         // 80ffff = Teal -++   ffff80 ++- +Z_FWD
@@ -288,7 +297,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
 
         // Convert normalized device coordinates to screen space
         s32 sx = (s32)((ndc[0] + 1.0f) * 0.5f * W);
-        s32 sy = (s32)((ndc[1] + 1.0f) * 0.5f * H);
+        s32 sy = (s32)((1.0f - ndc[1]) * 0.5f * H);
 
         // Draw the pixel in the RGBA buffer
         Bitmap__Set2DPixel(screen, sx, sy, color);

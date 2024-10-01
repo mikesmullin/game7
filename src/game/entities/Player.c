@@ -35,7 +35,7 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   entity->transform.position.y = 0.370f;
   entity->transform.position.z = 0.0f;
 
-  entity->transform.rotation.x = 180.0f;
+  entity->transform.rotation.x = 0.0f;
   entity->transform.rotation.y = 0.0f;
   entity->transform.rotation.z = 0.0f;
   entity->transform.rotation.w = 0.0f;
@@ -62,7 +62,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     }
 
     if (0 != state->mState->y) {
-      logic->game->curPlyr->transform.rotation.y += -state->mState->y * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.y += state->mState->y * PLAYER_LOOK_SPEED;
       logic->game->curPlyr->transform.rotation.y =
           Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
       state->mState->y = 0;
@@ -77,9 +77,9 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     if (state->kbState->fwd && state->kbState->back) {
       self->input.zAxis = 0.0f;
     } else if (state->kbState->fwd) {
-      self->input.zAxis = 1.0f;
+      self->input.zAxis = -1.0f;  // -Z_FWD
     } else if (state->kbState->back) {
-      self->input.zAxis = -1.0f;
+      self->input.zAxis = +1.0f;
     } else {
       self->input.zAxis = 0.0f;
     }
@@ -88,9 +88,9 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     if (state->kbState->left && state->kbState->right) {
       self->input.xAxis = 0.0f;
     } else if (state->kbState->left) {
-      self->input.xAxis = 1.0f;
-    } else if (state->kbState->right) {
       self->input.xAxis = -1.0f;
+    } else if (state->kbState->right) {
+      self->input.xAxis = +1.0f;  // +X_RIGHT
     } else {
       self->input.xAxis = 0.0f;
     }
@@ -99,7 +99,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     if (state->kbState->up && state->kbState->down) {
       self->input.yAxis = 0.0f;
     } else if (state->kbState->up) {
-      self->input.yAxis = 1.0f;
+      self->input.yAxis = +1.0f;  // +Y_UP
     } else if (state->kbState->down) {
       self->input.yAxis = -1.0f;
     } else {
@@ -130,7 +130,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
     // apply left/right motion
     if (0 != self->input.xAxis) {
-      glms_v3_scale(right, -self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
+      glms_v3_scale(right, self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
       glms_v3_add(entity->transform.position, forward, &entity->transform.position);
     }
 
@@ -138,8 +138,8 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     if (0 != self->input.yAxis) {
       entity->transform.position.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
 
-      entity->transform.position.y =
-          MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
+      // entity->transform.position.y =
+      //     MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
     }
   }
 }

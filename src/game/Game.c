@@ -112,11 +112,11 @@ void Game__render(Game_t* game, Engine__State_t* state) {
     // game->local->CANVAS_DEBUG_Y = 40;
 
     // draw debug cursor
-    Bitmap__Set2DPixel(
-        &logic->screen,
-        logic->CANVAS_DEBUG_X,
-        logic->CANVAS_DEBUG_Y,
-        Math__urandom() | 0xffff0000 + 0xff993399);
+    // Bitmap__Set2DPixel(
+    //     &logic->screen,
+    //     logic->CANVAS_DEBUG_X,
+    //     logic->CANVAS_DEBUG_Y,
+    //     Math__urandom() | 0xffff0000 + 0xff993399);
 
     Bitmap__DebugText(
         &logic->screen,
