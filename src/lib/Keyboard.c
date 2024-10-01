@@ -20,10 +20,10 @@ void Keyboard__Poll(KbInputState_t* kbState) {
   // #macro KEYBOARD_UPDATE_LATCH(T1)
   //   {{~#for T1~}}
   //   if (false == lastState.{{this.s1}} && true == keystate[{{this.e1}}]) {
-  //     state->{{this.s2}} = true;
+  //     kbState->{{this.s2}} = true;
   //   }
   //   else if (false == keystate[{{this.e1}}]) {
-  //     state->{{this.s2}} = false;
+  //     kbState->{{this.s2}} = false;
   //   }
   //   lastState.{{this.s1}} = keystate[{{this.e1}}];
   //   {{~/for~}}
@@ -34,9 +34,9 @@ void Keyboard__Poll(KbInputState_t* kbState) {
   //   sKey   | SDL_SCANCODE_S      | back
   //   aKey   | SDL_SCANCODE_A      | left
   //   dKey   | SDL_SCANCODE_D      | right
-  //   spKey  | SDL_SCANCODE_SPACE  | use
-  //   qKey   | SDL_SCANCODE_Q      | up
-  //   eKey   | SDL_SCANCODE_E      | down
+  //   spKey  | SDL_SCANCODE_SPACE  | up
+  //   ctlKey | SDL_SCANCODE_LCTRL  | down
+  //   eKey   | SDL_SCANCODE_E      | use
   //   rKey   | SDL_SCANCODE_R      | reload
   //   escKey | SDL_SCANCODE_ESCAPE | escape
   //
@@ -67,21 +67,21 @@ void Keyboard__Poll(KbInputState_t* kbState) {
   }
   lastState.dKey = keystate[SDL_SCANCODE_D];
   if (false == lastState.spKey && true == keystate[SDL_SCANCODE_SPACE]) {
-    kbState->use = true;
-  } else if (false == keystate[SDL_SCANCODE_SPACE]) {
-    kbState->use = false;
-  }
-  lastState.spKey = keystate[SDL_SCANCODE_SPACE];
-  if (false == lastState.qKey && true == keystate[SDL_SCANCODE_Q]) {
     kbState->up = true;
-  } else if (false == keystate[SDL_SCANCODE_Q]) {
+  } else if (false == keystate[SDL_SCANCODE_SPACE]) {
     kbState->up = false;
   }
-  lastState.qKey = keystate[SDL_SCANCODE_Q];
-  if (false == lastState.eKey && true == keystate[SDL_SCANCODE_E]) {
+  lastState.spKey = keystate[SDL_SCANCODE_SPACE];
+  if (false == lastState.ctlKey && true == keystate[SDL_SCANCODE_LCTRL]) {
     kbState->down = true;
-  } else if (false == keystate[SDL_SCANCODE_E]) {
+  } else if (false == keystate[SDL_SCANCODE_LCTRL]) {
     kbState->down = false;
+  }
+  lastState.ctlKey = keystate[SDL_SCANCODE_LCTRL];
+  if (false == lastState.eKey && true == keystate[SDL_SCANCODE_E]) {
+    kbState->use = true;
+  } else if (false == keystate[SDL_SCANCODE_E]) {
+    kbState->use = false;
   }
   lastState.eKey = keystate[SDL_SCANCODE_E];
   if (false == lastState.rKey && true == keystate[SDL_SCANCODE_R]) {
@@ -96,6 +96,7 @@ void Keyboard__Poll(KbInputState_t* kbState) {
     kbState->escape = false;
   }
   lastState.escKey = keystate[SDL_SCANCODE_ESCAPE];
+
   // #metaend
 
   // LOG_DEBUGF(

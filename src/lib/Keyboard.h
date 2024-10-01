@@ -10,12 +10,12 @@ typedef struct KeyboardState_t {
   bool aKey;
   bool sKey;
   bool dKey;
-  bool spKey;
   bool qKey;
   bool eKey;
   bool rKey;
+  bool spKey;
+  bool ctlKey;
   // bool altKey;
-  // bool ctrlKey;
   // bool shiftKey;
   // bool metaKey;
   bool escKey;
