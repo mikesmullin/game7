@@ -54,17 +54,17 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     state->mState->x = 0;
     state->mState->y = 0;
   } else {
-    if (0 != state->mState->x) {
-      logic->game->curPlyr->transform.rotation.x += state->mState->x * PLAYER_LOOK_SPEED;
-      logic->game->curPlyr->transform.rotation.x =
-          Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
+    if (0 != state->mState->x) {  // yaw (rotate around Y-axis)
+      logic->game->curPlyr->transform.rotation.y += -state->mState->x * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.y =
+          Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
       state->mState->x = 0;
     }
 
-    if (0 != state->mState->y) {
-      logic->game->curPlyr->transform.rotation.y += state->mState->y * PLAYER_LOOK_SPEED;
-      logic->game->curPlyr->transform.rotation.y =
-          Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
+    if (0 != state->mState->y) {  // pitch (rotate around X-axis)
+      logic->game->curPlyr->transform.rotation.x += state->mState->y * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.x =
+          Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
       state->mState->y = 0;
     }
 
@@ -110,12 +110,12 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     v3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    float yaw_radians = glms_rad(entity->transform.rotation.x);
+    f32 yaw_radians = glms_rad(entity->transform.rotation.y);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
-    front.x = Math__cos(yaw_radians);
+    front.x = Math__sin(yaw_radians);
     front.y = 0.0f;
-    front.z = Math__sin(yaw_radians);
+    front.z = Math__cos(yaw_radians);
     glms_v3_normalize(&front);
 
     // Calculate the right vector (perpendicular to the front vector)
@@ -130,7 +130,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
     // apply left/right motion
     if (0 != self->input.xAxis) {
-      glms_v3_scale(right, self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
+      glms_v3_scale(right, -self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
       glms_v3_add(entity->transform.position, forward, &entity->transform.position);
     }
 

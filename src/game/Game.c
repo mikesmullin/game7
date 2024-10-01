@@ -129,6 +129,6 @@ void Game__render(Game_t* game, Engine__State_t* state) {
         logic->game->curPlyr->transform.position.x,
         logic->game->curPlyr->transform.position.y,
         logic->game->curPlyr->transform.position.z,
-        logic->game->curPlyr->transform.rotation.x);
+        logic->game->curPlyr->transform.rotation.y);
   }
 }

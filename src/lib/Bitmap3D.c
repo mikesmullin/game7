@@ -162,7 +162,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   cX = player->base.transform.position.x;
   cY = player->base.transform.position.y;
   cZ = player->base.transform.position.z;
-  f32 cRX = player->base.transform.rotation.x;
+  f32 cRX = player->base.transform.rotation.y;
   logic->game->curLvl->spawner->base.x = 0.0f;
   logic->game->curLvl->spawner->base.y = 0.0f;
 
@@ -190,10 +190,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   // ya = Math__map(c1, -1, 1, -1, 1);
   // za = Math__map(c2, -1, 1, -10, 0);
   mat4 view = {
-      {1, 0, 0, cX},  //
-      {0, 1, 0, cY},  //
-      {0, 0, 1, cZ},  //
-      {0, 0, 0, 1},   //
+      {1, 0, 0, -cX},  //
+      {0, 1, 0, -cY},  //
+      {0, 0, 1, -cZ},  //
+      {0, 0, 0, 1},    //
   };
   mat4 translate1 = {
       {1, 0, 0, xa},  //
