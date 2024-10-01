@@ -124,6 +124,32 @@ void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   glms_mat4_mulv(rot2, vc, dest);
 }
 
+void mat4_proj(Engine__State_t* state, f32 aspect, f32 fovy, f32 nearZ, f32 farZ, mat4 dest) {
+  // fovy should be given in radians!
+  f32 f = 1.0f / tanf(fovy * 0.5f);
+  f32 fn = 1.0f / (nearZ - farZ);
+
+  dest[0][0] = f / aspect;
+  dest[0][1] = 0.0f;
+  dest[0][2] = 0.0f;
+  dest[0][3] = 0.0f;
+
+  dest[1][0] = 0.0f;
+  dest[1][1] = f;
+  dest[1][2] = 0.0f;
+  dest[1][3] = 0.0f;
+
+  dest[2][0] = 0.0f;
+  dest[2][1] = 0.0f;
+  dest[2][2] = (nearZ + farZ) * fn;
+  dest[2][3] = -1.0f;
+
+  dest[3][0] = 0.0f;
+  dest[3][1] = 0.0f;
+  dest[3][2] = 2.0f * nearZ * farZ * fn;
+  dest[3][3] = 0.0f;
+}
+
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
@@ -150,19 +176,30 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   f32 s1 = Math__sin(state->currentTime / (1000 * 7));
   f32 c1 = Math__cos(state->currentTime / (1000 * 3));
   f32 c2 = Math__cos(state->currentTime / (1000 * 1));
-  f32 xa = 0, ya = 0, za = 5;
-  // xa = -1, ya = -1, za = -1;
-  xa = Math__map(s1, -1, 1, -1, 1);
+  f32 xa = 0, ya = 0, za = -3;
+  // xa = Math__map(s1, -1, 1, -1, 1);
   ya = Math__map(c1, -1, 1, -1, 1);
-  za = Math__map(c2, -1, 1, -10, 0);
-  f32 s2 = Math__triangleWave(state->currentTime, 1000 * 10);
-  f32 sz1 = 1.0;
-  // sz1 = Math__map(s2, -1, 1, 0, 1);
+  // za = Math__map(c2, -1, 1, -10, 0);
   mat4 view = {
-      {sz1, 0, 0, xa},  //
-      {0, sz1, 0, ya},  //
-      {0, 0, sz1, za},  //
-      {0, 0, 0, 1},     //
+      {1, 0, 0, xa},  //
+      {0, 1, 0, ya},  //
+      {0, 0, 1, za},  //
+      {0, 0, 0, 1},   //
+  };
+  mat4 translate1 = {
+      {1, 0, 0, xa},  //
+      {0, 1, 0, ya},  //
+      {0, 0, 1, za},  //
+      {0, 0, 0, 1},   //
+  };
+  f32 s2 = Math__triangleWave(state->currentTime, 1000 * 1);
+  f32 sz1 = 1.0;
+  sz1 = Math__map(s2, -1, 1, 0.5, 2);
+  mat4 scale1 = {
+      {sz1, 0, 0, 0},  //
+      {0, sz1, 0, 0},  //
+      {0, 0, sz1, 0},  //
+      {0, 0, 0, 1},    //
   };
   // print_mat4(state, 16 + 4, view);
 
@@ -172,8 +209,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   float aspect = W / H;
   float nearZ = 1.0f;
   float farZ = 10.0f;
-  glm_perspective(fovy, aspect, nearZ, farZ, projection);
-  // print_mat4(state, 16 + 8, projection);
+  // glm_perspective(fovy, aspect, nearZ, farZ, projection);
+  mat4_proj(state, aspect, fovy, nearZ, farZ, projection);
+  print_mat4(state, 16 + 8, projection);
 
   // +x/right +y/up -z/fwd
   f32 step = 2.0f;
@@ -189,10 +227,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         // Create a vec4 for the point in model space (homogeneous coordinates)
         vec4 model_point = {x, y, z, 1.0f};
 
+        // test: translate
+        // vec4 mp0;
+        // glm_vec4_copy(model_point, mp0);
+        // glms_mat4_mulv(translate1, mp0, model_point);
+
         f32 deg = Math__map(Math__sin(state->currentTime / (1000 * 1)), -1, 1, 0, 180);
         // mat4_rotx(state, model_point, deg, model_point);
         // mat4_roty(state, model_point, deg, model_point);
-        mat4_rotz(state, model_point, deg, model_point);
+        // mat4_rotz(state, model_point, deg, model_point);
 
         // Transform the point by the model matrix (from model space to world space)
         vec4 world_point;
@@ -210,8 +253,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         vec4 ndc;
         if (clip_point[3] != 0.0f) {
           ndc[0] = clip_point[0] / clip_point[3];
-          ndc[1] = clip_point[1] /= clip_point[3];
-          ndc[2] = clip_point[2] /= clip_point[3];
+          ndc[1] = clip_point[1] / clip_point[3];
+          ndc[2] = clip_point[2] / clip_point[3];
         }
         if (ndc[0] < -1.0f || ndc[0] > 1.0f) continue;
         if (ndc[1] < -1.0f || ndc[1] > 1.0f) continue;
