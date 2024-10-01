@@ -222,10 +222,8 @@ void Window__RenderLoop(
       // calc average cost (over past second)
       mavgLastAvg = Math__mavg(mavgWindow, renderFps, costThrottle, &mavgCursor, &mavgLastSum);
 
-      if (costTotal < 1) {
-        // sleep to prevent hot loop
-        SLEEP(1);
-      }
+      // sleep to prevent hot loop
+      SLEEP(1);
     }
   }
 }
