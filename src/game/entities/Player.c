@@ -62,7 +62,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     }
 
     if (0 != state->mState->y) {  // pitch (rotate around X-axis)
-      logic->game->curPlyr->transform.rotation.x += state->mState->y * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->transform.rotation.x += -state->mState->y * PLAYER_LOOK_SPEED;
       logic->game->curPlyr->transform.rotation.x =
           Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
       state->mState->y = 0;

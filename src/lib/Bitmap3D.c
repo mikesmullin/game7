@@ -163,6 +163,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   cY = player->base.transform.position.y;
   cZ = player->base.transform.position.z;
   f32 cRX = player->base.transform.rotation.y;
+  f32 cRY = player->base.transform.rotation.x;
   logic->game->curLvl->spawner->base.x = 0.0f;
   logic->game->curLvl->spawner->base.y = 0.0f;
 
@@ -275,6 +276,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         vec4 camera_point;
         glms_mat4_mulv(view, world_point, camera_point);
         mat4_roty(state, camera_point, cRX, camera_point);
+        mat4_rotx(state, camera_point, cRY, camera_point);
 
         // Apply perspective projection (from camera space to clip space)
         vec4 clip_point;
