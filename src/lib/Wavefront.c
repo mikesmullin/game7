@@ -8,6 +8,8 @@
 #include "List.h"
 #include "Log.h"
 
+// Wavefront Format Specification: http://www.martinreddy.net/gfx/3d/OBJ.spec
+
 Wavefront_t* Wavefront__parse_obj(Arena_t* arena, const char* filename) {
   FILE* file;
   fopen_s(&file, filename, "r");
