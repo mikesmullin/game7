@@ -16,6 +16,39 @@ static u32 LIME = 0xff00ff00;
 static u32 PINK = 0xffff00ff;
 static u32 WHITE = 0xffffffff;
 
+static f32 safe_divide(f32 numerator, f32 denominator) {
+  // Check if y is close to zero, then clamp the value of z
+  if (fabs(denominator) < FLT_EPSILON) {
+    return 0.0f;  // Clamp z when y is too small
+  }
+  return numerator / denominator;
+}
+
+static f32 safe_multiply(f32 a, f32 b) {
+  f32 result = a * b;
+
+  // Check for underflow (too small to represent)
+  if (fabs(result) < FLT_MIN) {
+    return 0.0f;  // Clamp to zero for underflow
+  }
+
+  // Check for overflow
+  if (fabs(result) > FLT_MAX) {
+    return result > 0 ? FLT_MAX : -FLT_MAX;  // Clamp to max float
+  }
+
+  return result;
+}
+
+void mat4_mulv(mat4 mat, vec4 v, vec4 dest) {
+  for (u8 i = 0; i < 4; i++) {
+    dest[i] = safe_multiply(mat[i][0], v[0]) +  //
+              safe_multiply(mat[i][1], v[1]) +  //
+              safe_multiply(mat[i][2], v[2]) +  //
+              safe_multiply(mat[i][3], v[3]);
+  }
+}
+
 void print_mat4(Engine__State_t* state, u32 row, mat4 m) {
   Bitmap__DebugText2(
       state,
@@ -91,7 +124,7 @@ void mat4_rotx(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   };
   // print_mat4(state, 16, rot1);
   // print_mat4(state, 16 + 4, rot2);
-  glms_mat4_mulv(rot2, vc, dest);
+  mat4_mulv(rot2, vc, dest);
 }
 
 void mat4_roty(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
@@ -108,7 +141,7 @@ void mat4_roty(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   };
   // print_mat4(state, 16, rot1);
   // print_mat4(state, 16 + 4, rot2);
-  glms_mat4_mulv(rot2, vc, dest);
+  mat4_mulv(rot2, vc, dest);
 }
 
 void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
@@ -123,7 +156,7 @@ void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
       {0, 0, 1, 0},   //
       {0, 0, 0, 1},   //
   };
-  glms_mat4_mulv(rot2, vc, dest);
+  mat4_mulv(rot2, vc, dest);
 }
 
 void mat4_proj(Engine__State_t* state, f32 aspect, f32 fovy, f32 nearZ, f32 farZ, mat4 dest) {
@@ -155,8 +188,8 @@ void mat4_proj(Engine__State_t* state, f32 aspect, f32 fovy, f32 nearZ, f32 farZ
 }
 
 // Linear interpolation
-f64 lerp(f64 a, f64 b, f64 t) {
-  return a + t * (b - a);
+f32 lerp(f32 a, f32 b, f32 t) {
+  return (a + t * (b - a));
 }
 
 bool project(Engine__State_t* state, vec3 v0, vec3 dest) {
@@ -193,39 +226,49 @@ bool project(Engine__State_t* state, vec3 v0, vec3 dest) {
 
   // Create a vec4 for the point in model space (homogeneous coordinates)
   vec4 model_point = {v0[0], v0[1], v0[2], 1.0f};
+  // print_vec4(state, 1, model_point, WHITE);
 
   // Transform the point by the model matrix (from model space to world space)
   vec4 world_point;
-  glms_mat4_mulv(model, model_point, world_point);
+  mat4_mulv(model, model_point, world_point);
+  // print_vec4(state, 2, world_point, WHITE);
 
   // Transform the point by the view (camera) matrix (from world space to camera space)
   vec4 camera_point;
-  glms_mat4_mulv(view, world_point, camera_point);
+  mat4_mulv(view, world_point, camera_point);
+  // print_vec4(state, 3, camera_point, WHITE);
   mat4_roty(state, camera_point, cRX, camera_point);
+  // print_vec4(state, 4, camera_point, WHITE);
   mat4_rotx(state, camera_point, cRY, camera_point);
+  // print_vec4(state, 5, camera_point, WHITE);
 
   // Apply perspective projection (from camera space to clip space)
   vec4 clip_point;
-  glms_mat4_mulv(projection, camera_point, clip_point);
+  mat4_mulv(projection, camera_point, clip_point);
+  // print_vec4(state, 6, clip_point, WHITE);
 
   // Perform perspective division (convert homogeneous to normalized device coordinates)
   vec4 ndc;
   if (clip_point[3] != 0.0f) {
-    ndc[0] = clip_point[0] / clip_point[3];
-    ndc[1] = clip_point[1] / clip_point[3];
-    ndc[2] = clip_point[2] / clip_point[3];
+    ndc[0] = safe_divide(clip_point[0], clip_point[3]);
+    ndc[1] = safe_divide(clip_point[1], clip_point[3]);
+    ndc[2] = safe_divide(clip_point[2], clip_point[3]);
+    ndc[3] = safe_divide(clip_point[3], clip_point[3]);
   }
   // if (ndc[0] < -1.0f || ndc[0] > 1.0f) return false;
   // if (ndc[1] < -1.0f || ndc[1] > 1.0f) return false;
   // if (ndc[2] < -1.0f || ndc[2] > 1.0f) return false;
+  // print_vec4(state, 7, ndc, WHITE);
 
   // Convert normalized device coordinates to screen space
-  s32 sx = (s32)((ndc[0] + 1.0f) * 0.5f * W);
-  s32 sy = (s32)((1.0f - ndc[1]) * 0.5f * H);
+  s32 sx = ((ndc[0] + 1.0f) * 0.5f * W);  // 0..W
+  s32 sy = ((1.0f - ndc[1]) * 0.5f * H);  // 0..H
+  f32 sz = (ndc[2] + 1.0f) * 0.5f;        // 0..1
 
   dest[0] = sx;
   dest[1] = sy;
-  dest[2] = ndc[2];
+  dest[2] = MATH_CLAMP(0, sz, 1);
+  // print_vec4(state, 8, dest, WHITE);
 
   return true;
 }
@@ -259,11 +302,11 @@ void draw_triangle(Bitmap_t* screen, f32* zbuffer, vec3 a, vec3 b, vec3 c, bool 
         // Update Z-buffer with the new depth value
         zbuffer[i] = z;
         // Draw the Z-buffer (for debugging)
-        // u32 cmp = Math__map(z, FLT_MIN, FLT_MAX, 255, 128);
-        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+        u32 cmp = Math__map(z, 0, 1, 128, 255);
+        Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
 
         // Draw the pixel in the RGBA buffer
-        Bitmap__Set2DPixel(screen, x, y, color);
+        // Bitmap__Set2DPixel(screen, x, y, color);
       }
     }
   }
@@ -465,7 +508,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         // test: translate
         // vec4 mp0;
         // glm_vec4_copy(model_point, mp0);
-        // glms_mat4_mulv(translate1, mp0, model_point);
+        // mat4_mulv(translate1, mp0, model_point);
 
         // f32 deg = Math__map(Math__sin(state->currentTime / (1000 * 1)), -1, 1, 0, 180);
         // mat4_rotx(state, model_point, deg, model_point);
@@ -474,17 +517,17 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
 
         // Transform the point by the model matrix (from model space to world space)
         vec4 world_point;
-        glms_mat4_mulv(model, model_point, world_point);
+        mat4_mulv(model, model_point, world_point);
 
         // Transform the point by the view (camera) matrix (from world space to camera space)
         vec4 camera_point;
-        glms_mat4_mulv(view, world_point, camera_point);
+        mat4_mulv(view, world_point, camera_point);
         mat4_roty(state, camera_point, cRX, camera_point);
         mat4_rotx(state, camera_point, cRY, camera_point);
 
         // Apply perspective projection (from camera space to clip space)
         vec4 clip_point;
-        glms_mat4_mulv(projection, camera_point, clip_point);
+        mat4_mulv(projection, camera_point, clip_point);
 
         // Perform perspective division (convert homogeneous to normalized device coordinates)
         vec4 ndc;

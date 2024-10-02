@@ -154,12 +154,3 @@ void glms_perspective(f32 fovy, f32 aspect, f32 nearZ, f32 farZ, mat4 dest) {
   dest[3][2] = 2.0f * nearZ * farZ * fn;
   dest[3][3] = 0;
 }
-
-void glms_mat4_mulv(mat4 mat, vec4 v, vec4 dest) {
-  for (u8 i = 0; i < 4; i++) {
-    dest[i] = mat[i][0] * v[0] +  //
-              mat[i][1] * v[1] +  //
-              mat[i][2] * v[2] +  //
-              mat[i][3] * v[3];
-  }
-}
