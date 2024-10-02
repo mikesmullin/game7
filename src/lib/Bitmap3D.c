@@ -215,9 +215,9 @@ bool project(Engine__State_t* state, vec3 v0, vec2 dest) {
     ndc[1] = clip_point[1] / clip_point[3];
     ndc[2] = clip_point[2] / clip_point[3];
   }
-  if (ndc[0] < -1.0f || ndc[0] > 1.0f) return false;
-  if (ndc[1] < -1.0f || ndc[1] > 1.0f) return false;
-  if (ndc[2] < -1.0f || ndc[2] > 1.0f) return false;
+  // if (ndc[0] < -1.0f || ndc[0] > 1.0f) return false;
+  // if (ndc[1] < -1.0f || ndc[1] > 1.0f) return false;
+  // if (ndc[2] < -1.0f || ndc[2] > 1.0f) return false;
 
   // Convert normalized device coordinates to screen space
   s32 sx = (s32)((ndc[0] + 1.0f) * 0.5f * W);
@@ -316,9 +316,25 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
 
     // Project the 3D vertices to 2D screen space
     vec2 v0, v1, v2;
-    if (!project(state, *v00, v0)) continue;  // clipped
-    if (!project(state, *v01, v1)) continue;  // clipped
-    if (!project(state, *v02, v2)) continue;  // clipped
+    project(state, *v00, v0);
+    project(state, *v01, v1);
+    project(state, *v02, v2);
+
+    // Perform basic clipping on each vertex
+    if (v0[0] < 0) v0[0] = 0;
+    if (v0[0] >= W) v0[0] = W - 1;
+    if (v0[1] < 0) v0[1] = 0;
+    if (v0[1] >= H) v0[1] = H - 1;
+
+    if (v1[0] < 0) v1[0] = 0;
+    if (v1[0] >= W) v1[0] = W - 1;
+    if (v1[1] < 0) v1[1] = 0;
+    if (v1[1] >= H) v1[1] = H - 1;
+
+    if (v2[0] < 0) v2[0] = 0;
+    if (v2[0] >= W) v2[0] = W - 1;
+    if (v2[1] < 0) v2[1] = 0;
+    if (v2[1] >= H) v2[1] = H - 1;
 
     // // Calculate the bounding box for the triangle
     // f32 min_x = glm_min(v0[0], glm_min(v1[0], v2[0]));
