@@ -9,6 +9,7 @@
 #include "../lib/List.h"
 #include "../lib/Math.h"
 #include "../lib/String.h"
+#include "../lib/Wavefront.h"
 #include "Dispatcher.h"
 #include "Logic.h"
 #include "entities/Player.h"
@@ -59,6 +60,11 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/pickupCoin.wav");
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/click.wav");
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/powerUp.wav");
+
+  // preload meshes
+  logic->game->meshes = List__alloc(state->arena);
+  Wavefront_t* obj = Wavefront__parse_obj(state->arena, "../assets/models/box.obj");
+  List__append(state->arena, logic->game->meshes, obj);
 }
 
 void Game__tick(Game_t* game, Engine__State_t* state) {

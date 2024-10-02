@@ -14,6 +14,7 @@ typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
 typedef struct Level_t Level_t;
+typedef struct Wavefront_t Wavefront_t;
 typedef enum DispatchFnId DispatchFnId;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
@@ -31,6 +32,10 @@ enum AUDIO_FILES {
   AUDIO_PICKUP_COIN = 1,
   AUDIO_CLICK = 2,
   AUDIO_POWERUP = 3,
+};
+
+enum MODELS {
+  MODEL_BOX = 0,  // models/box.obj
 };
 
 typedef enum PlayerFacing_t {
@@ -135,6 +140,7 @@ typedef struct Block_t {
   DispatchFnId tick;
   DispatchFnId render;
   u32 id;
+  enum MODELS meshId;
   bool blocking;
   bool masked;
   f32 x, y;
@@ -175,6 +181,7 @@ typedef struct Game_t {
   Menu_t* menu;
   Level_t* curLvl;
   Entity_t* curPlyr;
+  List_t* meshes;
   u32 lastUid;
 } Game_t;
 

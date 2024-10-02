@@ -5,8 +5,10 @@
 #include "Easing.h"
 #include "Engine.h"
 #include "GLMShim.h"
+#include "List.h"
 #include "Log.h"
 #include "Math.h"
+#include "Wavefront.h"
 
 static f32 W, H;
 static u32 BLACK = 0xff000000;
@@ -299,56 +301,24 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   // print_mat4(state, 16 + 8, projection);
 
   // --- POINT INTERPOLATION ----
-
-  // Define the 8 vertices of a cube
-  vec3 cube_vertices[8] = {
-      {-1, -1, -1},
-      {1, -1, -1},
-      {1, 1, -1},
-      {-1, 1, -1},  // Back face
-      {-1, -1, 1},
-      {1, -1, 1},
-      {1, 1, 1},
-      {-1, 1, 1}  // Front face
-  };
-
-  // Define the 6 faces of the cube as two triangles each
-  s32 cube_faces[12][3] = {
-      {0, 1, 2},
-      {0, 2, 3},  // Back face
-      {4, 5, 6},
-      {4, 6, 7},  // Front face
-      {0, 1, 5},
-      {0, 5, 4},  // Bottom face
-      {2, 3, 7},
-      {2, 7, 6},  // Top face
-      {0, 3, 7},
-      {0, 7, 4},  // Left face
-      {1, 2, 6},
-      {1, 6, 5}  // Right face
-  };
+  Wavefront_t* obj = List__get(logic->game->meshes, MODEL_BOX);
+  // Wavefront__print_obj(obj);
 
   // render_cube()
   // Project and draw all triangles that form the faces
-  for (s32 i = 0; i < 12; i++) {
-    vec3* v00 = &cube_vertices[cube_faces[i][0]];
-    vec3* v01 = &cube_vertices[cube_faces[i][1]];
-    vec3* v02 = &cube_vertices[cube_faces[i][2]];
+  List__Node_t* c = obj->faces->head;
+  for (s32 i = 0; i < obj->faces->len; i++) {
+    Wavefront__Face_t* f = c->data;
+    vec3* v00 = List__get(obj->vertices, f->vertex_idx[0] - 1);
+    vec3* v01 = List__get(obj->vertices, f->vertex_idx[1] - 1);
+    vec3* v02 = List__get(obj->vertices, f->vertex_idx[2] - 1);
+    c = c->next;
 
     // Project the 3D vertices to 2D screen space
     vec2 v0, v1, v2;
     if (!project(state, *v00, v0)) continue;  // clipped
     if (!project(state, *v01, v1)) continue;  // clipped
     if (!project(state, *v02, v2)) continue;  // clipped
-
-    // LOG_DEBUGF(
-    //     "v0 %+5.2f,%+5.2f v1 %+5.2f,%+5.2f v2 %+5.2f,%+5.2f",
-    //     v0[0],
-    //     v0[1],
-    //     v1[0],
-    //     v1[1],
-    //     v2[0],
-    //     v2[1]);
 
     // // Calculate the bounding box for the triangle
     // f32 min_x = glm_min(v0[0], glm_min(v1[0], v2[0]));
@@ -391,17 +361,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
       v1[0] = temp[0], v1[1] = temp[1];
     }
 
-    // LOG_DEBUGF(
-    //     "v0 %+5.2f,%+5.2f v1 %+5.2f,%+5.2f v2 %+5.2f,%+5.2f",
-    //     v0[0],
-    //     v0[1],
-    //     v1[0],
-    //     v1[1],
-    //     v2[0],
-    //     v2[1]);
-
-    // LOG_DEBUGF("v1[1] %+5.2f - v0[1] %+5.2f = %+5.2f", v1[1], v0[1], v1[1] - v0[1]);
-
     // Draw the upper part of the triangle (from v0 to v1)
     for (f32 y = v0[1]; y <= v1[1]; y++) {
       float t0 = (float)(y - v0[1]) / (v2[1] - v0[1]);
@@ -420,9 +379,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
     }
 
     // Draw the lower part of the triangle (from v1 to v2)
-
-    // LOG_DEBUGF("v2[1] %d - v1[1] %d = %d", v2[1], v1[1], v2[1] - v1[1]);
-
     for (f32 y = v1[1]; y <= v2[1]; y++) {
       float t0 = (float)(y - v0[1]) / (v2[1] - v0[1]);
       float t1 = (float)(y - v1[1]) / (v2[1] - v1[1]);
@@ -433,7 +389,6 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
         x0 = x1;
         x1 = tmp;
       }
-      // LOG_DEBUGF("x1 %d - x0 %d = %d", x1, x0, x1 - x0);
 
       for (f32 x = x0; x <= x1; x++) {
         // Draw the pixel in the RGBA buffer

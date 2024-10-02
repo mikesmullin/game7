@@ -16,6 +16,7 @@ void WallBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   Block__init(block, state, x, y);
   block->tick = WALL_BLOCK__TICK;
   block->render = WALL_BLOCK__RENDER;
+  block->meshId = MODEL_BOX;
 }
 
 void WallBlock__render(Block_t* block, Engine__State_t* state) {
