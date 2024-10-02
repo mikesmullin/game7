@@ -3,6 +3,7 @@
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
+#include "../../lib/Log.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
 #include "Block.h"
@@ -27,11 +28,8 @@ void WallBlock__render(Block_t* block, Engine__State_t* state) {
   u32 tex = logic->game->curLvl->wallTex;
   u32 col = logic->game->curLvl->wallCol;
 
-  // render pixel as 3d cube of 4 faces (N,S,E,W)
-  Bitmap3D__RenderWall(state, x + 0, y + 0, x + 0, y + 1, 1, col, tex, 0);
-  Bitmap3D__RenderWall(state, x + 0, y + 1, x + 1, y + 1, 2, col, tex, 0);
-  Bitmap3D__RenderWall(state, x + 1, y + 1 - 1, x + 0, y + 1 - 1, 3, col, tex, 0);
-  Bitmap3D__RenderWall(state, x + 0 + 1, y + 1, x + 0 + 1, y + 0, 4, col, tex, 0);
+  // render block mesh/model
+  Bitmap3D__RenderWall(state, x, 0, y, tex, col);
 }
 
 void WallBlock__tick(Block_t* block, Engine__State_t* state) {

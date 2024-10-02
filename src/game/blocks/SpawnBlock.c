@@ -40,12 +40,9 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
     state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
-    // TODO: fix the coords being rendered out of order and flipped
-    logic->game->curPlyr->transform.position.x = block->y + 0.8f;
+    logic->game->curPlyr->transform.position.x = block->x;
     logic->game->curPlyr->transform.position.y = 0.370f;
-    logic->game->curPlyr->transform.position.z = -block->x + 0.8f;
+    logic->game->curPlyr->transform.position.z = block->y;
     logic->game->curPlyr->transform.rotation.x = 0.0f;
-    logic->game->curPlyr->transform.rotation.y = 0.0f;
-    // logic->game->curPlyr->transform.rotation.x = 180.0f;
   }
 }
