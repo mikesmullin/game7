@@ -159,7 +159,7 @@ f64 lerp(f64 a, f64 b, f64 t) {
   return a + t * (b - a);
 }
 
-bool project(Engine__State_t* state, vec3 v0, vec2 dest) {
+bool project(Engine__State_t* state, vec3 v0, vec3 dest) {
   Logic__State_t* logic = state->local;
   Bitmap_t* screen = &state->local->screen;
   Player_t* player = (Player_t*)state->local->game->curPlyr;
@@ -186,8 +186,8 @@ bool project(Engine__State_t* state, vec3 v0, vec2 dest) {
   mat4 projection;
   float fovy = glms_rad(90.0f);
   float aspect = W / H;
-  float nearZ = 10.0f;
-  float farZ = 1.0f;
+  float nearZ = 100.0f;
+  float farZ = 3.0f;
   // glm_perspective(fovy, aspect, nearZ, farZ, projection);
   mat4_proj(state, aspect, fovy, nearZ, farZ, projection);
 
@@ -225,8 +225,48 @@ bool project(Engine__State_t* state, vec3 v0, vec2 dest) {
 
   dest[0] = sx;
   dest[1] = sy;
+  dest[2] = ndc[2];
 
   return true;
+}
+
+void draw_triangle(Bitmap_t* screen, f32* zbuffer, vec3 a, vec3 b, vec3 c, bool upper, u32 color) {
+  for (f32 y = a[1]; y <= b[1]; y++) {
+    f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);
+    f32 t1 = (y - a[1]) / (b[1] - a[1]);
+    f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);
+    f32 x1 = lerp(a[0], b[0], t1);
+    f32 z0_interpolated = upper ? lerp(a[2], c[2], t0) : lerp(b[2], c[2], t0);
+    f32 z1_interpolated = upper ? lerp(a[2], b[2], t1) : lerp(a[2], c[2], t1);
+
+    if (x0 > x1) {
+      f32 tmp = x0;
+      x0 = x1;
+      x1 = tmp;
+      f32 tmpZ = z0_interpolated;
+      z0_interpolated = z1_interpolated;
+      z1_interpolated = tmpZ;
+    }
+    for (f32 x = x0; x <= x1; x++) {
+      // Horizontal interpolation factor
+      f32 t = (x - x0) / (x1 - x0);
+      // Interpolated Z value for this pixel
+      f32 z = lerp(z0_interpolated, z1_interpolated, t);
+
+      // Check if the pixel's depth is closer than what's stored in the Z-buffer
+      u32 i = y * W + x;
+      if (z > zbuffer[i]) {
+        // Update Z-buffer with the new depth value
+        zbuffer[i] = z;
+        // Draw the Z-buffer (for debugging)
+        // u32 cmp = Math__map(z, FLT_MIN, FLT_MAX, 255, 128);
+        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+
+        // Draw the pixel in the RGBA buffer
+        Bitmap__Set2DPixel(screen, x, y, color);
+      }
+    }
+  }
 }
 
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
@@ -304,7 +344,12 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Wavefront_t* obj = List__get(logic->game->meshes, MODEL_BOX);
   // Wavefront__print_obj(obj);
 
-  // render_cube()
+  f32 zbuffer[(u32)(W * H)];
+  for (u32 i = 0; i < W * H; i++) {
+    zbuffer[i] = FLT_MIN;  // Initialize with a very large value
+  }
+
+  // render_mesh()
   // Project and draw all triangles that form the faces
   List__Node_t* c = obj->faces->head;
   for (s32 i = 0; i < obj->faces->len; i++) {
@@ -315,7 +360,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
     c = c->next;
 
     // Project the 3D vertices to 2D screen space
-    vec2 v0, v1, v2;
+    vec3 v0, v1, v2;
     project(state, *v00, v0);
     project(state, *v01, v1);
     project(state, *v02, v2);
@@ -378,39 +423,10 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
     }
 
     // Draw the upper part of the triangle (from v0 to v1)
-    for (f32 y = v0[1]; y <= v1[1]; y++) {
-      float t0 = (float)(y - v0[1]) / (v2[1] - v0[1]);
-      float t1 = (float)(y - v0[1]) / (v1[1] - v0[1]);
-      f32 x0 = (f32)lerp(v0[0], v2[0], t0);
-      f32 x1 = (f32)lerp(v0[0], v1[0], t1);
-      if (x0 > x1) {
-        f32 tmp = x0;
-        x0 = x1;
-        x1 = tmp;
-      }
-      for (f32 x = x0; x <= x1; x++) {
-        // Draw the pixel in the RGBA buffer
-        Bitmap__Set2DPixel(screen, x, y, color);
-      }
-    }
+    draw_triangle(screen, zbuffer, v0, v1, v2, true, color);
 
     // Draw the lower part of the triangle (from v1 to v2)
-    for (f32 y = v1[1]; y <= v2[1]; y++) {
-      float t0 = (float)(y - v0[1]) / (v2[1] - v0[1]);
-      float t1 = (float)(y - v1[1]) / (v2[1] - v1[1]);
-      f32 x0 = (f32)lerp(v0[0], v2[0], t0);
-      f32 x1 = (f32)lerp(v1[0], v2[0], t1);
-      if (x0 > x1) {
-        f32 tmp = x0;
-        x0 = x1;
-        x1 = tmp;
-      }
-
-      for (f32 x = x0; x <= x1; x++) {
-        // Draw the pixel in the RGBA buffer
-        Bitmap__Set2DPixel(screen, x, y, color);
-      }
-    }
+    draw_triangle(screen, zbuffer, v1, v2, v0, false, color);
   }
 
   return;
