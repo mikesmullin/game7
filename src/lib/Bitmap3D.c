@@ -28,14 +28,14 @@ static f32 safe_multiply(f32 a, f32 b) {
   f32 result = a * b;
 
   // Check for underflow (too small to represent)
-  if (fabs(result) < FLT_MIN) {
-    return 0.0f;  // Clamp to zero for underflow
-  }
+  // if (fabs(result) < FLT_MIN) {
+  //   return 0.0f;  // Clamp to zero for underflow
+  // }
 
   // Check for overflow
-  if (fabs(result) > FLT_MAX) {
-    return result > 0 ? FLT_MAX : -FLT_MAX;  // Clamp to max float
-  }
+  // if (fabs(result) > FLT_MAX) {
+  //   return result > 0 ? FLT_MAX : -FLT_MAX;  // Clamp to max float
+  // }
 
   return result;
 }
@@ -189,7 +189,28 @@ void mat4_proj(Engine__State_t* state, f32 aspect, f32 fovy, f32 nearZ, f32 farZ
 
 // Linear interpolation
 f32 lerp(f32 a, f32 b, f32 t) {
-  return (a + t * (b - a));
+  f32 result = a + t * (b - a);
+
+  // Check for underflow (too small to represent)
+  if (fabs(result) < FLT_MIN) {
+    return 0.0f;  // Clamp to zero for underflow
+  }
+
+  // Check for overflow
+  if (fabs(result) > FLT_MAX) {
+    return result > 0 ? FLT_MAX : -FLT_MAX;  // Clamp to max float
+  }
+
+  return result;
+
+  // return safe_multiply(a + t, (b - a));
+
+  // if (t == 0.0f) {
+  //   return a;  // To avoid division by zero
+  // }
+
+  // // Calculate lerp using division instead of multiplication
+  // return safe_divide(a + (b - a), (safe_divide(1.0f, t)));
 }
 
 bool project(Engine__State_t* state, vec3 v0, vec3 dest) {
@@ -279,8 +300,10 @@ void draw_triangle(Bitmap_t* screen, f32* zbuffer, vec3 a, vec3 b, vec3 c, bool 
     f32 t1 = (y - a[1]) / (b[1] - a[1]);
     f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);
     f32 x1 = lerp(a[0], b[0], t1);
-    f32 z0_interpolated = upper ? lerp(a[2], c[2], t0) : lerp(b[2], c[2], t0);
-    f32 z1_interpolated = upper ? lerp(a[2], b[2], t1) : lerp(a[2], c[2], t1);
+    f32 z0_interpolated = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);
+    f32 z1_interpolated = upper ? lerp(a[2], b[2], t1) : lerp(a[2], b[2], t1);
+    // f32 z0_interpolated = c[2];
+    // f32 z1_interpolated = b[2];
 
     if (x0 > x1) {
       f32 tmp = x0;
@@ -302,11 +325,11 @@ void draw_triangle(Bitmap_t* screen, f32* zbuffer, vec3 a, vec3 b, vec3 c, bool 
         // Update Z-buffer with the new depth value
         zbuffer[i] = z;
         // Draw the Z-buffer (for debugging)
-        u32 cmp = Math__map(z, 0, 1, 128, 255);
-        Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+        // u32 cmp = Math__map(z, 0, 1, 128, 255);
+        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
 
         // Draw the pixel in the RGBA buffer
-        // Bitmap__Set2DPixel(screen, x, y, color);
+        Bitmap__Set2DPixel(screen, x, y, color);
       }
     }
   }
@@ -440,13 +463,15 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
     // }
 
     // Color for this face
-    u8 r = Math__map(Math__triangleWave(v0[1], 10), -1, 1, 128, 255);
-    u8 g = Math__map(Math__triangleWave(v1[1], 10), -1, 1, 128, 255);
-    u8 b = Math__map(Math__triangleWave(v2[1], 10), -1, 1, 128, 255);
+    // u8 r = Math__map(Math__triangleWave(v0[1], 10), -1, 1, 128, 255);
+    // u8 g = Math__map(Math__triangleWave(v1[1], 10), -1, 1, 128, 255);
+    // u8 b = Math__map(Math__triangleWave(v2[1], 10), -1, 1, 128, 255);
+    u8 r = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
+    u8 g = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
+    u8 b = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
     u32 color = 0xff000000 | b << 16 | g << 8 | r;
 
-    // Draw the triangle for this face
-    // draw_triangle(p0, p1, p2, color);
+    // Draw the 2 triangles for this square face
 
     // Sort vertices by y-coordinate (v0[1] <= v1[1] <= v2[1])
     if (v0[1] > v1[1]) {
