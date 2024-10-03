@@ -190,32 +190,11 @@ static void mat4_proj(
 
 // Linear interpolation
 f32 lerp(f32 a, f32 b, f32 t) {
-  f32 result = a + t * (b - a);
-
-  // Check for underflow (too small to represent)
-  if (fabs(result) < FLT_MIN) {
-    return 0.0f;  // Clamp to zero for underflow
-  }
-
-  // Check for overflow
-  if (fabs(result) > FLT_MAX) {
-    return result > 0 ? FLT_MAX : -FLT_MAX;  // Clamp to max float
-  }
-
-  return result;
-
-  // return safe_multiply(a + t, (b - a));
-
-  // if (t == 0.0f) {
-  //   return a;  // To avoid division by zero
-  // }
-
-  // // Calculate lerp using division instead of multiplication
-  // return safe_divide(a + (b - a), (safe_divide(1.0f, t)));
+  return a + t * (b - a);
 }
 
 static bool project(
-    Engine__State_t* state, mat4 model, mat4 view, mat4 projection, vec3 v0, vec3 dest) {
+    Engine__State_t* state, mat4 model, mat4 view, mat4 projection, vec3 v0, vec4 dest) {
   Logic__State_t* logic = state->local;
   Bitmap_t* screen = &state->local->screen;
   Player_t* player = (Player_t*)state->local->game->curPlyr;
@@ -261,7 +240,7 @@ static bool project(
   if (ndc[0] < -1.0f || ndc[0] > 1.0f) return false;
   if (ndc[1] < -1.0f || ndc[1] > 1.0f) return false;
   if (ndc[2] < -1.0f || ndc[2] > 1.0f) return false;
-  // print_vec4(state, 7, ndc, WHITE);
+  // print_vec4(state, 7, ndc, LIME);
 
   // Convert normalized device coordinates to screen space
   s32 sx = ((ndc[0] + 1.0f) * 0.5f * W);  // 0..W
@@ -270,35 +249,47 @@ static bool project(
 
   dest[0] = sx;
   dest[1] = sy;
-  dest[2] = MATH_CLAMP(0, sz, 1);
-  // print_vec4(state, 8, dest, WHITE);
+  // dest[2] = MATH_CLAMP(0, sz, 1);
+  dest[2] = sz;
+  dest[3] = 0;
+  // if (sz < 0 || 1 < sz) {
+  if (sz < FLT_EPSILON) sz = 0;  // clip rounding error
+  if (0 != sz) {
+    // printf("% 20.20f", sz);
+    print_vec4(state, 8, dest, LIME);
+  }
 
   return true;
 }
 
 static void draw_triangle(
-    Bitmap_t* screen, f32* zbuffer, vec3 a, vec3 b, vec3 c, bool upper, u32 color) {
-  for (f32 y = a[1]; y <= b[1]; y++) {
-    f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);
-    f32 t1 = (y - a[1]) / (b[1] - a[1]);
-    f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);
-    f32 x1 = lerp(a[0], b[0], t1);
-    f32 z0_interpolated = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);
-    f32 z1_interpolated = upper ? lerp(a[2], b[2], t1) : lerp(a[2], b[2], t1);
+    Engine__State_t* state,
+    Bitmap_t* screen,
+    f32* zbuffer,
+    vec3 a,
+    vec3 b,
+    vec3 c,
+    bool upper,
+    u32 color) {
+  for (f32 y = a[1]; y <= b[1]; y++) {                                         // -n .. +n
+    f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);  // 0 .. 1, diagonal
+    f32 t1 = (y - a[1]) / (b[1] - a[1]);                                       // 0 .. 1, vertical
+    f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);              // -n .. +n left edge
+    f32 x1 = lerp(a[0], b[0], t1);                                 // -n .. +n right edge
+    f32 z0 = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);  // -n .. +n left edge
+    f32 z1 = lerp(a[2], b[2], t1);                                 // -n .. +n right edge
 
-    if (x0 > x1) {
-      f32 tmp = x0;
-      x0 = x1;
-      x1 = tmp;
-      f32 tmpZ = z0_interpolated;
-      z0_interpolated = z1_interpolated;
-      z1_interpolated = tmpZ;
+    if (x0 > x1) {  // -n .. n
+      f32 tmpX, tmpZ;
+      tmpX = x0, x0 = x1, x1 = tmpX;
+      tmpZ = z0, z0 = z1, z1 = tmpZ;
     }
     for (f32 x = x0; x <= x1; x++) {
       // Horizontal interpolation factor
       f32 t = (x - x0) / (x1 - x0);
       // Interpolated Z value for this pixel
-      f32 z = lerp(z0_interpolated, z1_interpolated, t);
+      // TODO: fix the rounding error and range here
+      f32 z = 1000.0f * lerp(z0, z1, t);
 
       // Check if the pixel's depth is closer than what's stored in the Z-buffer
       u32 i = y * W + x;
@@ -307,10 +298,15 @@ static void draw_triangle(
         zbuffer[i] = z;
         // Draw the Z-buffer (for debugging)
         u32 cmp = Math__map(z, 0, 1, 128, 255);
-        Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
 
         // Draw the pixel in the RGBA buffer
-        // Bitmap__Set2DPixel(screen, x, y, color);
+        Bitmap__Set2DPixel(screen, x, y, color);
+
+        // print_vec4(state, 23, (vec4){x0, x1, a[1], b[1]}, WHITE);
+        // print_vec4(state, 23, (vec4){a[2], b[2], c[2], 0}, WHITE);
+        // print_vec4(state, 24, (vec4){z0, z1, 0, 0}, WHITE);
+        // print_vec4(state, 25, (vec4){x, y, z, 0}, WHITE);
       }
     }
   }
@@ -319,6 +315,10 @@ static void draw_triangle(
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
+
+  for (u32 i = 0; i < W * H; i++) {
+    logic->zbuf[i] = FLT_MIN;
+  }
 }
 
 void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tex, u32 color) {
@@ -361,10 +361,8 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
   // --- POINT INTERPOLATION ----
   Wavefront_t* obj = List__get(logic->game->meshes, MODEL_BOX);
 
-  f32 zbuffer[(u32)(W * H)];
-  for (u32 i = 0; i < W * H; i++) {
-    zbuffer[i] = FLT_MIN;
-  }
+  // DEBUG: wipe screen so only last block is visible
+  // Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
 
   // render_mesh()
   // Project and draw all triangles that form the faces
@@ -377,7 +375,7 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     c = c->next;
 
     // Project the 3D vertices to 2D screen space
-    vec3 v0, v1, v2;
+    vec4 v0, v1, v2;
     if (!project(state, model, view, projection, *v00, v0)) continue;
     if (!project(state, model, view, projection, *v01, v1)) continue;
     if (!project(state, model, view, projection, *v02, v2)) continue;
@@ -387,6 +385,7 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     if (v0[0] >= W) v0[0] = W - 1;
     if (v0[1] < 0) v0[1] = 0;
     if (v0[1] >= H) v0[1] = H - 1;
+    // TODO: clip on Z 0..1?
 
     if (v1[0] < 0) v1[0] = 0;
     if (v1[0] >= W) v1[0] = W - 1;
@@ -403,34 +402,38 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     // u8 g = Math__map(Math__triangleWave(v1[1], 10), -1, 1, 128, 255);
     // u8 b = Math__map(Math__triangleWave(v2[1], 10), -1, 1, 128, 255);
     u8 r = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
-    u8 g = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
-    u8 b = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
+    u8 g = Math__map(Math__triangleWave(i + 1, obj->faces->len), -1, 1, 128, 255);
+    u8 b = Math__map(Math__triangleWave(i + 2, obj->faces->len), -1, 1, 128, 255);
     u32 color = 0xff000000 | b << 16 | g << 8 | r;
 
     // Draw the 2 triangles for this square face
 
     // Sort vertices by y-coordinate (v0[1] <= v1[1] <= v2[1])
+    // such that v0 becomes a reference to the point furthest into the negative Y plane
     if (v0[1] > v1[1]) {
-      vec2 temp = (vec2){v0[0], v0[1]};
-      v0[0] = v1[0], v0[1] = v1[1];
-      v1[0] = temp[0], v1[1] = temp[1];
+      vec3 temp = (vec3){v0[0], v0[1], v0[2]};
+      v0[0] = v1[0], v0[1] = v1[1], v0[2] = v1[2];
+      v1[0] = temp[0], v1[1] = temp[1], v1[2] = temp[2];
     }
     if (v1[1] > v2[1]) {
-      vec2 temp = (vec2){v1[0], v1[1]};
-      v1[0] = v2[0], v1[1] = v2[1];
-      v2[0] = temp[0], v2[1] = temp[1];
+      vec3 temp = (vec3){v1[0], v1[1], v1[2]};
+      v1[0] = v2[0], v1[1] = v2[1], v1[2] = v2[2];
+      v2[0] = temp[0], v2[1] = temp[1], v2[2] = temp[2];
     }
     if (v0[1] > v1[1]) {
-      vec2 temp = (vec2){v0[0], v0[1]};
-      v0[0] = v1[0], v0[1] = v1[1];
-      v1[0] = temp[0], v1[1] = temp[1];
+      vec3 temp = (vec3){v0[0], v0[1], v0[2]};
+      v0[0] = v1[0], v0[1] = v1[1], v0[2] = v1[2];
+      v1[0] = temp[0], v1[1] = temp[1], v1[2] = temp[2];
     }
 
-    // Draw the upper part of the triangle (from v0 to v1)
-    draw_triangle(screen, zbuffer, v0, v1, v2, true, color);
+    // Bitmap__DebugText2(state, 4, 6 * 3, WHITE, BLACK, "face %u", i);
 
-    // Draw the lower part of the triangle (from v1 to v2)
-    draw_triangle(screen, zbuffer, v1, v2, v0, false, color);
+    // the concept of upper and lower here is nuanced
+    // 0 .. 1 .. 2 are divided along y-axis into min ... mid ... max
+    // this allows the scanline to loop over y,x, in two rectangular passes
+    // it means we can draw any triangle (not only right triangles, or 90deg aligned rotations)
+    draw_triangle(state, screen, logic->zbuf, v0, v1, v2, true, color);
+    draw_triangle(state, screen, logic->zbuf, v1, v2, v0, false, color);
   }
 
   return;
