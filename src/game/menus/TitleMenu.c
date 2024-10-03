@@ -89,6 +89,7 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
       logic->game->menu = NULL;
       logic->game->curLvl = Level__alloc(state->arena);
       Level__init(state->arena, logic->game->curLvl, state);
+      logic->game->curLvl->wallTex = 0;
       logic->game->curLvl->wallCol = 0x330000ff;
       Level__load(logic->game->curLvl, state, "../assets/textures/level1.png");
     } else if (1 == self->selection) {

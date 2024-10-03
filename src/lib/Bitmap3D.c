@@ -270,19 +270,30 @@ static void draw_triangle(
     vec3 b,
     vec3 c,
     bool upper,
+    Bitmap_t* texture,
+    u32 tex,
+    vec2 uv0,
+    vec2 uv1,
+    vec2 uv2,
     u32 color) {
   for (f32 y = a[1]; y <= b[1]; y++) {                                         // -n .. +n
     f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);  // 0 .. 1, diagonal
     f32 t1 = (y - a[1]) / (b[1] - a[1]);                                       // 0 .. 1, vertical
     f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);              // -n .. +n left edge
-    f32 x1 = lerp(a[0], b[0], t1);                                 // -n .. +n right edge
-    f32 z0 = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);  // -n .. +n left edge
-    f32 z1 = lerp(a[2], b[2], t1);                                 // -n .. +n right edge
+    f32 x1 = lerp(a[0], b[0], t1);                                           // -n .. +n right edge
+    f32 z0 = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);            // -n .. +n left edge
+    f32 z1 = lerp(a[2], b[2], t1);                                           // -n .. +n right edge
+    f32 uvx0 = upper ? lerp(uv0[0], uv2[0], t0) : lerp(uv2[0], uv1[0], t0);  // -n .. +n left edge
+    f32 uvx1 = lerp(a[0], b[0], t1);                                         // -n .. +n right edge
+    f32 uvy0 = upper ? lerp(uv0[1], uv2[1], t0) : lerp(uv2[1], uv1[1], t0);  // -n .. +n left edge
+    f32 uvy1 = lerp(a[1], b[1], t1);                                         // -n .. +n right edge
 
     if (x0 > x1) {  // -n .. n
-      f32 tmpX, tmpZ;
+      f32 tmpX, tmpZ, tmpUVX, tmpUVY;
       tmpX = x0, x0 = x1, x1 = tmpX;
       tmpZ = z0, z0 = z1, z1 = tmpZ;
+      tmpUVX = uvx0, uvx0 = uvx1, uvx1 = tmpUVX;
+      tmpUVY = uvy0, uvy0 = uvy1, uvy1 = tmpUVY;
     }
     for (f32 x = x0; x <= x1; x++) {
       // Horizontal interpolation factor
@@ -299,6 +310,9 @@ static void draw_triangle(
         // Draw the Z-buffer (for debugging)
         u32 cmp = Math__map(z, 0, 1, 128, 255);
         // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+
+        // Get the texel color
+        color = Bitmap__Get2DTiledPixel(texture, uvx0 * 8, uvy0 * 8, 8, tex, 0, PINK);
 
         // Draw the pixel in the RGBA buffer
         Bitmap__Set2DPixel(screen, x, y, color);
@@ -372,6 +386,9 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     vec3* v00 = List__get(obj->vertices, f->vertex_idx[0] - 1);
     vec3* v01 = List__get(obj->vertices, f->vertex_idx[1] - 1);
     vec3* v02 = List__get(obj->vertices, f->vertex_idx[2] - 1);
+    vec2* uv0 = List__get(obj->texcoords, f->vertex_idx[0] - 1);
+    vec2* uv1 = List__get(obj->texcoords, f->vertex_idx[1] - 1);
+    vec2* uv2 = List__get(obj->texcoords, f->vertex_idx[2] - 1);
     c = c->next;
 
     // Project the 3D vertices to 2D screen space
@@ -432,8 +449,35 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     // 0 .. 1 .. 2 are divided along y-axis into min ... mid ... max
     // this allows the scanline to loop over y,x, in two rectangular passes
     // it means we can draw any triangle (not only right triangles, or 90deg aligned rotations)
-    draw_triangle(state, screen, logic->zbuf, v0, v1, v2, true, color);
-    draw_triangle(state, screen, logic->zbuf, v1, v2, v0, false, color);
+    draw_triangle(
+        state,
+        screen,
+        logic->zbuf,
+        v0,
+        v1,
+        v2,
+        true,
+        &logic->atlas,
+        tex,
+        *uv0,
+        *uv1,
+        *uv2,
+        color);
+    draw_triangle(
+        state,
+        screen,
+        logic->zbuf,
+        v1,
+        v2,
+        v0,
+        false,
+        &logic->atlas,
+        tex,
+
+        *uv0,
+        *uv1,
+        *uv2,
+        color);
   }
 
   return;
