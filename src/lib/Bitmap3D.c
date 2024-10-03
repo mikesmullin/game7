@@ -1,6 +1,7 @@
 #include "Bitmap3D.h"
 
 #include "../game/Logic.h"
+#include "Breakpoint.h"
 #include "Color.h"
 #include "Easing.h"
 #include "Engine.h"
@@ -284,16 +285,16 @@ static void draw_triangle(
     f32 z0 = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);            // -n .. +n left edge
     f32 z1 = lerp(a[2], b[2], t1);                                           // -n .. +n right edge
     f32 uvx0 = upper ? lerp(uv0[0], uv2[0], t0) : lerp(uv2[0], uv1[0], t0);  // -n .. +n left edge
-    f32 uvx1 = lerp(a[0], b[0], t1);                                         // -n .. +n right edge
+    f32 uvx1 = lerp(uv0[0], uv1[0], t1);                                     // -n .. +n right edge
     f32 uvy0 = upper ? lerp(uv0[1], uv2[1], t0) : lerp(uv2[1], uv1[1], t0);  // -n .. +n left edge
-    f32 uvy1 = lerp(a[1], b[1], t1);                                         // -n .. +n right edge
+    f32 uvy1 = lerp(uv0[1], uv1[1], t1);                                     // -n .. +n right edge
 
     if (x0 > x1) {  // -n .. n
       f32 tmpX, tmpZ, tmpUVX, tmpUVY;
       tmpX = x0, x0 = x1, x1 = tmpX;
       tmpZ = z0, z0 = z1, z1 = tmpZ;
       tmpUVX = uvx0, uvx0 = uvx1, uvx1 = tmpUVX;
-      tmpUVY = uvy0, uvy0 = uvy1, uvy1 = tmpUVY;
+      // tmpUVY = uvy0, uvy0 = uvy1, uvy1 = tmpUVY;
     }
     for (f32 x = x0; x <= x1; x++) {
       // Horizontal interpolation factor
@@ -312,7 +313,14 @@ static void draw_triangle(
         // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
 
         // Get the texel color
-        color = Bitmap__Get2DTiledPixel(texture, uvx0 * 8, uvy0 * 8, 8, tex, 0, PINK);
+        f32 tx = lerp(uvx0, uvx1, t) * 8 * 2;
+        f32 ty = lerp(uvy0, uvy1, t1) * 8 * 2;
+        // LOG_DEBUGF("tx %f uvx0 %f uvx1 %f t %f ty %f", tx, uvx0, uvx1, t, ty);
+        // DEBUGGER();
+        if (uv0[1] == 0 || uv1[1] == 0 || uv2[1] == 0) {
+          print_vec4(state, 23, (vec4){uv0[0], uv0[1]}, WHITE);
+        }
+        color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
 
         // Draw the pixel in the RGBA buffer
         Bitmap__Set2DPixel(screen, x, y, color);
