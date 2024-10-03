@@ -253,12 +253,7 @@ static bool project(
   // dest[2] = MATH_CLAMP(0, sz, 1);
   dest[2] = sz;
   dest[3] = 0;
-  // if (sz < 0 || 1 < sz) {
-  if (sz < FLT_EPSILON) sz = 0;  // clip rounding error
-  if (0 != sz) {
-    // printf("% 20.20f", sz);
-    print_vec4(state, 8, dest, LIME);
-  }
+  // if (sz < FLT_EPSILON) sz = 0;  // clip rounding error
 
   return true;
 }
@@ -315,11 +310,6 @@ static void draw_triangle(
         // Get the texel color
         f32 tx = lerp(uvx0, uvx1, t) * 8 * 2;
         f32 ty = lerp(uvy0, uvy1, t1) * 8 * 2;
-        // LOG_DEBUGF("tx %f uvx0 %f uvx1 %f t %f ty %f", tx, uvx0, uvx1, t, ty);
-        // DEBUGGER();
-        if (uv0[1] == 0 || uv1[1] == 0 || uv2[1] == 0) {
-          print_vec4(state, 23, (vec4){uv0[0], uv0[1]}, WHITE);
-        }
         color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
 
         // Draw the pixel in the RGBA buffer
