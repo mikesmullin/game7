@@ -295,8 +295,7 @@ static void draw_triangle(
       // Horizontal interpolation factor
       f32 t = (x - x0) / (x1 - x0);
       // Interpolated Z value for this pixel
-      // TODO: fix the rounding error and range here
-      f32 z = 1000.0f * lerp(z0, z1, t);
+      f32 z = lerp(z0, z1, t);
 
       // Check if the pixel's depth is closer than what's stored in the Z-buffer
       u32 i = y * W + x;
@@ -304,16 +303,16 @@ static void draw_triangle(
         // Update Z-buffer with the new depth value
         zbuffer[i] = z;
         // Draw the Z-buffer (for debugging)
-        u32 cmp = Math__map(z, 0, 1, 128, 255);
-        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | cmp << 16 | cmp << 8 | cmp);
+        u32 zz = z * 100 * 255;
+        Bitmap__Set2DPixel(screen, x, y, 0xff000000 | zz << 16 | zz << 8 | zz);
 
         // Get the texel color
         f32 tx = lerp(uvx0, uvx1, t) * 8 * 2;
         f32 ty = lerp(uvy0, uvy1, t1) * 8 * 2;
-        color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
+        // color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
 
         // Draw the pixel in the RGBA buffer
-        Bitmap__Set2DPixel(screen, x, y, color);
+        // Bitmap__Set2DPixel(screen, x, y, color);
 
         // print_vec4(state, 23, (vec4){x0, x1, a[1], b[1]}, WHITE);
         // print_vec4(state, 23, (vec4){a[2], b[2], c[2], 0}, WHITE);
