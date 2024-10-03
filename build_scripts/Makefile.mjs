@@ -26,7 +26,7 @@ const DEBUG_COMPILER_ARGS = [
   '-O0',
   // export debug symbols (x86dbg understands both; turn these on when debugging, leave off for faster compile)
   // '-gdwarf', // DWARF (GDB / Linux compatible)
-  //'-g', '-gcodeview', // CodeView (PDB / windbg / Windows compatible)
+  '-g', /* '-gcodeview',*/ // CodeView (PDB / windbg / Windows compatible)
 ];
 const C_COMPILER_ARGS = [
   '-m64', // generate 64-bit executable 

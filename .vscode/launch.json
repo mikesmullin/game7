@@ -5,15 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
+      "name": "(Windows) Attach",
       "type": "cppvsdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/Pong_test.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/build",
-      "environment": [],
-      "console": "externalTerminal"
+      "request": "attach",
+      "processId": "${command:pickProcess}"
     }
   ]
 }
