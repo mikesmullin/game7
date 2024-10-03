@@ -11,11 +11,25 @@
 #include "Math.h"
 #include "Wavefront.h"
 
-static f32 W, H;
 static u32 BLACK = 0xff000000;
 static u32 LIME = 0xff00ff00;
 static u32 PINK = 0xffff00ff;
 static u32 WHITE = 0xffffffff;
+
+static f32 W, H;
+static mat4 model = {
+    {1, 0, 0, 0},  //
+    {0, 1, 0, 0},  //
+    {0, 0, 1, 0},  //
+    {0, 0, 0, 1},  //
+};
+static mat4 view = {
+    {1, 0, 0, 0},  //
+    {0, 1, 0, 0},  //
+    {0, 0, 1, 0},  //
+    {0, 0, 0, 1},  //
+};
+static mat4 projection;
 
 static f32 safe_divide(f32 numerator, f32 denominator) {
   // Check if y is close to zero, then clamp the value of z
@@ -292,6 +306,8 @@ static void draw_triangle(
       // tmpUVY = uvy0, uvy0 = uvy1, uvy1 = tmpUVY;
     }
     for (f32 x = x0; x <= x1; x++) {
+      if (x < 0 || W < x || y < 0 || H < y) continue;
+
       // Horizontal interpolation factor
       f32 t = (x - x0) / (x1 - x0);
       // Interpolated Z value for this pixel
@@ -304,15 +320,15 @@ static void draw_triangle(
         zbuffer[i] = z;
         // Draw the Z-buffer (for debugging)
         u32 zz = z * 100 * 255;
-        Bitmap__Set2DPixel(screen, x, y, 0xff000000 | zz << 16 | zz << 8 | zz);
+        // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | zz << 16 | zz << 8 | zz);
 
         // Get the texel color
-        f32 tx = lerp(uvx0, uvx1, t) * 8 * 2;
-        f32 ty = lerp(uvy0, uvy1, t1) * 8 * 2;
+        f32 tx = lerp(uvx0, uvx1, t) * 8;
+        f32 ty = lerp(uvy0, uvy1, t1) * 8;
         // color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
 
         // Draw the pixel in the RGBA buffer
-        // Bitmap__Set2DPixel(screen, x, y, color);
+        Bitmap__Set2DPixel(screen, x, y, color);
 
         // print_vec4(state, 23, (vec4){x0, x1, a[1], b[1]}, WHITE);
         // print_vec4(state, 23, (vec4){a[2], b[2], c[2], 0}, WHITE);
@@ -325,15 +341,6 @@ static void draw_triangle(
 
 void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
-  Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
-
-  for (u32 i = 0; i < W * H; i++) {
-    logic->zbuf[i] = FLT_MIN;
-  }
-}
-
-void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tex, u32 color) {
-  Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
   Player_t* player = (Player_t*)state->local->game->curPlyr;
@@ -345,35 +352,38 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
   cRX = player->base.transform.rotation.y;
   cRY = player->base.transform.rotation.x;
 
-  // Model matrix
-  mat4 model = {
-      {1.0f, 0, 0, x0},  //
-      {0, 1.0f, 0, y0},  //
-      {0, 0, 1.0f, z0},  //
-      {0, 0, 0, 1.0f},   //
-  };
-
   // View matrix (camera)
-  mat4 view = {
-      {1, 0, 0, -cX},  //
-      {0, 1, 0, -cY},  //
-      {0, 0, 1, -cZ},  //
-      {0, 0, 0, 1},    //
-  };
+  view[0][3] = -cX;
+  view[1][3] = -cY;
+  view[2][3] = -cZ;
 
   // Projection matrix (Perspective projection)
-  mat4 projection;
   float fovy = glms_rad(90.0f);
   float aspect = W / H;
   float nearZ = 1000.0f;
   float farZ = 0.01f;
   mat4_proj(state, aspect, fovy, nearZ, farZ, projection);
 
+  Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
+
+  for (u32 i = 0; i < W * H; i++) {  // wipe zbuf
+    logic->zbuf[i] = FLT_MIN;
+  }
+}
+
+void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tex, u32 color) {
+  Logic__State_t* logic = state->local;
+  Bitmap_t* atlas = &state->local->atlas;
+  Bitmap_t* screen = &state->local->screen;
+  Player_t* player = (Player_t*)state->local->game->curPlyr;
+
+  // Model matrix
+  model[0][3] = x0;
+  model[1][3] = y0;
+  model[2][3] = z0;
+
   // --- POINT INTERPOLATION ----
   Wavefront_t* obj = List__get(logic->game->meshes, MODEL_BOX);
-
-  // DEBUG: wipe screen so only last block is visible
-  // Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
 
   // render_mesh()
   // Project and draw all triangles that form the faces
@@ -420,8 +430,6 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
     u8 b = Math__map(Math__triangleWave(i + 2, obj->faces->len), -1, 1, 128, 255);
     u32 color = 0xff000000 | b << 16 | g << 8 | r;
 
-    // Draw the 2 triangles for this square face
-
     // Sort vertices by y-coordinate (v0[1] <= v1[1] <= v2[1])
     // such that v0 becomes a reference to the point furthest into the negative Y plane
     if (v0[1] > v1[1]) {
@@ -439,8 +447,6 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
       v0[0] = v1[0], v0[1] = v1[1], v0[2] = v1[2];
       v1[0] = temp[0], v1[1] = temp[1], v1[2] = temp[2];
     }
-
-    // Bitmap__DebugText2(state, 4, 6 * 3, WHITE, BLACK, "face %u", i);
 
     // the concept of upper and lower here is nuanced
     // 0 .. 1 .. 2 are divided along y-axis into min ... mid ... max
@@ -481,6 +487,97 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
 }
 
 void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex, u32 color) {
+  Logic__State_t* logic = state->local;
+  Bitmap_t* atlas = &state->local->atlas;
+  Bitmap_t* screen = &state->local->screen;
+
+  // Model matrix
+  model[0][3] = x;
+  model[1][3] = y;
+  model[2][3] = z;
+
+  // points
+  f32 u = 0.5f;
+  vec3 v00 = {-u, +u, 0};  // tl
+  vec3 v01 = {+u, +u, 0};  // tr
+  vec3 v02 = {+u, -u, 0};  // br
+  vec3 v03 = {-u, -u, 0};  // bl
+
+  // uv map
+  vec2 uv0 = {0, 0};  // tl
+  vec2 uv1 = {1, 0};  // tr
+  vec2 uv2 = {0, 1};  // br
+  vec2 uv3 = {1, 1};  // bl
+
+  // Project the 3D vertices to 2D screen space
+  vec4 v0, v1, v2, v3;
+  if (!project(state, model, view, projection, v00, v0)) return;
+  if (!project(state, model, view, projection, v01, v1)) return;
+  if (!project(state, model, view, projection, v02, v2)) return;
+  if (!project(state, model, view, projection, v03, v3)) return;
+
+  // print_vec4(state, 1, (vec4){v00[0], v00[1], v00[2], 0}, WHITE);
+  // print_vec4(state, 2, (vec4){v01[0], v01[1], v01[2], 0}, WHITE);
+  // print_vec4(state, 3, (vec4){v02[0], v02[1], v02[2], 0}, WHITE);
+  // print_vec4(state, 4, (vec4){v03[0], v03[1], v03[2], 0}, WHITE);
+
+  // Perform basic clipping on each vertex
+  if (v0[0] < 0) v0[0] = 0;
+  if (v0[0] >= W) v0[0] = W - 1;
+  if (v0[1] < 0) v0[1] = 0;
+  if (v0[1] >= H) v0[1] = H - 1;
+
+  if (v1[0] < 0) v1[0] = 0;
+  if (v1[0] >= W) v1[0] = W - 1;
+  if (v1[1] < 0) v1[1] = 0;
+  if (v1[1] >= H) v1[1] = H - 1;
+
+  if (v2[0] < 0) v2[0] = 0;
+  if (v2[0] >= W) v2[0] = W - 1;
+  if (v2[1] < 0) v2[1] = 0;
+  if (v2[1] >= H) v2[1] = H - 1;
+
+  if (v3[0] < 0) v3[0] = 0;
+  if (v3[0] >= W) v3[0] = W - 1;
+  if (v3[1] < 0) v3[1] = 0;
+  if (v3[1] >= H) v3[1] = H - 1;
+
+  print_vec4(state, 8, v0, WHITE);
+  print_vec4(state, 9, v1, WHITE);
+  print_vec4(state, 10, v2, WHITE);
+  print_vec4(state, 11, v3, WHITE);
+
+  // upper tri: bl tl tr
+  // draw_triangle(
+  //     state,
+  //     screen,
+  //     logic->zbuf,
+  //     v0,
+  //     v2,
+  //     v1,
+  //     true,
+  //     &logic->atlas,
+  //     tex,
+  //     uv0,
+  //     uv1,
+  //     uv2,
+  //     PINK);
+
+  // lower tri: bl br tr
+  draw_triangle(
+      state,
+      screen,
+      logic->zbuf,
+      v3,
+      v2,
+      v1,
+      false,
+      &logic->atlas,
+      tex,
+      uv3,
+      uv2,
+      uv1,
+      PINK);
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* state) {

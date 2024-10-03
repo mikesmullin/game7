@@ -56,7 +56,7 @@ void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  entity->transform.position.x += self->xa * CAT_FLY_SPEED;
-  entity->transform.position.y += self->ya * CAT_FLY_SPEED;
-  entity->transform.position.z += self->za * CAT_FLY_SPEED;
+  // entity->transform.position.x += self->xa * CAT_FLY_SPEED;
+  // entity->transform.position.y += self->ya * CAT_FLY_SPEED;
+  // entity->transform.position.z += self->za * CAT_FLY_SPEED;
 }
