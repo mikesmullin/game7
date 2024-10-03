@@ -192,7 +192,7 @@ void Window__RenderLoop(
         // drop frames while avg perf is low
         if (mavgLastAvg > 1000.0 / 16) {
           // enough of these will bring the average back down
-          costThrottle -= 1;  // -1 brings it down slowly
+          costThrottle = 0;
 
           LOG_DEBUGF(
               "DROPPED FRAME. mavgLastAvg %6.3f costThrottled %u",
