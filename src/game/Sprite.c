@@ -5,7 +5,6 @@
 #include "Dispatcher.h"
 #include "Logic.h"
 
-
 Sprite_t* Sprite__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Sprite_t));
 }
@@ -29,6 +28,11 @@ void Sprite__init(Sprite_t* sprite, Engine__State_t* state) {
 }
 
 void Sprite__render(struct Sprite_t* sprite, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  Sprite_t* self = (Sprite_t*)sprite;
+}
+
+void Sprite__gui(struct Sprite_t* sprite, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Sprite_t* self = (Sprite_t*)sprite;
 }

@@ -159,6 +159,7 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
   }
 
   Game__render(logic->game, state);
+  Game__gui(logic->game, state);
 
   state->VulkanWrapper__UpdateTextureImage(&logic->screen);
 }

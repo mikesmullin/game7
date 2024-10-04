@@ -46,6 +46,11 @@ void Player__render(struct Entity_t* entity, Engine__State_t* state) {
   Player_t* self = (Player_t*)entity;
 }
 
+void Player__gui(struct Entity_t* entity, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  Player_t* self = (Player_t*)entity;
+}
+
 void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;

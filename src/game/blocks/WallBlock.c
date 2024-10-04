@@ -32,6 +32,11 @@ void WallBlock__render(Block_t* block, Engine__State_t* state) {
   Bitmap3D__RenderWall(state, x, 0, y, tex, col);
 }
 
+void WallBlock__gui(Block_t* block, Engine__State_t* state) {
+  WallBlock_t* self = (WallBlock_t*)block;
+  Logic__State_t* logic = state->local;
+}
+
 void WallBlock__tick(Block_t* block, Engine__State_t* state) {
   WallBlock_t* self = (WallBlock_t*)block;
   Logic__State_t* logic = state->local;

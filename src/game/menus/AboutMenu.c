@@ -16,13 +16,18 @@ Menu_t* AboutMenu__alloc(Arena_t* arena) {
 
 void AboutMenu__init(Menu_t* menu, Engine__State_t* state) {
   menu->tick = ABOUT_MENU__TICK;
-  menu->render = ABOUT_MENU__RENDER;
+  // menu->render = ABOUT_MENU__RENDER;
+  menu->gui = ABOUT_MENU__GUI;
 }
 
 void AboutMenu__render(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   AboutMenu_t* self = (AboutMenu_t*)menu;
+}
 
+void AboutMenu__gui(struct Menu_t* menu, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  AboutMenu_t* self = (AboutMenu_t*)menu;
   memset(logic->screen.buf, 0, logic->screen.len);  // reset black
 
   Bitmap__DebugText(
@@ -39,8 +44,9 @@ void AboutMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   AboutMenu_t* self = (AboutMenu_t*)menu;
 
-  if (state->kbState->use) {
+  if (state->kbState->use || state->kbState->up) {
     state->kbState->use = false;
+    state->kbState->up = false;
 
     // TODO: reuse existing TitleMenu instance like a singleton, to avoid memory leak
     logic->game->menu = TitleMenu__alloc(state->arena);

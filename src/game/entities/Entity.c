@@ -19,6 +19,11 @@ void Entity__render(struct Entity_t* entity, Engine__State_t* state) {
   Entity_t* self = (Entity_t*)entity;
 }
 
+void Entity__gui(struct Entity_t* entity, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  Entity_t* self = (Entity_t*)entity;
+}
+
 void Entity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Entity_t* self = (Entity_t*)entity;

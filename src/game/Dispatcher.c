@@ -13,12 +13,42 @@
 #include "menus/TitleMenu.h"
 
 static void (*VTABLE[])() = {
-    Block__tick,      Block__render,      CatSpawnBlock__tick, CatSpawnBlock__render,
-    SpawnBlock__tick, SpawnBlock__render, WallBlock__tick,     WallBlock__render,
-    Entity__tick,     Entity__render,     CatEntity__tick,     CatEntity__render,
-    Player__tick,     Player__render,     AboutMenu__tick,     AboutMenu__render,
-    HelpMenu__tick,   HelpMenu__render,   TitleMenu__tick,     TitleMenu__render,
-    Sprite__tick,     Sprite__render,
+    Block__tick,            //
+    Block__render,          //
+    Block__gui,             //
+    CatSpawnBlock__tick,    //
+    CatSpawnBlock__render,  //
+    CatSpawnBlock__gui,     //
+    SpawnBlock__tick,       //
+    SpawnBlock__render,     //
+    SpawnBlock__gui,        //
+    WallBlock__tick,        //
+    WallBlock__render,      //
+    WallBlock__gui,         //
+
+    Entity__tick,       //
+    Entity__render,     //
+    Entity__gui,        //
+    CatEntity__tick,    //
+    CatEntity__render,  //
+    CatEntity__gui,     //
+    Player__tick,       //
+    Player__render,     //
+    Player__gui,        //
+
+    AboutMenu__tick,    //
+    AboutMenu__render,  //
+    AboutMenu__gui,     //
+    HelpMenu__tick,     //
+    HelpMenu__render,   //
+    HelpMenu__gui,      //
+    TitleMenu__tick,    //
+    TitleMenu__render,  //
+    TitleMenu__gui,     //
+
+    Sprite__tick,    //
+    Sprite__render,  //
+    Sprite__gui,     //
 };
 
 // static / switch / tag / conditional dispatch

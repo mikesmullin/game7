@@ -23,7 +23,8 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
   block->tick = CAT_SPAWN_BLOCK__TICK;
-  block->render = CAT_SPAWN_BLOCK__RENDER;
+  // block->render = CAT_SPAWN_BLOCK__RENDER;
+  block->gui = CAT_SPAWN_BLOCK__GUI;
   self->firstTick = true;
   self->spawnCount = 1;              // instances
   self->spawnInterval = 1.0f / 100;  // per sec
@@ -34,14 +35,19 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
 void CatSpawnBlock__render(Block_t* block, Engine__State_t* state) {
   CatSpawnBlock_t* self = (CatSpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
+}
+
+void CatSpawnBlock__gui(Block_t* block, Engine__State_t* state) {
+  CatSpawnBlock_t* self = (CatSpawnBlock_t*)block;
+  Logic__State_t* logic = state->local;
 
   Bitmap__DebugText(
       &logic->screen,
       &logic->glyphs0,
       4,
       6 * 20,
-      0xff00ff00,
-      0,
+      0xffffffff,
+      0xff000000,
       "cats %u",
       self->spawnedCount);
 }

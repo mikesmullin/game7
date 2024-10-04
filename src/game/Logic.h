@@ -86,6 +86,7 @@ typedef struct VirtualJoystick_t {
 typedef struct Menu_t {
   DispatchFnId tick;
   DispatchFnId render;
+  DispatchFnId gui;
 } Menu_t;
 
 typedef struct TitleMenu_t {
@@ -108,6 +109,7 @@ typedef struct HelpMenu_t {
 typedef struct Entity_t {
   DispatchFnId tick;
   DispatchFnId render;
+  DispatchFnId gui;
   u32 id;
   Transform_t transform;
   Level_t* level;
@@ -130,6 +132,7 @@ typedef struct CatEntity_t {
 typedef struct Sprite_t {
   DispatchFnId tick;
   DispatchFnId render;
+  DispatchFnId gui;
   Transform_t transform;
   u32 tex;
   u32 color;
@@ -139,6 +142,7 @@ typedef struct Sprite_t {
 typedef struct Block_t {
   DispatchFnId tick;
   DispatchFnId render;
+  DispatchFnId gui;
   u32 id;
   enum MODELS meshId;
   bool blocking;

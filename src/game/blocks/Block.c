@@ -27,6 +27,10 @@ void Block__render(Block_t* block, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 }
 
+void Block__gui(Block_t* block, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+}
+
 void Block__tick(Block_t* block, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 }

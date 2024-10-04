@@ -16,10 +16,16 @@ Menu_t* HelpMenu__alloc(Arena_t* arena) {
 
 void HelpMenu__init(Menu_t* menu, Engine__State_t* state) {
   menu->tick = HELP_MENU__TICK;
-  menu->render = HELP_MENU__RENDER;
+  // menu->render = HELP_MENU__RENDER;
+  menu->gui = HELP_MENU__GUI;
 }
 
 void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  HelpMenu_t* self = (HelpMenu_t*)menu;
+}
+
+void HelpMenu__gui(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   HelpMenu_t* self = (HelpMenu_t*)menu;
 
@@ -27,12 +33,12 @@ void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state) {
 
   char* lines[] = {
       "Use W,A,S,D to move, and",
-      "the arrow keys to turn.",
+      "the mouse to look.",
       "",
       "The 1-8 keys select",
       "items from the inventory",
       "",
-      "Space uses items",
+      "E uses items",
   };
   for (u8 i = 0; i < 7; i++) {
     Bitmap__DebugText(&logic->screen, &logic->glyphs0, 4, 6 * i + 4, 0xffffffff, 0, lines[i]);
@@ -43,8 +49,9 @@ void HelpMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   HelpMenu_t* self = (HelpMenu_t*)menu;
 
-  if (state->kbState->use) {
+  if (state->kbState->use || state->kbState->up) {
     state->kbState->use = false;
+    state->kbState->up = false;
 
     logic->game->menu = TitleMenu__alloc(state->arena);
     TitleMenu__init(logic->game->menu, state);

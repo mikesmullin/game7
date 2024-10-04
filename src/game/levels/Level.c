@@ -95,6 +95,24 @@ void Level__render(Level_t* level, Engine__State_t* state) {
   }
 }
 
+void Level__gui(Level_t* level, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+
+  List__Node_t* node = level->blocks->head;
+  for (u32 i = 0; i < level->blocks->len; i++) {
+    Block_t* block = node->data;
+    Dispatcher__call(block->gui, block, state);
+    node = node->next;
+  }
+
+  node = level->entities->head;
+  for (u32 i = 0; i < level->entities->len; i++) {
+    Entity_t* entity = node->data;
+    Dispatcher__call(entity->gui, entity, state);
+    node = node->next;
+  }
+}
+
 void Level__tick(Level_t* level, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 

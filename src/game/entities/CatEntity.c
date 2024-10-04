@@ -10,7 +10,7 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 CAT_FLY_SPEED = 0.001f;  // per-second
+static const f32 CAT_FLY_SPEED = 0.02f;  // per-second
 
 Entity_t* CatEntity__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(CatEntity_t));
@@ -50,6 +50,11 @@ void CatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
       entity->transform.position.z,
       5,
       0xff000000);
+}
+
+void CatEntity__gui(struct Entity_t* entity, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  CatEntity_t* self = (CatEntity_t*)entity;
 }
 
 void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {

@@ -26,7 +26,7 @@ void Game__init(Game_t* game, Engine__State_t* state) {
 
   game->menu = TitleMenu__alloc(state->arena);
   TitleMenu__init(game->menu, state);
-  ((TitleMenu_t*)game->menu)->skip = true;  // debug: skip title screen
+  ((TitleMenu_t*)game->menu)->skip = false;  // debug: skip title screen
   game->curLvl = NULL;
   game->curPlyr = NULL;
   game->lastUid = 0;
@@ -113,6 +113,20 @@ void Game__render(Game_t* game, Engine__State_t* state) {
     Bitmap3D__RenderHorizon(state);
     Level__render(logic->game->curLvl, state);
     Bitmap3D__PostProcessing(state);
+  }
+}
+
+void Game__gui(Game_t* game, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+
+  // menu system
+  if (NULL != game->menu) {
+    Dispatcher__call(game->menu->gui, game->menu, state);
+  }
+
+  // in-game
+  else {
+    Level__gui(logic->game->curLvl, state);
 
     // game->local->CANVAS_DEBUG_X = 80;
     // game->local->CANVAS_DEBUG_Y = 40;

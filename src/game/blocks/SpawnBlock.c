@@ -30,6 +30,11 @@ void SpawnBlock__render(Block_t* block, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 }
 
+void SpawnBlock__gui(Block_t* block, Engine__State_t* state) {
+  SpawnBlock_t* self = (SpawnBlock_t*)block;
+  Logic__State_t* logic = state->local;
+}
+
 void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
   SpawnBlock_t* self = (SpawnBlock_t*)block;
   Logic__State_t* logic = state->local;

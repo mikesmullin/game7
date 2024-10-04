@@ -20,7 +20,8 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
   menu->tick = TITLE_MENU__TICK;
-  menu->render = TITLE_MENU__RENDER;
+  // menu->render = TITLE_MENU__RENDER;
+  menu->gui = TITLE_MENU__GUI;
 
   state->Vulkan__FReadImage(&self->bmp, "../assets/textures/title.png");
 
@@ -33,6 +34,11 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state) {
 }
 
 void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  TitleMenu_t* self = (TitleMenu_t*)menu;
+}
+
+void TitleMenu__gui(struct Menu_t* menu, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   TitleMenu_t* self = (TitleMenu_t*)menu;
 
@@ -80,8 +86,9 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
     state->Audio__StopAudio(state->audio, AUDIO_CLICK);
     state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
   }
-  if (self->skip || state->kbState->use) {
+  if (self->skip || state->kbState->use || state->kbState->up) {
     state->kbState->use = false;
+    state->kbState->up = false;
     state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
     state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
@@ -89,7 +96,7 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
       logic->game->menu = NULL;
       logic->game->curLvl = Level__alloc(state->arena);
       Level__init(state->arena, logic->game->curLvl, state);
-      logic->game->curLvl->wallTex = 0;
+      logic->game->curLvl->wallTex = 2;
       logic->game->curLvl->wallCol = 0x330000ff;
       Level__load(logic->game->curLvl, state, "../assets/textures/level1.png");
     } else if (1 == self->selection) {
