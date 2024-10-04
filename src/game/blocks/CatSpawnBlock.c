@@ -25,9 +25,9 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->tick = CAT_SPAWN_BLOCK__TICK;
   block->render = CAT_SPAWN_BLOCK__RENDER;
   self->firstTick = true;
-  self->spawnCount = 1;        // instances
-  self->spawnInterval = 1.0f;  // per sec
-  self->animTime = 0;          // counter
+  self->spawnCount = 1;              // instances
+  self->spawnInterval = 1.0f / 100;  // per sec
+  self->animTime = 0;                // counter
   self->spawnedCount = 0;
 }
 
@@ -52,23 +52,22 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
 
   if (self->firstTick) {
     self->firstTick = false;
-    // }
+  }
 
-    // self->animTime += state->deltaTime;
-    // while (self->animTime > self->spawnInterval) {
-    //   self->animTime -= self->spawnInterval;
+  self->animTime += state->deltaTime;
+  while (self->animTime > self->spawnInterval) {
+    self->animTime -= self->spawnInterval;
 
-    // // spawn entities (like a particle emitter)
-    // for (u32 i = 0; i < self->spawnCount; i++) {
-    // TODO: associate spawned entities with spawning block?
-    Entity_t* entity = CatEntity__alloc(state->arena);
-    CatEntity__init(entity, state);
-    entity->transform.position.x = block->x;
-    entity->transform.position.y = 0.370f;
-    entity->transform.position.z = block->y;
-    List__append(state->arena, state->local->game->curLvl->entities, entity);
-    self->spawnedCount++;
-    // }
-    // }
+    // spawn entities (like a particle emitter)
+    for (u32 i = 0; i < self->spawnCount; i++) {
+      // TODO: associate spawned entities with spawning block?
+      Entity_t* entity = CatEntity__alloc(state->arena);
+      CatEntity__init(entity, state);
+      entity->transform.position.x = block->x;
+      entity->transform.position.y = 0;
+      entity->transform.position.z = block->y;
+      List__append(state->arena, state->local->game->curLvl->entities, entity);
+      self->spawnedCount++;
+    }
   }
 }

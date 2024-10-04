@@ -1,5 +1,7 @@
 #include "Bitmap3D.h"
 
+#include <math.h>
+
 #include "../game/Logic.h"
 #include "Breakpoint.h"
 #include "Color.h"
@@ -286,6 +288,10 @@ static void draw_triangle(
     vec2 uv1,
     vec2 uv2,
     u32 color) {
+  f32 nx;
+  nx = min(a[0], b[0]), nx = min(nx, c[0]);
+  f32 mx;
+  mx = max(a[0], b[0]), mx = max(mx, c[0]);
   for (f32 y = a[1]; y <= b[1]; y++) {                                         // -n .. +n
     f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);  // 0 .. 1, diagonal
     f32 t1 = (y - a[1]) / (b[1] - a[1]);                                       // 0 .. 1, vertical
@@ -308,6 +314,8 @@ static void draw_triangle(
     for (f32 x = x0; x <= x1; x++) {
       if (x < 0 || W < x || y < 0 || H < y) continue;
 
+      f32 t2 = (x - nx) / (mx - nx);
+
       // Horizontal interpolation factor
       f32 t = (x - x0) / (x1 - x0);
       // Interpolated Z value for this pixel
@@ -323,12 +331,15 @@ static void draw_triangle(
         // Bitmap__Set2DPixel(screen, x, y, 0xff000000 | zz << 16 | zz << 8 | zz);
 
         // Get the texel color
-        f32 tx = lerp(uvx0, uvx1, t) * 8;
+        // f32 tx = lerp(uvx0, uvx1, t2) * 8;
+        f32 tx = t2 * 8;
         f32 ty = lerp(uvy0, uvy1, t1) * 8;
-        // color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
+        color = Bitmap__Get2DTiledPixel(texture, tx, ty, 8, tex, 0, PINK);
 
-        // Draw the pixel in the RGBA buffer
-        Bitmap__Set2DPixel(screen, x, y, color);
+        if (BLACK != color) {  // bit mask for transparency
+          // Draw the pixel in the RGBA buffer
+          Bitmap__Set2DPixel(screen, x, y, color);
+        }
 
         // print_vec4(state, 23, (vec4){x0, x1, a[1], b[1]}, WHITE);
         // print_vec4(state, 23, (vec4){a[2], b[2], c[2], 0}, WHITE);
@@ -491,10 +502,36 @@ void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
 
+  vec3* pos = (vec3*)&logic->game->curPlyr->transform.position;
+  vec3 mpos = (vec3){x, y, z};
+  vec3 to_camera;
+  glm_vec3_sub(*pos, mpos,
+               to_camera);  // Vector from sprite to camera
+  glm_vec3_normalize(to_camera);
+
+  // a 2D billboard that rotates around the Y axis only
+  // Get the angle to rotate around the Y axis by projecting the "to_camera" vector on the XZ plane.
+  f32 angle = atan2f(to_camera[0], to_camera[2]);
+  f32 s = Math__sin((angle));
+  // print_vec4(state, 20, (vec4){angle, to_camera[0], to_camera[1], 0}, LIME);
+  f32 c = Math__cos((angle));
+
   // Model matrix
-  model[0][3] = x;
-  model[1][3] = y;
-  model[2][3] = z;
+  mat4 model2 = {
+      {1, 0, 0, 0},
+      {0, 1, 0, 0},
+      {0, 0, 1, 0},
+      {0, 0, 0, 1},
+  };
+  model2[0][3] = x;
+  model2[1][3] = y;
+  model2[2][3] = z;
+  model2[0][0] = c;
+  model2[0][2] = s;
+  model2[2][0] = -s;
+  model2[2][2] = c;
+
+  // print_mat4(state, 22, model2);
 
   // points
   f32 u = 0.5f;
@@ -511,10 +548,10 @@ void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex
 
   // Project the 3D vertices to 2D screen space
   vec4 v0, v1, v2, v3;
-  if (!project(state, model, view, projection, v00, v0)) return;
-  if (!project(state, model, view, projection, v01, v1)) return;
-  if (!project(state, model, view, projection, v02, v2)) return;
-  if (!project(state, model, view, projection, v03, v3)) return;
+  if (!project(state, model2, view, projection, v00, v0)) return;
+  if (!project(state, model2, view, projection, v01, v1)) return;
+  if (!project(state, model2, view, projection, v02, v2)) return;
+  if (!project(state, model2, view, projection, v03, v3)) return;
 
   // print_vec4(state, 1, (vec4){v00[0], v00[1], v00[2], 0}, WHITE);
   // print_vec4(state, 2, (vec4){v01[0], v01[1], v01[2], 0}, WHITE);
@@ -542,42 +579,76 @@ void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex
   if (v3[1] < 0) v3[1] = 0;
   if (v3[1] >= H) v3[1] = H - 1;
 
-  print_vec4(state, 8, v0, WHITE);
-  print_vec4(state, 9, v1, WHITE);
-  print_vec4(state, 10, v2, WHITE);
-  print_vec4(state, 11, v3, WHITE);
+  // print_vec4(state, 8, v0, WHITE);
+  // print_vec4(state, 9, v1, WHITE);
+  // print_vec4(state, 10, v2, WHITE);
+  // print_vec4(state, 11, v3, WHITE);
 
+  // face tri 1
   // upper tri: bl tl tr
-  // draw_triangle(
-  //     state,
-  //     screen,
-  //     logic->zbuf,
-  //     v0,
-  //     v2,
-  //     v1,
-  //     true,
-  //     &logic->atlas,
-  //     tex,
-  //     uv0,
-  //     uv1,
-  //     uv2,
-  //     PINK);
+  draw_triangle(
+      state,
+      screen,
+      logic->zbuf,
+      v0,
+      v1,
+      v2,
+      true,
+      &logic->atlas,
+      tex,
+      uv0,
+      uv1,
+      uv2,
+      PINK);
 
   // lower tri: bl br tr
   draw_triangle(
       state,
       screen,
       logic->zbuf,
-      v3,
-      v2,
       v1,
+      v2,
+      v0,
       false,
       &logic->atlas,
       tex,
+      uv1,
+      uv2,
+      uv0,
+      PINK);
+
+  // face tri 2
+  // upper tri: bl tl tr
+  draw_triangle(
+      state,
+      screen,
+      logic->zbuf,
+      v0,
+      v3,
+      v2,
+      true,
+      &logic->atlas,
+      tex,
+      uv0,
       uv3,
       uv2,
-      uv1,
-      PINK);
+      LIME);
+
+  // lower tri: bl br tr
+  // draw_triangle(
+  //     state,
+  //     screen,
+  //     logic->zbuf,
+  //     v0,
+  //     v3,
+  //     v2,
+  //     false,
+  //     &logic->atlas,
+  //     tex,
+  //     uv3,
+  //     uv2,
+  //     uv1,
+  //     LIME);
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* state) {
