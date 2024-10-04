@@ -294,8 +294,10 @@ static void draw_triangle(
   mx = max(a[0], b[0]), mx = max(mx, c[0]);
   for (f32 y = a[1]; y <= b[1]; y++) {                                         // -n .. +n
     f32 t0 = upper ? (y - a[1]) / (c[1] - a[1]) : (y - c[1]) / (b[1] - c[1]);  // 0 .. 1, diagonal
-    f32 t1 = (y - a[1]) / (b[1] - a[1]);                                       // 0 .. 1, vertical
-    f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);              // -n .. +n left edge
+    if (isinf(t0) || isnan(t0)) t0 = 0;
+    f32 t1 = (y - a[1]) / (b[1] - a[1]);  // 0 .. 1, vertical
+    if (isinf(t1) || isnan(t1)) t1 = 0;
+    f32 x0 = upper ? lerp(a[0], c[0], t0) : lerp(c[0], b[0], t0);            // -n .. +n left edge
     f32 x1 = lerp(a[0], b[0], t1);                                           // -n .. +n right edge
     f32 z0 = upper ? lerp(a[2], c[2], t0) : lerp(c[2], b[2], t0);            // -n .. +n left edge
     f32 z1 = lerp(a[2], b[2], t1);                                           // -n .. +n right edge
