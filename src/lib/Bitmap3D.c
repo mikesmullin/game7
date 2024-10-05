@@ -759,4 +759,16 @@ void Bitmap3D__RenderSprite(
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  u32* buf = (u32*)logic->screen.buf;
+
+  // fog distance by zbuf
+  for (u32 i = 0; i < W * H; i++) {
+    // NOTE using *80 here instead of *100. why are these numbers magic?
+    u32 b1 = Math__map(logic->zbuf[i] * 80, 0, 1, 255, 0);
+    // blackness of varying alpha overlaid on existing color
+    buf[i] = alpha_blend(buf[i], b1 << 24);
+
+    // TODO: player hurt blood spatter
+  }
 }
