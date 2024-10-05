@@ -765,9 +765,15 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   // fog distance by zbuf
   for (u32 i = 0; i < W * H; i++) {
     // NOTE using *80 here instead of *100. why are these numbers magic?
-    u32 b1 = Math__map(logic->zbuf[i] * 80, 0, 1, 255, 0);
+    // 0xff1de6b5
+    f32 b0 = logic->zbuf[i] * 80;
+    u32 color = buf[i];
+    // cat eyes glow in the dark
+    if (0xff1de6b5 == color) b0 = MATH_CLAMP(0, 1.0f - b0, 1);
+    if (0xff00f2f4 == color) b0 = MATH_CLAMP(0, b0 * 2.4f, 1);
+    u32 b1 = Math__map(b0, 0, 1, 255, 0);
     // blackness of varying alpha overlaid on existing color
-    buf[i] = alpha_blend(buf[i], b1 << 24);
+    buf[i] = alpha_blend(color, b1 << 24);
 
     // TODO: player hurt blood spatter
   }
