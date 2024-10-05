@@ -16,6 +16,7 @@
 Level_t* Level__alloc(Arena_t* arena) {
   Level_t* level = Arena__Push(arena, sizeof(Level_t));
   level->bmp = Bitmap__Prealloc(arena);
+  level->world = Bitmap__Prealloc(arena);
   level->blocks = List__alloc(arena);
   level->entities = List__alloc(arena);
   return level;
@@ -24,6 +25,7 @@ Level_t* Level__alloc(Arena_t* arena) {
 void Level__init(Arena_t* arena, Level_t* level, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
+  level->skybox = false;
   level->wallTex = 0;
   level->ceilTex = 1;
   level->floorTex = 2;
@@ -61,10 +63,11 @@ Block_t* Level__makeBlock(Engine__State_t* state, u32 col, f32 x, f32 y) {
   return NULL;
 }
 
-void Level__load(Level_t* level, Engine__State_t* state, char* file) {
+void Level__load(Level_t* level, Engine__State_t* state, char* levelFile, char* worldFile) {
   Logic__State_t* logic = state->local;
 
-  state->Vulkan__FReadImage(level->bmp, file);
+  state->Vulkan__FReadImage(level->bmp, levelFile);
+  state->Vulkan__FReadImage(level->world, worldFile);
 
   for (s32 y = 0; y < level->bmp->h; y++) {
     for (s32 x = 0; x < level->bmp->w; x++) {

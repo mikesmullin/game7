@@ -46,8 +46,9 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
     logic->game->curPlyr->transform.position.x = block->x;
-    logic->game->curPlyr->transform.position.y = 0.370f;
+    logic->game->curPlyr->transform.position.y = 0;
     logic->game->curPlyr->transform.position.z = block->y;
-    logic->game->curPlyr->transform.rotation.x = 0.0f;
+    logic->game->curPlyr->transform.rotation.x = 0;
+    logic->game->curPlyr->transform.rotation.y = 0;
   }
 }

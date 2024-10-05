@@ -581,7 +581,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   view[2][3] = -cZ;
 
   // Projection matrix (Perspective projection)
-  float fovy = glms_rad(90.0f);
+  float fovy = glms_rad(60.0f);
   float aspect = W / H;
   float nearZ = 1000.0f;
   float farZ = 0.01f;
@@ -589,8 +589,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
 
   Bitmap__Fill(&logic->screen, 0, 0, W, H, BLACK);  // wipe
 
-  for (u32 i = 0; i < W * H; i++) {  // wipe zbuf
-    logic->zbuf[i] = FLT_MIN;
+  for (u32 i = 0; i < W * H; i++) {
+    logic->zbuf[i] = FLT_MIN;  // wipe zbuf
   }
 }
 
@@ -674,7 +674,8 @@ void Bitmap3D__RenderSprite(
   glm_vec3_normalize(to_camera);
 
   // a 2D billboard that rotates around the Y axis only
-  // Get the angle to rotate around the Y axis by projecting the "to_camera" vector on the XZ plane.
+  // Get the angle to rotate around the Y axis by projecting the "to_camera" vector on the XZ
+  // plane.
   f32 angle = atan2f(to_camera[0], to_camera[2]);
   f32 s = Math__sin((angle));
   // print_vec4(state, 20, (vec4){angle, to_camera[0], to_camera[1], 0}, LIME);
@@ -760,7 +761,12 @@ void Bitmap3D__RenderSprite(
 
 void Bitmap3D__PostProcessing(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
+  Level_t* level = logic->game->curLvl;
+  Player_t* player = (Player_t*)logic->game->curPlyr;
   u32* buf = (u32*)logic->screen.buf;
+  f32 cRX = 0, cRY = 0;
+  cRX = player->base.transform.rotation.y;
+  cRY = player->base.transform.rotation.x;
 
   // fog distance by zbuf
   for (u32 i = 0; i < logic->screen.len; i++) {
@@ -776,15 +782,26 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
     buf[i] = alpha_blend(color, b1 << 24);
   }
 
+  // skybox
+  if (level->skybox) {
+    for (u32 i = 0; i < logic->screen.len; i++) {
+      if (FLT_MIN == logic->zbuf[i]) {
+        s32 xx = ((s32)floorf((i % (u32)W) - glms_rad(cRX) * 512 / (Math__PI * 2))) & 511;
+        s32 yy = ((s32)floorf((i / (u32)H) - glms_rad(cRY + 10) * 512 / (Math__PI))) & 511;
+        u32 color = Bitmap__Get2DPixel(level->world, xx, yy, BLACK);
+        buf[i] = alpha_blend(color, level->ceilCol);
+      }
+    }
+  }
+
   // player hurt blood spatter
-  Player_t* player = (Player_t*)logic->game->curPlyr;
   if (player->base.hurtTime > 0) {
     f32 t = 1 - (player->base.hurtTime / PLAYER_HURT_ANIM_TIME);
     f32 offs = 1.0f * easeInQuart(t);
     if (player->base.dead) offs = 0.5;
     for (u32 i = 0; i < logic->screen.len; i++) {
       f32 xp = ((i % logic->screen.w) - logic->screen.w / 2.0f) / logic->screen.w * 2.0f;
-      f32 yp = ((i / logic->screen.h) - logic->screen.h / 2.0f) / logic->screen.h * 2.0f;
+      f32 yp = (((f32)i / logic->screen.h) - logic->screen.h / 2.0f) / logic->screen.h * 2.0f;
 
       if (Math__random(0, 1) + offs < sqrtf(xp * xp + yp * yp)) {
         u32 color = (u32)(Math__random(0, 5) / 4.0f) * 0xff000077;

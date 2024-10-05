@@ -46,7 +46,7 @@ void CatSpawnBlock__gui(Block_t* block, Engine__State_t* state) {
       &logic->glyphs0,
       4,
       6 * 20,
-      0xffffffff,
+      0xff00ff00,
       0xff000000,
       "cats %u",
       self->spawnedCount);

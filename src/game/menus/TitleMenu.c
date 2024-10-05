@@ -98,7 +98,14 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
       Level__init(state->arena, logic->game->curLvl, state);
       logic->game->curLvl->wallTex = 5;
       logic->game->curLvl->wallCol = 0x66ff0000;
-      Level__load(logic->game->curLvl, state, "../assets/textures/level1.png");
+      Level__load(
+          logic->game->curLvl,
+          state,
+          "../assets/textures/level1.png",
+          "../assets/textures/sky.png");
+      logic->game->curLvl->skybox = true;
+      // logic->game->curLvl->ceilCol = 0x77000022;  // blood red
+      logic->game->curLvl->ceilCol = 0xaa000000;  // darken
     } else if (1 == self->selection) {
       logic->game->menu = HelpMenu__alloc(state->arena);
       HelpMenu__init(logic->game->menu, state);

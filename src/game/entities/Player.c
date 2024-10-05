@@ -9,8 +9,9 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 PLAYER_WALK_SPEED = 1.5f;  // per-second
-static const f32 PLAYER_FLY_SPEED = 0.5f;   // per-second
+static const f32 PLAYER_WALK_SPEED = 4.0f;  // per-second
+static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
+static const f32 PLAYER_FLY_SPEED = 1.0f;   // per-second
 static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 
 Entity_t* Player__alloc(Arena_t* arena) {
@@ -25,7 +26,6 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
 
   entity->tick = PLAYER_ENTITY__TICK;
   entity->render = PLAYER_ENTITY__RENDER;
-  entity->transform.position.y = 0.370f;
 
   self->input.xAxis = 0.0f;
   self->input.yAxis = 0.0f;
@@ -130,7 +130,10 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
     // apply left/right motion
     if (0 != self->input.xAxis) {
-      glms_v3_scale(right, -self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
+      glms_v3_scale(
+          right,
+          -self->input.xAxis * PLAYER_WALK_SPEED * PLAYER_STRAFE_MOD * state->deltaTime,
+          &forward);
       glms_v3_add(entity->transform.position, forward, &entity->transform.position);
     }
 

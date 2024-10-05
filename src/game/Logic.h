@@ -12,7 +12,6 @@ typedef double f64;
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
-typedef struct Level_t Level_t;
 typedef struct Wavefront_t Wavefront_t;
 typedef enum DispatchFnId DispatchFnId;
 
@@ -116,7 +115,6 @@ typedef struct Entity_t {
   DispatchFnId render;
   DispatchFnId gui;
   Transform_t transform;
-  Level_t* level;
   List_t* sprites;
   u32 id;
   bool flying;
@@ -180,6 +178,8 @@ typedef struct Level_t {
   Bitmap_t* bmp;
   List_t* blocks;
   List_t* entities;
+  bool skybox;
+  Bitmap_t* world;
   u32 wallTex;
   u32 ceilTex;
   u32 floorTex;
