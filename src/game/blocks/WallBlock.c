@@ -29,7 +29,28 @@ void WallBlock__render(Block_t* block, Engine__State_t* state) {
   u32 col = logic->game->curLvl->wallCol;
 
   // render block mesh/model
-  Bitmap3D__RenderWall(state, x, 0, y, tex, col);
+  Bitmap3D__RenderWall(
+      state,
+      x,
+      0,
+      y,
+      (u32[]){//
+
+              0,  // t
+              2,  // s
+              3,  // w
+              0,  // b
+              4,  // e
+              1,
+              0,  // t
+              2,  // s
+              3,  // w
+              0,  // b
+              4,  // e
+              1,
+              1,
+              1},
+      col);
 }
 
 void WallBlock__gui(Block_t* block, Engine__State_t* state) {
