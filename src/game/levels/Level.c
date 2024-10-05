@@ -33,10 +33,6 @@ void Level__init(Arena_t* arena, Level_t* level, Engine__State_t* state) {
   level->ceilCol = 0;
   level->floorCol = 0;
   level->spawner = NULL;
-
-  // world
-  logic->WORLD_HEIGHT = 4.0f;  // world height
-  logic->ATLAS_TILE_SIZE = 8.0f;
 }
 
 Block_t* Level__makeBlock(Engine__State_t* state, u32 col, f32 x, f32 y) {

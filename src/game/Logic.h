@@ -21,7 +21,13 @@ typedef void (*logic_onreload_t)(Engine__State_t* state);
 typedef void (*logic_onfixedupdate_t)(Engine__State_t* state);
 typedef void (*logic_onupdate_t)(Engine__State_t* state);
 
+static const f32 PLAYER_WALK_SPEED = 4.0f;  // per-second
+static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
+static const f32 PLAYER_FLY_SPEED = 1.0f;   // per-second
+static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
+static const f32 PLAYER_BOB = 0.05f;
 static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
+static const f32 WORLD_HEIGHT = 10.0f;
 
 enum INSTANCES {
   INSTANCE_QUAD1 = 0,
@@ -213,8 +219,6 @@ typedef struct Logic__State_t {
   u16 PIXELS_PER_UNIT;
   f32 PLAYER_ZOOM_SPEED;
 
-  f32 WORLD_HEIGHT;
-  f32 ATLAS_TILE_SIZE;
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
 } Logic__State_t;

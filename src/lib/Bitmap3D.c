@@ -576,7 +576,9 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   cRX = player->base.transform.rotation.y;
   cRY = player->base.transform.rotation.x;
 
-  cY = Math__sin(player->bobPhase) * PLAYER_BOB;
+  if (0 == cY) {  // grounded
+    cY = Math__sin(player->bobPhase) * PLAYER_BOB;
+  }
 
   // View matrix (camera)
   view[0][3] = -cX;

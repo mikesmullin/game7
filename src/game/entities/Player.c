@@ -136,8 +136,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     if (0 != self->input.yAxis) {
       entity->transform.position.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
 
-      // entity->transform.position.y =
-      //     MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
+      entity->transform.position.y = MATH_CLAMP(0, entity->transform.position.y, WORLD_HEIGHT);
     }
 
     f32 xm = self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime;
