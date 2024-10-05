@@ -127,6 +127,7 @@ typedef struct Player_t {
   Entity_t base;
   Camera_t camera;
   VirtualJoystick_t input;
+  f32 bobPhase;
 } Player_t;
 
 typedef struct CatEntity_t {

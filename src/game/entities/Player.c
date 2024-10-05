@@ -9,11 +9,6 @@
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 PLAYER_WALK_SPEED = 4.0f;  // per-second
-static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
-static const f32 PLAYER_FLY_SPEED = 1.0f;   // per-second
-static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
-
 Entity_t* Player__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Player_t));
 }
@@ -144,6 +139,10 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
       // entity->transform.position.y =
       //     MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
     }
+
+    f32 xm = self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime;
+    f32 zm = self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime;
+    self->bobPhase += sqrt(xm * xm + zm * zm) * 4.0f;
   }
 
   if (entity->hurtTime > 0) {

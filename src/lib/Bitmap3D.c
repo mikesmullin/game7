@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "../game/Logic.h"
+#include "../game/entities/Player.h"
 #include "Breakpoint.h"
 #include "Color.h"
 #include "Easing.h"
@@ -575,6 +576,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   cRX = player->base.transform.rotation.y;
   cRY = player->base.transform.rotation.x;
 
+  cY = Math__sin(player->bobPhase) * PLAYER_BOB;
+
   // View matrix (camera)
   view[0][3] = -cX;
   view[1][3] = -cY;
@@ -770,9 +773,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
 
   // fog distance by zbuf
   for (u32 i = 0; i < logic->screen.len; i++) {
-    // NOTE using *80 here instead of *100. why are these numbers magic?
-    // 0xff1de6b5
-    f32 b0 = logic->zbuf[i] * 80;
+    f32 b0 = logic->zbuf[i] * 100;
     u32 color = buf[i];
     // cat eyes glow in the dark
     if (0xff1de6b5 == color) b0 = MATH_CLAMP(0, 1.0f - b0, 1);
