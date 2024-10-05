@@ -130,3 +130,11 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
     node = node->next;
   }
 }
+
+Block_t* Level__getBlock(Level_t* level, u32 x, u32 z) {
+  s32 W = level->bmp->w, D = level->bmp->h;
+  if (x < -W || W < x || z < -D || D < z) {
+    return level->voidWall;
+  }
+  return List__get(level->blocks, x + z * W);
+}

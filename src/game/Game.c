@@ -60,6 +60,10 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/pickupCoin.wav");
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/click.wav");
   state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/powerUp.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/chop.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/punch.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/hurt.wav");
+  state->Audio__LoadAudioFile(state->arena, state->audio, "../assets/audio/sfx/bash.wav");
 
   // preload meshes
   logic->game->meshes = List__alloc(state->arena);

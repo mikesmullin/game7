@@ -67,7 +67,14 @@ __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
     state->dllLoadedOnce = true;
     // doesn't play audio the first time proc runs
   } else {
-    state->Audio__ResumeAudio(state->audio, AUDIO_PICKUP_COIN, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_HURT, false, 1.0f);
+  }
+
+  // play player hurt animation (a visual queue on top of audio queue is nice when muted)
+  Logic__State_t* logic = state->local;
+  Player_t* player = (Player_t*)logic->game->curPlyr;
+  if (NULL != player) {
+    player->base.hurtTime = PLAYER_HURT_ANIM_TIME;
   }
 }
 

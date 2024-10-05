@@ -763,7 +763,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   u32* buf = (u32*)logic->screen.buf;
 
   // fog distance by zbuf
-  for (u32 i = 0; i < W * H; i++) {
+  for (u32 i = 0; i < logic->screen.len; i++) {
     // NOTE using *80 here instead of *100. why are these numbers magic?
     // 0xff1de6b5
     f32 b0 = logic->zbuf[i] * 80;
@@ -774,7 +774,22 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
     u32 b1 = Math__map(b0, 0, 1, 255, 0);
     // blackness of varying alpha overlaid on existing color
     buf[i] = alpha_blend(color, b1 << 24);
+  }
 
-    // TODO: player hurt blood spatter
+  // player hurt blood spatter
+  Player_t* player = (Player_t*)logic->game->curPlyr;
+  if (player->base.hurtTime > 0) {
+    f32 t = 1 - (player->base.hurtTime / PLAYER_HURT_ANIM_TIME);
+    f32 offs = 1.0f * easeInQuart(t);
+    if (player->base.dead) offs = 0.5;
+    for (u32 i = 0; i < logic->screen.len; i++) {
+      f32 xp = ((i % logic->screen.w) - logic->screen.w / 2.0f) / logic->screen.w * 2.0f;
+      f32 yp = ((i / logic->screen.h) - logic->screen.h / 2.0f) / logic->screen.h * 2.0f;
+
+      if (Math__random(0, 1) + offs < sqrtf(xp * xp + yp * yp)) {
+        u32 color = (u32)(Math__random(0, 5) / 4.0f) * 0xff000077;
+        buf[i] = color;
+      }
+    }
   }
 }

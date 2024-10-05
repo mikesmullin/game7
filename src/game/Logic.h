@@ -1,5 +1,4 @@
-#ifndef LOGIC_H
-#define LOGIC_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -23,6 +22,8 @@ typedef void (*logic_onreload_t)(Engine__State_t* state);
 typedef void (*logic_onfixedupdate_t)(Engine__State_t* state);
 typedef void (*logic_onupdate_t)(Engine__State_t* state);
 
+static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
+
 enum INSTANCES {
   INSTANCE_QUAD1 = 0,
 };
@@ -32,6 +33,10 @@ enum AUDIO_FILES {
   AUDIO_PICKUP_COIN = 1,
   AUDIO_CLICK = 2,
   AUDIO_POWERUP = 3,
+  AUDIO_CHOP = 4,
+  AUDIO_PUNCH = 5,
+  AUDIO_HURT = 6,
+  AUDIO_BASH = 7,
 };
 
 enum MODELS {
@@ -110,12 +115,14 @@ typedef struct Entity_t {
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
-  u32 id;
   Transform_t transform;
   Level_t* level;
   List_t* sprites;
+  u32 id;
   bool flying;
+  bool dead;
   bool removed;
+  f32 hurtTime;
 } Entity_t;
 
 typedef struct Player_t {
@@ -179,6 +186,7 @@ typedef struct Level_t {
   u32 wallCol;
   u32 ceilCol;
   u32 floorCol;
+  Block_t* voidWall;
   SpawnBlock_t* spawner;
 } Level_t;
 
@@ -209,5 +217,3 @@ typedef struct Logic__State_t {
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
 } Logic__State_t;
-
-#endif  // LOGIC_H

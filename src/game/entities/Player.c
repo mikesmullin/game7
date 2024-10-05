@@ -7,6 +7,7 @@
 #include "../../lib/Math.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
+#include "Entity.h"
 
 static const f32 PLAYER_WALK_SPEED = 1.5f;  // per-second
 static const f32 PLAYER_FLY_SPEED = 0.5f;   // per-second
@@ -20,8 +21,11 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* self = (Player_t*)entity;
 
+  Entity__init(entity, state);
+
   entity->tick = PLAYER_ENTITY__TICK;
   entity->render = PLAYER_ENTITY__RENDER;
+  entity->transform.position.y = 0.370f;
 
   self->input.xAxis = 0.0f;
   self->input.yAxis = 0.0f;
@@ -30,15 +34,6 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   self->camera.fov = 45.0f;
   self->camera.nearZ = 0.1f;
   self->camera.farZ = 1000.0f;
-
-  entity->transform.position.x = 0.0f;
-  entity->transform.position.y = 0.370f;
-  entity->transform.position.z = 0.0f;
-
-  entity->transform.rotation.x = 0.0f;
-  entity->transform.rotation.y = 0.0f;
-  entity->transform.rotation.z = 0.0f;
-  entity->transform.rotation.w = 0.0f;
 }
 
 void Player__render(struct Entity_t* entity, Engine__State_t* state) {
@@ -146,5 +141,10 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
       // entity->transform.position.y =
       //     MATH_CLAMP(0, entity->transform.position.y, 1.0f /*logic->WORLD_HEIGHT*/);
     }
+  }
+
+  if (entity->hurtTime > 0) {
+    entity->hurtTime -= state->deltaTime;
+    if (entity->hurtTime < 0) entity->hurtTime = 0;
   }
 }
