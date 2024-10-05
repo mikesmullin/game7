@@ -352,7 +352,8 @@ static void draw_triangle(
     vec3 c,
     bool upper,
     Bitmap_t* texture,
-    u32 tex,
+    u32 tx0,
+    u32 ty0,
     vec2 uv0,
     vec2 uv1,
     vec2 uv2,
@@ -435,7 +436,7 @@ static void draw_triangle(
             uv01,
             uv02,
             ttt);
-        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tex, 0, PINK);
+        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
 
         if (!useMask || mask != color) {  // bit mask for transparency
           // Update Z-buffer with the new depth value
@@ -506,7 +507,7 @@ static void draw_triangle(
             uv01,
             uv02,
             ttt);
-        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tex, 0, PINK);
+        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
 
         if (!useMask || mask != color) {  // bit mask for transparency
           // Update Z-buffer with the new depth value
@@ -593,7 +594,8 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   }
 }
 
-void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tex[12], u32 color) {
+void Bitmap3D__RenderWall(
+    Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tx0[12], u32 ty0, u32 color) {
   Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
@@ -645,7 +647,8 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
         v2,
         true,
         &logic->atlas,
-        tex[i],
+        tx0[i],
+        ty0,
         *uv0,
         *uv1,
         *uv2,
@@ -657,7 +660,8 @@ void Bitmap3D__RenderWall(Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 te
   return;
 }
 
-void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex, u32 color) {
+void Bitmap3D__RenderSprite(
+    Engine__State_t* state, f64 x, f64 y, f64 z, u32 tx0, u32 ty0, u32 color) {
   Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
@@ -723,7 +727,8 @@ void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex
       v2,
       true,
       &logic->atlas,
-      tex,
+      tx0,
+      ty0,
       uv0,
       uv1,
       uv2,
@@ -743,7 +748,8 @@ void Bitmap3D__RenderSprite(Engine__State_t* state, f64 x, f64 y, f64 z, u32 tex
       v2,
       true,
       &logic->atlas,
-      tex,
+      tx0,
+      ty0,
       uv0,
       uv3,
       uv2,

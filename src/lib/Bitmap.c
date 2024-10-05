@@ -64,7 +64,7 @@ u32 Bitmap__Get2DPixel(Bitmap_t* bmp, u32 x, u32 y, u32 def) {
  */
 u32 Bitmap__Get2DTiledPixel(Bitmap_t* bmp, u32 x, u32 y, u32 ts, u32 tx, u32 ty, u32 def) {
   u32 xt = ((u32)x & (ts - 1)) + (ts * tx);
-  u32 yt = (u32)y & (ts - 1) + (ts * ty);
+  u32 yt = ((u32)y & (ts - 1)) + (ts * ty);
   return Bitmap__Get2DPixel(bmp, xt, yt, def);
 }
 

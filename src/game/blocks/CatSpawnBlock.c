@@ -70,7 +70,7 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
       Entity_t* entity = CatEntity__alloc(state->arena);
       CatEntity__init(entity, state);
       entity->transform.position.x = block->x;
-      entity->transform.position.y = 0;
+      entity->transform.position.y = -0.25f;
       entity->transform.position.z = block->y;
       List__append(state->arena, state->local->game->curLvl->entities, entity);
       self->spawnedCount++;

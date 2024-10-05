@@ -50,6 +50,7 @@ void WallBlock__render(Block_t* block, Engine__State_t* state) {
               1,
               1,
               1},
+      0,
       col);
 }
 

@@ -37,6 +37,8 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   self->xa = Math__random(-1, 1);
   self->ya = Math__random(-1, 1);
   self->za = Math__random(-1, 1);
+
+  self->tx = Math__urandom2(0, 7);
 }
 
 void CatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
@@ -48,7 +50,8 @@ void CatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
       entity->transform.position.x,
       entity->transform.position.y,
       entity->transform.position.z,
-      5,
+      self->tx,
+      1,
       0xff000000);
 }
 
@@ -62,6 +65,6 @@ void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   CatEntity_t* self = (CatEntity_t*)entity;
 
   entity->transform.position.x += self->xa * CAT_FLY_SPEED;
-  entity->transform.position.y += self->ya * CAT_FLY_SPEED;
+  // entity->transform.position.y += self->ya * CAT_FLY_SPEED;
   entity->transform.position.z += self->za * CAT_FLY_SPEED;
 }

@@ -127,6 +127,7 @@ typedef struct Player_t {
 typedef struct CatEntity_t {
   Entity_t base;
   f32 xa, ya, za;
+  u32 tx;
 } CatEntity_t;
 
 typedef struct Sprite_t {
