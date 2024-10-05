@@ -52,7 +52,7 @@ void CatEntity__render(struct Entity_t* entity, Engine__State_t* state) {
       entity->transform.position.z,
       self->tx,
       1,
-      0xff000000);
+      0x00000000);
 }
 
 void CatEntity__gui(struct Entity_t* entity, Engine__State_t* state) {

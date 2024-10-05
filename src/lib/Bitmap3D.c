@@ -436,9 +436,9 @@ static void draw_triangle(
             uv01,
             uv02,
             ttt);
-        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
+        u32 tc = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
 
-        if (!useMask || mask != color) {  // bit mask for transparency
+        if (!useMask || tc != mask) {  // bit mask for transparency
           // Update Z-buffer with the new depth value
           zbuffer[i] = z;
           // Draw the Z-buffer (for debugging)
@@ -446,7 +446,7 @@ static void draw_triangle(
           // color = 0xff000000 | zz << 16 | zz << 8 | zz;
 
           // Draw the pixel in the RGBA buffer
-          Bitmap__Set2DPixel(screen, x, y, color);
+          Bitmap__Set2DPixel(screen, x, y, alpha_blend(tc, color));
         }
       }
     }
@@ -507,9 +507,9 @@ static void draw_triangle(
             uv01,
             uv02,
             ttt);
-        color = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
+        u32 tc = Bitmap__Get2DTiledPixel(texture, ttt[0] * 8, (1 - ttt[1]) * 8, 8, tx0, ty0, PINK);
 
-        if (!useMask || mask != color) {  // bit mask for transparency
+        if (!useMask || tc != mask) {  // bit mask for transparency
           // Update Z-buffer with the new depth value
           zbuffer[i] = z;
           // Draw the Z-buffer (for debugging)
@@ -517,7 +517,7 @@ static void draw_triangle(
           // color = 0xff000000 | zz << 16 | zz << 8 | zz;
 
           // Draw the pixel in the RGBA buffer
-          Bitmap__Set2DPixel(screen, x, y, color);
+          Bitmap__Set2DPixel(screen, x, y, alpha_blend(tc, color));
         }
       }
     }
@@ -595,7 +595,7 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
 }
 
 void Bitmap3D__RenderWall(
-    Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tx0[12], u32 ty0, u32 color) {
+    Engine__State_t* state, f32 x0, f32 y0, f32 z0, u32 tx0, u32 ty0, u32 color) {
   Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
@@ -632,10 +632,10 @@ void Bitmap3D__RenderWall(
     // u8 r = Math__map(Math__triangleWave(v0[1], 10), -1, 1, 128, 255);
     // u8 g = Math__map(Math__triangleWave(v1[1], 10), -1, 1, 128, 255);
     // u8 b = Math__map(Math__triangleWave(v2[1], 10), -1, 1, 128, 255);
-    u8 r = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
-    u8 g = Math__map(Math__triangleWave(i + 1, obj->faces->len), -1, 1, 128, 255);
-    u8 b = Math__map(Math__triangleWave(i + 2, obj->faces->len), -1, 1, 128, 255);
-    u32 color = 0xff000000 | b << 16 | g << 8 | r;
+    // u8 r = Math__map(Math__triangleWave(i, obj->faces->len), -1, 1, 128, 255);
+    // u8 g = Math__map(Math__triangleWave(i + 1, obj->faces->len), -1, 1, 128, 255);
+    // u8 b = Math__map(Math__triangleWave(i + 2, obj->faces->len), -1, 1, 128, 255);
+    // u32 color = 0xff000000 | b << 16 | g << 8 | r;
 
     draw_triangle(
         state,
@@ -647,7 +647,7 @@ void Bitmap3D__RenderWall(
         v2,
         true,
         &logic->atlas,
-        tx0[i],
+        tx0,
         ty0,
         *uv0,
         *uv1,
@@ -734,7 +734,7 @@ void Bitmap3D__RenderSprite(
       uv2,
       true,
       BLACK,
-      PINK);
+      color);
 
   // face tri 2
   // upper tri: bl tl tr
@@ -755,7 +755,7 @@ void Bitmap3D__RenderSprite(
       uv2,
       true,
       BLACK,
-      PINK);
+      color);
 }
 
 void Bitmap3D__PostProcessing(Engine__State_t* state) {
