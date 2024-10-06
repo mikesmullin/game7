@@ -24,6 +24,7 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
 
   entity->tick = CAT_ENTITY__TICK;
   entity->render = CAT_ENTITY__RENDER;
+  entity->collide = CAT_ENTITY__COLLIDE;
 
   entity->transform.position.x = 0.0f;
   entity->transform.position.y = 0.0f;
@@ -64,7 +65,24 @@ void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  entity->transform.position.x += self->xa * CAT_FLY_SPEED;
-  // entity->transform.position.y += self->ya * CAT_FLY_SPEED;
-  entity->transform.position.z += self->za * CAT_FLY_SPEED;
+  entity->xa = 0;
+  entity->za = 0;
+  entity->xa += self->xa * CAT_FLY_SPEED;
+  // entity->ya += self->ya * CAT_FLY_SPEED;
+  entity->za += self->za * CAT_FLY_SPEED;
+
+  Entity__move(entity, state);
+}
+
+bool CatEntity__collide(Entity_t* entity, Engine__State_t* state, Entity_t* other, f64 x, f64 y) {
+  Logic__State_t* logic = state->local;
+  CatEntity_t* self = (CatEntity_t*)entity;
+
+  bool collision = Entity__collide(entity, state, other, x, y);
+  if (collision) {
+    self->xa = Math__random(-1, 1);
+    self->ya = Math__random(-1, 1);
+    self->za = Math__random(-1, 1);
+  }
+  return collision;
 }

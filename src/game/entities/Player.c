@@ -118,9 +118,15 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     glms_v3_normalize(&right);
 
     // apply forward/backward motion
+    v3 pos;
+    // TODO: can manipulate this to simulate slipping/ice
+    entity->xa = 0;
+    entity->za = 0;
     if (0 != self->input.zAxis) {
       glms_v3_scale(front, self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
-      glms_v3_add(entity->transform.position, forward, &entity->transform.position);
+      glms_v3_add(entity->transform.position, forward, &pos);
+      entity->xa += pos.x - entity->transform.position.x;
+      entity->za += pos.z - entity->transform.position.z;
     }
 
     // apply left/right motion
@@ -129,19 +135,24 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
           right,
           -self->input.xAxis * PLAYER_WALK_SPEED * PLAYER_STRAFE_MOD * state->deltaTime,
           &forward);
-      glms_v3_add(entity->transform.position, forward, &entity->transform.position);
+      glms_v3_add(entity->transform.position, forward, &pos);
+      entity->xa += pos.x - entity->transform.position.x;
+      entity->za += pos.z - entity->transform.position.z;
     }
 
     // apply up/down motion
     if (0 != self->input.yAxis) {
       entity->transform.position.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
 
-      entity->transform.position.y = MATH_CLAMP(0, entity->transform.position.y, WORLD_HEIGHT);
+      entity->transform.position.y =
+          MATH_CLAMP(0, entity->transform.position.y, logic->game->curLvl->height);
     }
 
     f32 xm = self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime;
     f32 zm = self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime;
     self->bobPhase += sqrt(xm * xm + zm * zm) * 4.0f;
+
+    Entity__move(entity, state);
   }
 
   if (entity->hurtTime > 0) {

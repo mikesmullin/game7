@@ -94,12 +94,12 @@ void Game__tick(Game_t* game, Engine__State_t* state) {
       game->curPlyr = Player__alloc(state->arena);
       Player__init(game->curPlyr, state);
     }
-    Dispatcher__call(game->menu->tick, game->menu, state);
+    Dispatcher__engine(game->menu->tick, game->menu, state);
   }
 
   // in-game
   else {
-    Dispatcher__call(game->curPlyr->tick, game->curPlyr, state);
+    Dispatcher__engine(game->curPlyr->tick, game->curPlyr, state);
     Level__tick(logic->game->curLvl, state);
   }
 }
@@ -109,7 +109,7 @@ void Game__render(Game_t* game, Engine__State_t* state) {
 
   // menu system
   if (NULL != game->menu) {
-    Dispatcher__call(game->menu->render, game->menu, state);
+    Dispatcher__engine(game->menu->render, game->menu, state);
   }
 
   // in-game
@@ -125,7 +125,7 @@ void Game__gui(Game_t* game, Engine__State_t* state) {
 
   // menu system
   if (NULL != game->menu) {
-    Dispatcher__call(game->menu->gui, game->menu, state);
+    Dispatcher__engine(game->menu->gui, game->menu, state);
   }
 
   // in-game

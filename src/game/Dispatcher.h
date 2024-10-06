@@ -1,6 +1,11 @@
 #pragma once
 
+#include <stdbool.h>
+typedef float f32;
+typedef double f64;
+
 typedef struct Engine__State_t Engine__State_t;
+typedef struct Entity_t Entity_t;
 
 typedef enum DispatchFnId {
   BLOCK__TICK,
@@ -41,4 +46,13 @@ typedef enum DispatchFnId {
   SPRITE__GUI,
 } DispatchFnId;
 
-void Dispatcher__call(DispatchFnId id, void* self, Engine__State_t* state);
+typedef enum DispatchFn2Id {
+  BLOCK__COLLIDE,
+
+  ENTITY__COLLIDE,
+  CAT_ENTITY__COLLIDE,
+} DispatchFn2Id;
+
+void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state);
+bool Dispatcher__collide(
+    DispatchFn2Id id, void* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y);

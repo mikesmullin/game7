@@ -12,7 +12,9 @@
 #include "menus/HelpMenu.h"
 #include "menus/TitleMenu.h"
 
-static void (*VTABLE[])() = {
+typedef float f32;
+
+static void (*VTABLE_ENGINE[])() = {
     Block__tick,            //
     Block__render,          //
     Block__gui,             //
@@ -51,9 +53,22 @@ static void (*VTABLE[])() = {
     Sprite__gui,     //
 };
 
+static bool (*VTABLE_COLISSION[])() = {
+    Block__collide,  //
+
+    Entity__collide,     //
+    CatEntity__collide,  //
+};
+
 // static / switch / tag / conditional dispatch
 // a hot-reload safe, simple alternative to polymorphism
 // works because all fns are known at compile-time
-void Dispatcher__call(DispatchFnId id, void* self, Engine__State_t* state) {
-  return VTABLE[id](self, state);
+void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state) {
+  return VTABLE_ENGINE[id](self, state);
+}
+
+// collision check & notify
+bool Dispatcher__collide(
+    DispatchFn2Id id, void* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y) {
+  return VTABLE_COLISSION[id](self, state, entity, x, y);
 }

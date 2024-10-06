@@ -82,14 +82,14 @@ void Level__render(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
-    Dispatcher__call(block->render, block, state);
+    Dispatcher__engine(block->render, block, state);
     node = node->next;
   }
 
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    Dispatcher__call(entity->render, entity, state);
+    Dispatcher__engine(entity->render, entity, state);
     node = node->next;
   }
 }
@@ -100,14 +100,14 @@ void Level__gui(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
-    Dispatcher__call(block->gui, block, state);
+    Dispatcher__engine(block->gui, block, state);
     node = node->next;
   }
 
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    Dispatcher__call(entity->gui, entity, state);
+    Dispatcher__engine(entity->gui, entity, state);
     node = node->next;
   }
 }
@@ -118,22 +118,33 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
-    Dispatcher__call(block->tick, block, state);
     node = node->next;
+    Dispatcher__engine(block->tick, block, state);
   }
 
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    Dispatcher__call(entity->tick, entity, state);
     node = node->next;
+    Dispatcher__engine(entity->tick, entity, state);
   }
 }
 
-Block_t* Level__getBlock(Level_t* level, u32 x, u32 z) {
-  s32 W = level->bmp->w, D = level->bmp->h;
+Block_t* Level__getBlock(Level_t* level, f32 x, f32 z) {
+  f32 W = level->width / 2, D = level->depth / 2;
   if (x < -W || W < x || z < -D || D < z) {
-    return level->voidWall;
+    return NULL;
   }
-  return List__get(level->blocks, x + z * W);
+
+  // TODO: would be faster if we use array lookup
+  List__Node_t* node = level->blocks->head;
+  for (u32 i = 0; i < level->blocks->len; i++) {
+    Block_t* block = node->data;
+    node = node->next;
+
+    if (block->x == x && block->y == z) {
+      return block;
+    }
+  }
+  return NULL;
 }

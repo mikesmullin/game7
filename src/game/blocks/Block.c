@@ -16,8 +16,9 @@ void Block__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   Logic__State_t* logic = state->local;
   block->tick = BLOCK__TICK;
   block->render = BLOCK__RENDER;
+  block->collide = BLOCK__COLLIDE;
   block->id = ++logic->game->lastUid;
-  block->blocking = false;
+  block->blocking = true;
   block->masked = false;
   block->x = x;
   block->y = y;
@@ -33,4 +34,8 @@ void Block__gui(Block_t* block, Engine__State_t* state) {
 
 void Block__tick(Block_t* block, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
+}
+
+bool Block__collide(Block_t* block, Engine__State_t* state, Entity_t* entity, f64 x, f64 y) {
+  return block->blocking;
 }

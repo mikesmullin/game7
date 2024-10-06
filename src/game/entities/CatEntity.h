@@ -1,5 +1,7 @@
-#ifndef CAT_ENTITY_H
-#define CAT_ENTITY_H
+#pragma once
+
+#include <stdbool.h>
+typedef double f64;
 
 typedef struct Arena_t Arena_t;
 typedef struct Entity_t Entity_t;
@@ -10,5 +12,4 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state);
 void CatEntity__tick(Entity_t* entity, Engine__State_t* state);
 void CatEntity__render(Entity_t* entity, Engine__State_t* state);
 void CatEntity__gui(struct Entity_t* entity, Engine__State_t* state);
-
-#endif  // CAT_ENTITY_H
+bool CatEntity__collide(Entity_t* self, Engine__State_t* state, Entity_t* other, f64 x, f64 y);

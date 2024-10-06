@@ -14,6 +14,7 @@ typedef struct Engine__State_t Engine__State_t;
 typedef struct List_t List_t;
 typedef struct Wavefront_t Wavefront_t;
 typedef enum DispatchFnId DispatchFnId;
+typedef enum DispatchFn2Id DispatchFn2Id;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
@@ -27,7 +28,6 @@ static const f32 PLAYER_FLY_SPEED = 1.0f;   // per-second
 static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 static const f32 PLAYER_BOB = 0.05f;
 static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
-static const f32 WORLD_HEIGHT = 10.0f;
 
 enum INSTANCES {
   INSTANCE_QUAD1 = 0,
@@ -120,6 +120,7 @@ typedef struct Entity_t {
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
+  DispatchFn2Id collide;
   Transform_t transform;
   List_t* sprites;
   u32 id;
@@ -127,6 +128,8 @@ typedef struct Entity_t {
   bool dead;
   bool removed;
   f32 hurtTime;
+  f32 r;       // radius
+  f32 xa, za;  // movement deltas (pre-collision)
 } Entity_t;
 
 typedef struct Player_t {
@@ -156,6 +159,7 @@ typedef struct Block_t {
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
+  DispatchFn2Id collide;
   u32 id;
   enum MODELS meshId;
   bool blocking;
@@ -193,7 +197,9 @@ typedef struct Level_t {
   u32 wallCol;
   u32 ceilCol;
   u32 floorCol;
-  Block_t* voidWall;
+  u32 width;
+  u32 depth;
+  u32 height;
   SpawnBlock_t* spawner;
 } Level_t;
 

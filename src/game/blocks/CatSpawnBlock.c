@@ -25,6 +25,8 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->tick = CAT_SPAWN_BLOCK__TICK;
   // block->render = CAT_SPAWN_BLOCK__RENDER;
   block->gui = CAT_SPAWN_BLOCK__GUI;
+  block->blocking = false;
+
   self->firstTick = true;
   self->spawnCount = 1;        // instances
   self->spawnInterval = 1.0f;  // per sec
