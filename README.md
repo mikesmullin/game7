@@ -57,7 +57,6 @@ C:\> node build_scripts/Makefile.mjs watch
    - https://www.youtube.com/watch?v=TZ5a3gCCZYo
    - https://www.youtube.com/watch?v=3IAlJSIjvH0
    - https://www.youtube.com/watch?v=Tc763vPm4Ws
-
 - 3D Transforms & Perspective Projection Math
   - https://www.youtube.com/watch?v=rvJHkYnAR3w
   - https://www.youtube.com/watch?v=o-xwmTODTUI
@@ -67,6 +66,10 @@ C:\> node build_scripts/Makefile.mjs watch
   - https://www.youtube.com/watch?v=JC5IMfK7Yfw
   - https://www.youtube.com/watch?v=rs4B8-qoY1I
   - https://chatgpt.com/share/66f4c8ea-db3c-8009-b897-c56886dd3b3b
+- Quad Trees
+  - https://www.youtube.com/watch?v=OJxEcs0w_kE
+  - https://www.youtube.com/watch?v=QQx_NmCIuCY
+  - https://www.youtube.com/watch?v=z0YFFg_nBjw
 
 ## Cool Tools
 
@@ -76,3 +79,4 @@ C:\> node build_scripts/Makefile.mjs watch
 - [kenney](https://www.kenney.nl/assets) affordable game art
 - [x64dbg](https://x64dbg.com/) catches breakpoints on memory access violation
 - [fantasy namegen](http://rinkworks.com/namegen/) surprisingly nuanced
+- [p5.js](https://p5js.org/reference/) math visualization aid
