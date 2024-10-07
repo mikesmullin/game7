@@ -95,7 +95,7 @@ bool Entity__checkCollide(Entity_t* entity, Engine__State_t* state, f32 x, f32 y
 
     // check & notify each entity
     bool collision = false;
-    collision &= Dispatcher__collide(e->collide, e, state, entity, x, y);
+    /*collision &=*/Dispatcher__collide(e->collide, e, state, entity, x, y);
     collision &= Dispatcher__collide(entity->collide, entity, state, e, x, y);
   }
   return false;
