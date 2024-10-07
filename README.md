@@ -43,14 +43,25 @@ C:\> node build_scripts/Makefile.mjs watch
     - aggressive "phonk" genre
     - 3d and many quads but all bitmap sprite textures [cross-plane billboarding](https://www.reddit.com/r/gamedev/comments/q2qbp2/what_is_it_called_when_two_billboarded_sprites/)
     - [memes](https://www.youtube.com/watch?v=lrTcb3Kx1zM)!
-    
+- jdh 🇩🇰 ([@jdah__](https://x.com/jdah__))
+  - https://www.youtube.com/watch?v=PcMua73C_94
+  - https://www.youtube.com/watch?v=fSjc8vLMg8c
+  - https://www.youtube.com/watch?v=KyhrqbfEgfA
+  - https://www.youtube.com/watch?v=b5ovU9xeQ7c
+- Zeekerss ([@ZeekerssRBLX](https://x.com/zeekerssrblx?lang=en))
+  - https://store.steampowered.com/app/1717770/The_Upturned/
+  - https://store.steampowered.com/search/?developer=Zeekerss
+- David Szymanski 🇺🇸 ([@DUSKdev](https://x.com/DUSKdev))
+  - https://store.steampowered.com/app/519860/DUSK/
+  - https://store.steampowered.com/developer/davidszymanski/#browse
 
 ## References
 
-- [ChatGPT Analysis](docs/90s-raycasting.md): No worries brah. GPT can ELI5 Notch's crypticly-abbreviated and 100% uncommented code, probably better than the author himself.
-- [Permadi’s Raycasting Tutorial](https://permadi.com/1996/05/ray-casting-tutorial-table-of-contents/): This classic resource provides a detailed step-by-step guide to raycasting, including wall detection, fisheye distortion correction, and basic shading techniques. It's accompanied by demos and interactive examples to help visualize the concepts, especially for beginners.
-- [Tim Wheeler’s Wolfenstein 3D Raycasting Tutorial in C](https://timallanwheeler.com/blog/2023/04/01/wolfenstein-3d-raycasting-in-c/): This blog post dives into the math and code behind raycasting in C, offering explanations on how to compute ray directions, handle wall intersections, and render columns of pixels efficiently. It’s a good resource for programmers working in C.
-- [Gabriel Gambetta’s 2.5D Engines and Raycasting Tutorial](https://gabrielgambetta.com/computer-graphics-from-scratch/02-basic-raytracing.html): A detailed modern take on the subject, explaining how to implement 2.5D rendering using raycasting. It covers everything from ray generation to texture mapping and optimizing the rendering process for smooth performance.
+- Wolfenstein/Doom vs. Quake style Rendering
+  - [ChatGPT Analysis](docs/90s-raycasting.md): No worries brah. GPT can ELI5 Notch's crypticly-abbreviated and 100% uncommented code, probably better than the author himself.
+  - [Permadi’s Raycasting Tutorial](https://permadi.com/1996/05/ray-casting-tutorial-table-of-contents/): This classic resource provides a detailed step-by-step guide to raycasting, including wall detection, fisheye distortion correction, and basic shading techniques. It's accompanied by demos and interactive examples to help visualize the concepts, especially for beginners.
+  - [Tim Wheeler’s Wolfenstein 3D Raycasting Tutorial in C](https://timallanwheeler.com/blog/2023/04/01/wolfenstein-3d-raycasting-in-c/): This blog post dives into the math and code behind raycasting in C, offering explanations on how to compute ray directions, handle wall intersections, and render columns of pixels efficiently. It’s a good resource for programmers working in C.
+  - [Gabriel Gambetta’s 2.5D Engines and Raycasting Tutorial](https://gabrielgambetta.com/computer-graphics-from-scratch/02-basic-raytracing.html): A detailed modern take on the subject, explaining how to implement 2.5D rendering using raycasting. It covers everything from ray generation to texture mapping and optimizing the rendering process for smooth performance.
 - C String Manipulation
   - https://www.youtube.com/watch?v=2wio9UOFcow
 - C Arena Memory Management
@@ -70,6 +81,8 @@ C:\> node build_scripts/Makefile.mjs watch
   - https://www.youtube.com/watch?v=OJxEcs0w_kE
   - https://www.youtube.com/watch?v=QQx_NmCIuCY
   - https://www.youtube.com/watch?v=z0YFFg_nBjw
+- DST BehaviorTree (AI), StateGraph (Animation), and Components (ECS)
+  - https://github.com/taichunmin/dont-starve-together-game-scripts
 
 ## Cool Tools
 
@@ -80,3 +93,5 @@ C:\> node build_scripts/Makefile.mjs watch
 - [x64dbg](https://x64dbg.com/) catches breakpoints on memory access violation
 - [fantasy namegen](http://rinkworks.com/namegen/) surprisingly nuanced
 - [p5.js](https://p5js.org/reference/) math visualization aid
+- [sokol](https://github.com/floooh/sokol) newer (more secure?) alternative to stb (cross-platform, tiny/cute header-only libs)
+
