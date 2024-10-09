@@ -15,21 +15,21 @@ Block_t* WallBlock__alloc(Arena_t* arena) {
 void WallBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   WallBlock_t* self = (WallBlock_t*)block;
   Block__init(block, state, x, y);
-  block->tick = WALL_BLOCK__TICK;
-  block->render = WALL_BLOCK__RENDER;
+  block->base.tick = WALL_BLOCK__TICK;
+  block->base.render = WALL_BLOCK__RENDER;
   block->meshId = MODEL_BOX;
 }
 
 void WallBlock__render(Block_t* block, Engine__State_t* state) {
   WallBlock_t* self = (WallBlock_t*)block;
   Logic__State_t* logic = state->local;
-  f32 x = block->x;
-  f32 y = block->y;
+  f32 x = block->base.transform.position.x;
+  f32 z = block->base.transform.position.z;
   u32 tex = logic->game->curLvl->wallTex;
   u32 col = logic->game->curLvl->wallCol;
 
   // render block mesh/model
-  Bitmap3D__RenderWall(state, x, 0, y, tex, 0, col);
+  Bitmap3D__RenderWall(state, x, 0, z, tex, 0, col);
 }
 
 void WallBlock__gui(Block_t* block, Engine__State_t* state) {

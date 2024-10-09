@@ -19,7 +19,6 @@ Level_t* Level__alloc(Arena_t* arena) {
   Level_t* level = Arena__Push(arena, sizeof(Level_t));
   level->bmp = Bitmap__Prealloc(arena);
   level->world = Bitmap__Prealloc(arena);
-  level->blocks = List__alloc(arena);
   level->entities = List__alloc(arena);
   return level;
 }
@@ -72,7 +71,7 @@ void Level__load(Level_t* level, Engine__State_t* state, char* levelFile, char* 
       u32 color = Bitmap__Get2DPixel(level->bmp, x, y, 0x00000000);
       Block_t* block = Level__makeBlock(state, color, x, y);
       if (NULL != block) {
-        List__append(state->arena, level->blocks, block);
+        List__append(state->arena, level->entities, block);
       }
     }
   }
@@ -81,14 +80,7 @@ void Level__load(Level_t* level, Engine__State_t* state, char* levelFile, char* 
 void Level__render(Level_t* level, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
-  List__Node_t* node = level->blocks->head;
-  for (u32 i = 0; i < level->blocks->len; i++) {
-    Block_t* block = node->data;
-    Dispatcher__engine(block->render, block, state);
-    node = node->next;
-  }
-
-  node = level->entities->head;
+  List__Node_t* node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
     Dispatcher__engine(entity->render, entity, state);
@@ -99,14 +91,7 @@ void Level__render(Level_t* level, Engine__State_t* state) {
 void Level__gui(Level_t* level, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
-  List__Node_t* node = level->blocks->head;
-  for (u32 i = 0; i < level->blocks->len; i++) {
-    Block_t* block = node->data;
-    Dispatcher__engine(block->gui, block, state);
-    node = node->next;
-  }
-
-  node = level->entities->head;
+  List__Node_t* node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
     Dispatcher__engine(entity->gui, entity, state);
@@ -125,13 +110,7 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
   }
   Arena__Reset(level->qtArena);
   level->qt = QuadTreeNode_create(level->qtArena, boundary);
-  List__Node_t* node = level->blocks->head;
-  for (u32 i = 0; i < level->blocks->len; i++) {
-    Block_t* block = node->data;
-    node = node->next;
-    QuadTreeNode_insert(level->qtArena, level->qt, (Point){block->x, block->y}, block);
-  }
-  node = level->entities->head;
+  List__Node_t* node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
     node = node->next;
@@ -142,36 +121,10 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
         entity);
   }
 
-  node = level->blocks->head;
-  for (u32 i = 0; i < level->blocks->len; i++) {
-    Block_t* block = node->data;
-    node = node->next;
-    Dispatcher__engine(block->tick, block, state);
-  }
-
   node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
     node = node->next;
     Dispatcher__engine(entity->tick, entity, state);
   }
-}
-
-Block_t* Level__getBlock(Level_t* level, f32 x, f32 z) {
-  f32 W = level->width / 2, D = level->depth / 2;
-  if (x < -W || W < x || z < -D || D < z) {
-    return NULL;
-  }
-
-  // TODO: would be faster if we use array lookup
-  List__Node_t* node = level->blocks->head;
-  for (u32 i = 0; i < level->blocks->len; i++) {
-    Block_t* block = node->data;
-    node = node->next;
-
-    if (block->x == x && block->y == z) {
-      return block;
-    }
-  }
-  return NULL;
 }

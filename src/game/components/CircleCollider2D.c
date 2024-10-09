@@ -1,11 +1,7 @@
-#include "BoxCollider2D.h"
+#include "CircleCollider2D.h"
 
-// TODO: add a box x circle checker
-
-bool BoxCollider2D__check(f32 x0, f32 y0, f32 r0, f32 x1, f32 y1, f32 r1) {
+bool CircleCollider2D__check(f32 x0, f32 y0, f32 r0, f32 x1, f32 y1, f32 r1) {
   // TODO: use component transforms (then everywhere)
-
-  // TODO: this is not the correct formula for checking boxes
 
   // Check for overlap using AABB (Axis-Aligned Bounding Box)
   // based on projected a position, and existing b position

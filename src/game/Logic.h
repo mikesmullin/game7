@@ -130,6 +130,7 @@ void EventEmitter__push();
 
 typedef enum ColliderType_t {
   BOX_COLLIDER_2D,
+  CIRCLE_COLLIDER_2D,
 } ColliderType;
 
 typedef struct ColliderComponent_t {
@@ -138,7 +139,15 @@ typedef struct ColliderComponent_t {
 
 typedef struct BoxCollider2DComponent_t {
   ColliderComponent base;
+  //f32 x, y; // origin
+  f32 hw, hh;  // half width/height (radius)
 } BoxCollider2DComponent;
+
+typedef struct CircleCollider2DComponent_t {
+  ColliderComponent base;
+  //f32 x, y; // origin
+  f32 r;  // radius
+} CircleCollider2DComponent;
 
 typedef struct Rigidbody2DComponent_t {
 } Rigidbody2DComponent;
@@ -150,18 +159,12 @@ typedef struct Components_t {
   Rigidbody2DComponent* rb;
 } Components;
 
-typedef enum EntityType_t {
-  ENTITY,
-  BLOCK,
-} EntityType;
-
 typedef struct Entity_t {
-  EntityType type;
   Components components;
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
-  DispatchFn2Id collide;
+  DispatchFnId collide;
   Transform_t transform;
   List_t* sprites;
   u32 id;
@@ -169,9 +172,14 @@ typedef struct Entity_t {
   bool dead;
   bool removed;
   f32 hurtTime;
-  f32 r;  // radius
   f32 xa, za;  // movement deltas (pre-collision)
 } Entity_t;
+
+typedef struct OnCollideClosure_t {
+  Entity_t *source, *target;
+  f32 x, y;
+  bool before, after;
+} OnCollideClosure;
 
 typedef struct Player_t {
   Entity_t base;
@@ -197,16 +205,9 @@ typedef struct Sprite_t {
 } Sprite_t;
 
 typedef struct Block_t {
-  EntityType type;
-  DispatchFnId tick;
-  DispatchFnId render;
-  DispatchFnId gui;
-  DispatchFn2Id collide;
-  u32 id;
+  Entity_t base;
   enum MODELS meshId;
-  bool blocking;
   bool masked;
-  f32 x, y, r;
 } Block_t;
 
 typedef struct WallBlock_t {
@@ -229,7 +230,6 @@ typedef struct CatSpawnBlock_t {
 
 typedef struct Level_t {
   Bitmap_t* bmp;
-  List_t* blocks;
   List_t* entities;
   bool skybox;
   Bitmap_t* world;

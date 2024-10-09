@@ -6,6 +6,7 @@
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
 #include "../../lib/List.h"
+#include "../../lib/Math.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../entities/CatEntity.h"
@@ -21,14 +22,14 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   CatSpawnBlock_t* self = (CatSpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
-  block->tick = CAT_SPAWN_BLOCK__TICK;
+  block->base.tick = CAT_SPAWN_BLOCK__TICK;
   // block->render = CAT_SPAWN_BLOCK__RENDER;
-  block->gui = CAT_SPAWN_BLOCK__GUI;
-  block->blocking = false;
+  block->base.gui = CAT_SPAWN_BLOCK__GUI;
+  block->base.components.collider = NULL;
 
   self->firstTick = true;
   self->spawnCount = 1;  // instances
-  self->spawnInterval = 3.0f;  // per sec
+  self->spawnInterval = 1.0f;  // per sec
   self->animTime = 0;  // counter
   self->spawnedCount = 0;
 }
@@ -70,9 +71,9 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
       // TODO: associate spawned entities with spawning block?
       Entity_t* entity = CatEntity__alloc(state->arena);
       CatEntity__init(entity, state);
-      entity->transform.position.x = block->x;
+      entity->transform.position.x = block->base.transform.position.x + Math__random(-1, 1);
       entity->transform.position.y = -0.25f;
-      entity->transform.position.z = block->y;
+      entity->transform.position.z = block->base.transform.position.z + Math__random(-1, 1);
       List__append(state->arena, state->local->game->curLvl->entities, entity);
       self->spawnedCount++;
     }

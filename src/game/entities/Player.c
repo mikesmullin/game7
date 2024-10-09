@@ -29,6 +29,12 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   self->camera.fov = 45.0f;
   self->camera.nearZ = 0.1f;
   self->camera.farZ = 1000.0f;
+
+  CircleCollider2DComponent* collider =
+      Arena__Push(state->arena, sizeof(CircleCollider2DComponent));
+  collider->base.type = CIRCLE_COLLIDER_2D;
+  collider->r = 0.5f;
+  entity->components.collider = (ColliderComponent*)collider;
 }
 
 void Player__render(struct Entity_t* entity, Engine__State_t* state) {

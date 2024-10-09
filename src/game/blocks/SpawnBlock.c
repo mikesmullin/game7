@@ -19,9 +19,9 @@ void SpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   SpawnBlock_t* self = (SpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
-  block->tick = SPAWN_BLOCK__TICK;
-  block->render = SPAWN_BLOCK__RENDER;
-  block->blocking = false;
+  block->base.tick = SPAWN_BLOCK__TICK;
+  block->base.render = SPAWN_BLOCK__RENDER;
+  block->base.components.collider = NULL;
 
   self->firstTick = true;
   logic->game->curLvl->spawner = self;
@@ -47,9 +47,9 @@ void SpawnBlock__tick(Block_t* block, Engine__State_t* state) {
     state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
     state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
 
-    logic->game->curPlyr->transform.position.x = block->x;
+    logic->game->curPlyr->transform.position.x = block->base.transform.position.x;
     logic->game->curPlyr->transform.position.y = 0;
-    logic->game->curPlyr->transform.position.z = block->y;
+    logic->game->curPlyr->transform.position.z = block->base.transform.position.z;
     logic->game->curPlyr->transform.rotation.x = 0;
     logic->game->curPlyr->transform.rotation.y = 0;
   }

@@ -15,4 +15,3 @@ void Level__load(Level_t* level, Engine__State_t* state, char* levelFile, char* 
 void Level__render(Level_t* level, Engine__State_t* state);
 void Level__gui(Level_t* level, Engine__State_t* state);
 void Level__tick(Level_t* level, Engine__State_t* state);
-Block_t* Level__getBlock(Level_t* level, f32 x, f32 z);

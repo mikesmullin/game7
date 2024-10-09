@@ -6,8 +6,11 @@ typedef double f64;
 
 typedef struct Engine__State_t Engine__State_t;
 typedef struct Entity_t Entity_t;
+typedef struct OnCollideClosure_t OnCollideClosure;
 
 typedef enum DispatchFnId {
+  DISPATCH_NONE,
+
   BLOCK__TICK,
   BLOCK__RENDER,
   BLOCK__GUI,
@@ -27,6 +30,7 @@ typedef enum DispatchFnId {
   CAT_ENTITY__TICK,
   CAT_ENTITY__RENDER,
   CAT_ENTITY__GUI,
+  CAT_ENTITY__COLLIDE,
   PLAYER_ENTITY__TICK,
   PLAYER_ENTITY__RENDER,
   PLAYER_ENTITY__GUI,
@@ -46,13 +50,6 @@ typedef enum DispatchFnId {
   SPRITE__GUI,
 } DispatchFnId;
 
-typedef enum DispatchFn2Id {
-  BLOCK__COLLIDE,
-
-  ENTITY__COLLIDE,
-  CAT_ENTITY__COLLIDE,
-} DispatchFn2Id;
-
 void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state);
-bool Dispatcher__collide(
-    DispatchFn2Id id, void* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y);
+void Dispatcher__collide(
+    DispatchFnId id, void* self, Engine__State_t* state, OnCollideClosure* params);

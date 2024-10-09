@@ -14,13 +14,18 @@
 
 typedef float f32;
 
+static void Dispatch__None() {
+}
+
 static void (*VTABLE_ENGINE[])() = {
+    Dispatch__None,
+
     Block__tick,  //
     Block__render,  //
     Block__gui,  //
     CatSpawnBlock__tick,  //
     CatSpawnBlock__render,  //
-    CatSpawnBlock__gui,  //
+    CatSpawnBlock__gui,
     SpawnBlock__tick,  //
     SpawnBlock__render,  //
     SpawnBlock__gui,  //
@@ -34,6 +39,7 @@ static void (*VTABLE_ENGINE[])() = {
     CatEntity__tick,  //
     CatEntity__render,  //
     CatEntity__gui,  //
+    CatEntity__collide,  //
     Player__tick,  //
     Player__render,  //
     Player__gui,  //
@@ -53,13 +59,6 @@ static void (*VTABLE_ENGINE[])() = {
     Sprite__gui,  //
 };
 
-static bool (*VTABLE_COLLISION[])() = {
-    Block__collide,  //
-
-    Entity__collide,  //
-    CatEntity__collide,  //
-};
-
 // static / switch / tag / conditional dispatch
 // a hot-reload safe, simple alternative to polymorphism
 // works because all fns are known at compile-time
@@ -67,8 +66,7 @@ void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state) {
   return VTABLE_ENGINE[id](self, state);
 }
 
-// collision check & notify
-bool Dispatcher__collide(
-    DispatchFn2Id id, void* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y) {
-  return VTABLE_COLLISION[id](self, state, entity, x, y);
+void Dispatcher__collide(
+    DispatchFnId id, void* self, Engine__State_t* state, OnCollideClosure* params) {
+  return VTABLE_ENGINE[id](self, state, params);
 }
