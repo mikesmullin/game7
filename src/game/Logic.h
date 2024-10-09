@@ -24,7 +24,7 @@ typedef void (*logic_onupdate_t)(Engine__State_t* state);
 
 static const f32 PLAYER_WALK_SPEED = 4.0f;  // per-second
 static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
-static const f32 PLAYER_FLY_SPEED = 1.0f;   // per-second
+static const f32 PLAYER_FLY_SPEED = 1.0f;  // per-second
 static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 static const f32 PLAYER_BOB = 0.05f;
 static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
@@ -75,11 +75,11 @@ typedef struct AnimationState_t {
 } AnimationState_t;
 
 typedef struct Camera_t {
-  f32 fov;          // field of view
-  f32 nearZ;        // near plane
-  f32 farZ;         // far plane
+  f32 fov;  // field of view
+  f32 nearZ;  // near plane
+  f32 farZ;  // far plane
   mat4 projection;  // projection matrix
-  mat4 view;        // view (camera) matrix
+  mat4 view;  // view (camera) matrix
 } Camera_t;
 
 typedef struct Transform_t {
@@ -116,7 +116,44 @@ typedef struct HelpMenu_t {
   Menu_t base;
 } HelpMenu_t;
 
+typedef struct TransformComponent_t {
+  v3 pos, rot;
+} TransformComponent;
+
+typedef struct EventEmitterComponent_t {
+} EventEmitterComponent;
+
+void EventEmitter__listen();
+void EventEmitter__remove();
+void EventEmitter__push();
+
+typedef enum ColliderType_t {
+  BOX_COLLIDER_2D,
+} ColliderType;
+
+typedef struct ColliderComponent_t {
+  ColliderType type;
+} ColliderComponent;
+
+typedef struct BoxCollider2DComponent_t {
+  ColliderComponent base;
+} BoxCollider2DComponent;
+
+typedef struct Entity_t Entity_t;
+bool BoxCollider2D__check(f32 x0, f32 y0, f32 r0, f32 x1, f32 y1, f32 r1);
+
+typedef struct Rigidbody2DComponent_t {
+} Rigidbody2DComponent;
+
+typedef struct Components_t {
+  TransformComponent* xform;
+  EventEmitterComponent* event;
+  ColliderComponent* collider;
+  Rigidbody2DComponent* rb;
+} Components;
+
 typedef struct Entity_t {
+  Components components;
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
@@ -128,7 +165,7 @@ typedef struct Entity_t {
   bool dead;
   bool removed;
   f32 hurtTime;
-  f32 r;       // radius
+  f32 r;  // radius
   f32 xa, za;  // movement deltas (pre-collision)
 } Entity_t;
 
@@ -164,7 +201,7 @@ typedef struct Block_t {
   enum MODELS meshId;
   bool blocking;
   bool masked;
-  f32 x, y;
+  f32 x, y, r;
 } Block_t;
 
 typedef struct WallBlock_t {

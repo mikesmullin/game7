@@ -15,48 +15,48 @@
 typedef float f32;
 
 static void (*VTABLE_ENGINE[])() = {
-    Block__tick,            //
-    Block__render,          //
-    Block__gui,             //
-    CatSpawnBlock__tick,    //
+    Block__tick,  //
+    Block__render,  //
+    Block__gui,  //
+    CatSpawnBlock__tick,  //
     CatSpawnBlock__render,  //
-    CatSpawnBlock__gui,     //
-    SpawnBlock__tick,       //
-    SpawnBlock__render,     //
-    SpawnBlock__gui,        //
-    WallBlock__tick,        //
-    WallBlock__render,      //
-    WallBlock__gui,         //
+    CatSpawnBlock__gui,  //
+    SpawnBlock__tick,  //
+    SpawnBlock__render,  //
+    SpawnBlock__gui,  //
+    WallBlock__tick,  //
+    WallBlock__render,  //
+    WallBlock__gui,  //
 
-    Entity__tick,       //
-    Entity__render,     //
-    Entity__gui,        //
-    CatEntity__tick,    //
+    Entity__tick,  //
+    Entity__render,  //
+    Entity__gui,  //
+    CatEntity__tick,  //
     CatEntity__render,  //
-    CatEntity__gui,     //
-    Player__tick,       //
-    Player__render,     //
-    Player__gui,        //
+    CatEntity__gui,  //
+    Player__tick,  //
+    Player__render,  //
+    Player__gui,  //
 
-    AboutMenu__tick,    //
+    AboutMenu__tick,  //
     AboutMenu__render,  //
-    AboutMenu__gui,     //
-    HelpMenu__tick,     //
-    HelpMenu__render,   //
-    HelpMenu__gui,      //
-    TitleMenu__tick,    //
+    AboutMenu__gui,  //
+    HelpMenu__tick,  //
+    HelpMenu__render,  //
+    HelpMenu__gui,  //
+    TitleMenu__tick,  //
     TitleMenu__render,  //
-    TitleMenu__gui,     //
+    TitleMenu__gui,  //
 
-    Sprite__tick,    //
+    Sprite__tick,  //
     Sprite__render,  //
-    Sprite__gui,     //
+    Sprite__gui,  //
 };
 
-static bool (*VTABLE_COLISSION[])() = {
+static bool (*VTABLE_COLLISION[])() = {
     Block__collide,  //
 
-    Entity__collide,     //
+    Entity__collide,  //
     CatEntity__collide,  //
 };
 
@@ -70,5 +70,5 @@ void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state) {
 // collision check & notify
 bool Dispatcher__collide(
     DispatchFn2Id id, void* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y) {
-  return VTABLE_COLISSION[id](self, state, entity, x, y);
+  return VTABLE_COLLISION[id](self, state, entity, x, y);
 }

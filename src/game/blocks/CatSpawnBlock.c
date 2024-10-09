@@ -6,7 +6,6 @@
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
 #include "../../lib/List.h"
-#include "../../lib/Log.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../entities/CatEntity.h"
@@ -28,9 +27,9 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->blocking = false;
 
   self->firstTick = true;
-  self->spawnCount = 1;        // instances
-  self->spawnInterval = 1.0f;  // per sec
-  self->animTime = 0;          // counter
+  self->spawnCount = 1;  // instances
+  self->spawnInterval = 1.0f / 10;  // per sec
+  self->animTime = 0;  // counter
   self->spawnedCount = 0;
 }
 

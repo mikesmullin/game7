@@ -22,6 +22,7 @@ void Block__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->masked = false;
   block->x = x;
   block->y = y;
+  block->r = 0.6f;
 }
 
 void Block__render(Block_t* block, Engine__State_t* state) {
