@@ -140,9 +140,6 @@ typedef struct BoxCollider2DComponent_t {
   ColliderComponent base;
 } BoxCollider2DComponent;
 
-typedef struct Entity_t Entity_t;
-bool BoxCollider2D__check(f32 x0, f32 y0, f32 r0, f32 x1, f32 y1, f32 r1);
-
 typedef struct Rigidbody2DComponent_t {
 } Rigidbody2DComponent;
 
