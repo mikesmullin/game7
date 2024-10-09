@@ -66,6 +66,7 @@ void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state) {
   return VTABLE_ENGINE[id](self, state);
 }
 
+// TODO: these fns should all just take one single closure pointer
 void Dispatcher__collide(
     DispatchFnId id, void* self, Engine__State_t* state, OnCollideClosure* params) {
   return VTABLE_ENGINE[id](self, state, params);

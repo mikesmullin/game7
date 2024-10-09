@@ -26,4 +26,5 @@ typedef struct QuadTreeNode_t {
 QuadTreeNode* QuadTreeNode_create(Arena_t* arena, Rect boundary);
 void QuadTreeNode_subdivide(Arena_t* arena, QuadTreeNode* node);
 bool QuadTreeNode_insert(Arena_t* arena, QuadTreeNode* node, Point point, void* data);
-void QuadTreeNode_query(QuadTreeNode* node, Rect range, void* matchData[], u32* matchCount);
+void QuadTreeNode_query(
+    QuadTreeNode* node, Rect range, u32 limit, void* matchData[], u32* matchCount);

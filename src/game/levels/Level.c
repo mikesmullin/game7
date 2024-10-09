@@ -106,7 +106,8 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
   f32 W = level->width / 2, D = level->depth / 2;
   Rect boundary = {0.0f, 0.0f, W, D};  // Center (0,0), width/height 20x20
   if (NULL == level->qtArena) {
-    level->qtArena = Arena__SubAlloc(state->arena, 1024 * 1024 * 1);  // 1MB
+    // TODO: reduce size back to 1MB; instead don't store entities in the tree that can't collide
+    level->qtArena = Arena__SubAlloc(state->arena, 1024 * 1024 * 10);  // MB
   }
   Arena__Reset(level->qtArena);
   level->qt = QuadTreeNode_create(level->qtArena, boundary);

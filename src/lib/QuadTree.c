@@ -65,7 +65,8 @@ bool QuadTreeNode_insert(Arena_t* arena, QuadTreeNode* node, Point point, void* 
 }
 
 // Query the quadtree for points within a given range
-void QuadTreeNode_query(QuadTreeNode* node, Rect range, void* matchData[], u32* matchCount) {
+void QuadTreeNode_query(
+    QuadTreeNode* node, Rect range, u32 limit, void* matchData[], u32* matchCount) {
   // If the range does not intersect this node's boundary, return
   if (!Rect__intersectsRect(node->boundary, range)) {
     return;
@@ -73,6 +74,7 @@ void QuadTreeNode_query(QuadTreeNode* node, Rect range, void* matchData[], u32* 
 
   // Check each point in this node to see if it's within the range
   for (u32 i = 0; i < node->point_count; i++) {
+    if (*matchCount >= limit) return;
     if (Rect__containsPoint(range, node->points[i])) {
       matchData[*matchCount] = node->data[i];
       (*matchCount)++;
@@ -81,9 +83,9 @@ void QuadTreeNode_query(QuadTreeNode* node, Rect range, void* matchData[], u32* 
 
   // If the node is subdivided, search the children
   if (node->subdivided) {
-    QuadTreeNode_query(node->northeast, range, matchData, matchCount);
-    QuadTreeNode_query(node->northwest, range, matchData, matchCount);
-    QuadTreeNode_query(node->southeast, range, matchData, matchCount);
-    QuadTreeNode_query(node->southwest, range, matchData, matchCount);
+    QuadTreeNode_query(node->northeast, range, limit, matchData, matchCount);
+    QuadTreeNode_query(node->northwest, range, limit, matchData, matchCount);
+    QuadTreeNode_query(node->southeast, range, limit, matchData, matchCount);
+    QuadTreeNode_query(node->southwest, range, limit, matchData, matchCount);
   }
 }

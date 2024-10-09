@@ -159,6 +159,12 @@ typedef struct Components_t {
   Rigidbody2DComponent* rb;
 } Components;
 
+typedef enum EntityType_t {
+  ENTITY_NONE,
+  ENTITY_CAT,
+  ENTITY_WALL,
+} EntityType;
+
 typedef struct Entity_t {
   Components components;
   DispatchFnId tick;
@@ -168,6 +174,7 @@ typedef struct Entity_t {
   Transform_t transform;
   List_t* sprites;
   u32 id;
+  EntityType type;
   bool flying;
   bool dead;
   bool removed;
@@ -179,6 +186,7 @@ typedef struct OnCollideClosure_t {
   Entity_t *source, *target;
   f32 x, y;
   bool before, after;
+  bool noclip;
 } OnCollideClosure;
 
 typedef struct Player_t {

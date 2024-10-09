@@ -74,9 +74,9 @@ bool Entity__checkCollide(Entity_t* entity, Engine__State_t* state, f32 x, f32 y
   }
 
   u32 matchCount = 0;
-  void* matchData[100];  // TODO: don't limit search results?
+  void* matchData[10];  // TODO: don't limit search results?
   // TODO: query can be the radius of the entity, to shorten this code?
-  QuadTreeNode_query(level->qt, range, matchData, &matchCount);
+  QuadTreeNode_query(level->qt, range, 10, matchData, &matchCount);
   for (u32 i = 0; i < matchCount; i++) {
     Entity_t* other = (Entity_t*)matchData[i];
     if (entity == other) continue;
@@ -109,18 +109,12 @@ bool Entity__checkCollide(Entity_t* entity, Engine__State_t* state, f32 x, f32 y
 
       if (collisionBefore || collisionAfter) {
         // notify each participant (onenter, onstay, onexit)
-        // source
-        Dispatcher__collide(
-            entity->collide,
-            entity,
-            state,
-            &(OnCollideClosure){entity, other, x, y, collisionBefore, collisionAfter});
-        // target
-        Dispatcher__collide(
-            other->collide,
-            other,
-            state,
-            &(OnCollideClosure){entity, other, x, y, collisionBefore, collisionAfter});
+        OnCollideClosure* params =
+            &(OnCollideClosure){entity, other, x, y, collisionBefore, collisionAfter, false};
+        Dispatcher__collide(other->collide, other, state, params);  // notify target
+        if (params->noclip) return false;
+        Dispatcher__collide(entity->collide, entity, state, params);  // notify source
+        if (params->noclip) return false;
       }
       if (collisionAfter) return true;
     }
