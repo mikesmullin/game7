@@ -15,6 +15,7 @@ typedef struct List_t List_t;
 typedef struct Wavefront_t Wavefront_t;
 typedef enum DispatchFnId DispatchFnId;
 typedef enum DispatchFn2Id DispatchFn2Id;
+typedef struct QuadTreeNode_t QuadTreeNode;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
@@ -152,7 +153,13 @@ typedef struct Components_t {
   Rigidbody2DComponent* rb;
 } Components;
 
+typedef enum EntityType_t {
+  ENTITY,
+  BLOCK,
+} EntityType;
+
 typedef struct Entity_t {
+  EntityType type;
   Components components;
   DispatchFnId tick;
   DispatchFnId render;
@@ -193,6 +200,7 @@ typedef struct Sprite_t {
 } Sprite_t;
 
 typedef struct Block_t {
+  EntityType type;
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
@@ -238,6 +246,8 @@ typedef struct Level_t {
   u32 depth;
   u32 height;
   SpawnBlock_t* spawner;
+  Arena_t* qtArena;
+  QuadTreeNode* qt;
 } Level_t;
 
 typedef struct Game_t {

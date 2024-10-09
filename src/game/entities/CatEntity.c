@@ -4,15 +4,17 @@
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
+#include "../../lib/Geometry.h"
 #include "../../lib/Keyboard.h"
 #include "../../lib/List.h"
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
+#include "../../lib/QuadTree.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
 #include "Entity.h"
 
-static const f32 CAT_FLY_SPEED = 0.1f;  // per-second
+static const f32 CAT_MOVE_SPEED = 0.1f;  // per-second
 
 Entity_t* CatEntity__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(CatEntity_t));
@@ -70,7 +72,7 @@ void CatEntity__gui(struct Entity_t* entity, Engine__State_t* state) {
 bool BoxCollider2D__check(f32 x0, f32 y0, f32 r0, f32 x1, f32 y1, f32 r1) {
   // TODO: use component transforms (then everywhere)
 
-  // Check for overlap using AABB (Axis-Aligned Bounding Box) logic
+  // Check for overlap using AABB (Axis-Aligned Bounding Box)
   // based on projected a position, and existing b position
   bool overlap_x = (x0 - r0 < x1 + r1) && (x0 + r0 > x1 - r1);
   bool overlap_y = (y0 - r0 < y1 + r1) && (y0 + r0 > y1 - r1);
@@ -94,70 +96,59 @@ void CatEntity__tick(struct Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  static f32 lastTurnWait = 3.0f;
+  static f32 lastTurnWait = 2.0f;
   static f32 sinceLastTurn = 0;
   sinceLastTurn += state->deltaTime;
 
   entity->xa = 0;
   entity->za = 0;
-  entity->xa += self->xa * CAT_FLY_SPEED;
-  // entity->ya += self->ya * CAT_FLY_SPEED;
-  entity->za += self->za * CAT_FLY_SPEED;
+  entity->xa += self->xa * CAT_MOVE_SPEED;
+  // entity->ya += self->ya * CAT_MOVE_SPEED;
+  entity->za += self->za * CAT_MOVE_SPEED;
 
   // TODO: move to Level
   Level_t* level = logic->game->curLvl;
   bool collision = false;
 
-  List__Node_t* c = level->entities->head;
-  for (u32 i = 0; i < level->entities->len; i++) {
-    Entity_t* other = c->data;
-    if (entity == other) continue;
-    bool r = BoxCollider2D__check(
-        entity->transform.position.x + entity->xa,
-        entity->transform.position.z + entity->za,
-        entity->r,
-        other->transform.position.x,
-        other->transform.position.z,
-        other->r);
-    if (r) {
-      if (sinceLastTurn > lastTurnWait) {
-        sinceLastTurn = 0;
-        turn_around(self);
-      }
-      collision = true;
-      break;
-      // return;
-    }
-    c = c->next;
-  }
-
-  if (!collision) {
-    c = level->blocks->head;
-    for (u32 i = 0; i < level->blocks->len; i++) {
-      Block_t* other = c->data;
-      if (entity == (void*)other) continue;
-      if (!other->blocking) continue;
-      bool r = BoxCollider2D__check(
-          entity->transform.position.x + entity->xa,
-          entity->transform.position.z + entity->za,
+  // use quadtree query to find nearby neighbors
+  f32 sr = 2.0f;  // search within this radius
+  f32 xxa = entity->transform.position.x + entity->xa;
+  f32 yya = entity->transform.position.z + entity->za;
+  Rect range = {
+      xxa,  // x,y origin
+      yya,
+      sr,  // w,h radius
+      sr};
+  void* matchData[100];  // TODO: don't limit search results?
+  u32 matchCount = 0;
+  // TODO: query can be the radius of the entity, to shorten this code?
+  QuadTreeNode_query(level->qt, range, matchData, &matchCount);
+  for (u32 i = 0; i < matchCount; i++) {
+    void* unk = matchData[i];
+    if (entity == unk) continue;
+    EntityType type = ((Block_t*)unk)->type;
+    collision = false;
+    if (ENTITY == type) {
+      Entity_t* othere = (Entity_t*)unk;
+      collision = BoxCollider2D__check(
+          xxa,
+          yya,
           entity->r,
-          other->x,
-          other->y,
-          other->r);
-      if (r) {
-        if (sinceLastTurn > lastTurnWait) {
-          sinceLastTurn = 0;
-          turn_around(self);
-        }
-        collision = true;
-        break;
-        // return;
-      }
-      c = c->next;
+          othere->transform.position.x,
+          othere->transform.position.z,
+          othere->r);
+    } else if (BLOCK == type) {
+      Block_t* otherb = (Block_t*)unk;
+      if (!otherb->blocking) continue;
+      collision = BoxCollider2D__check(xxa, yya, entity->r, otherb->x, otherb->y, otherb->r);
     }
+    if (collision) break;
   }
-
   if (collision) {
+    if (sinceLastTurn > lastTurnWait) {
+      sinceLastTurn = 0;
+      turn_around(self);
+    }
   } else {
     entity->transform.position.x += entity->xa;
     entity->transform.position.z += entity->za;

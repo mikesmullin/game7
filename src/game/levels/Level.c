@@ -4,9 +4,11 @@
 #include "../../lib/Bitmap.h"
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
+#include "../../lib/Geometry.h"
 #include "../../lib/List.h"
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
+#include "../../lib/QuadTree.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../blocks/CatSpawnBlock.h"
@@ -115,7 +117,32 @@ void Level__gui(Level_t* level, Engine__State_t* state) {
 void Level__tick(Level_t* level, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
+  // build a QuadTree of all entities
+  f32 W = level->width / 2, D = level->depth / 2;
+  Rect boundary = {0.0f, 0.0f, W, D};  // Center (0,0), width/height 20x20
+  if (NULL == level->qtArena) {
+    level->qtArena = Arena__SubAlloc(state->arena, 1024 * 1024 * 1);  // 1MB
+  }
+  Arena__Reset(level->qtArena);
+  level->qt = QuadTreeNode_create(level->qtArena, boundary);
   List__Node_t* node = level->blocks->head;
+  for (u32 i = 0; i < level->blocks->len; i++) {
+    Block_t* block = node->data;
+    node = node->next;
+    QuadTreeNode_insert(level->qtArena, level->qt, (Point){block->x, block->y}, block);
+  }
+  node = level->entities->head;
+  for (u32 i = 0; i < level->entities->len; i++) {
+    Entity_t* entity = node->data;
+    node = node->next;
+    QuadTreeNode_insert(
+        level->qtArena,
+        level->qt,
+        (Point){entity->transform.position.x, entity->transform.position.z},
+        entity);
+  }
+
+  node = level->blocks->head;
   for (u32 i = 0; i < level->blocks->len; i++) {
     Block_t* block = node->data;
     node = node->next;

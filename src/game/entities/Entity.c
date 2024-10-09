@@ -14,6 +14,7 @@ Entity_t* Entity__alloc(Arena_t* arena) {
 void Entity__init(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
 
+  entity->type = ENTITY;
   entity->tick = ENTITY__TICK;
   entity->render = ENTITY__RENDER;
   entity->gui = ENTITY__GUI;
@@ -65,22 +66,22 @@ bool Entity__checkCollide(Entity_t* entity, Engine__State_t* state, f32 x, f32 y
     Block_t* b;
     b = Level__getBlock(level, x0, y0);
     if (NULL != b && Dispatcher__collide(b->collide, b, state, entity, x, y)) {
-      Dispatcher__collide(entity->collide, entity, state, b, x, y);
+      // Dispatcher__collide(entity->collide, entity, state, b, x, y);
       return true;
     }
     b = Level__getBlock(level, x1, y0);
     if (NULL != b && Dispatcher__collide(b->collide, b, state, entity, x, y)) {
-      Dispatcher__collide(entity->collide, entity, state, b, x, y);
+      // Dispatcher__collide(entity->collide, entity, state, b, x, y);
       return true;
     }
     b = Level__getBlock(level, x0, y1);
     if (NULL != b && Dispatcher__collide(b->collide, b, state, entity, x, y)) {
-      Dispatcher__collide(entity->collide, entity, state, b, x, y);
+      // Dispatcher__collide(entity->collide, entity, state, b, x, y);
       return true;
     }
     b = Level__getBlock(level, x1, y1);
     if (NULL != b && Dispatcher__collide(b->collide, b, state, entity, x, y)) {
-      Dispatcher__collide(entity->collide, entity, state, b, x, y);
+      // Dispatcher__collide(entity->collide, entity, state, b, x, y);
       return true;
     }
   }
