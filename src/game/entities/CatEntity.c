@@ -6,7 +6,6 @@
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
 #include "../../lib/List.h"
-#include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../../lib/QuadTree.h"
 #include "../Dispatcher.h"

@@ -7,7 +7,8 @@ void logit(const char* line, ...);
 #define LOG_INFOF(s, ...) logit(s "\n", __VA_ARGS__);
 #define LOG_DEBUGF(s, ...) logit(s "\n", __VA_ARGS__);
 
-#include <stdlib.h>
+#include <stdlib.h>  // IWYU pragma: keep
+
 #define ASSERT(cond)                                                          \
   if (!(cond)) {                                                              \
     logit(("Assertion failed: " #cond "\n  at %s:%u\n"), __FILE__, __LINE__); \
