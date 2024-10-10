@@ -22,6 +22,7 @@ void WallBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   block->meshId = MODEL_BOX;
 
   entity->render = Arena__Push(state->arena, sizeof(RendererComponent));
+  entity->render->type = MESH_RENDERER;
   entity->render->atlas = ATLAS_TEXTURE;
   entity->render->tx = logic->game->curLvl->wallTex;
   entity->render->ty = 0;

@@ -55,6 +55,7 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->collider = (ColliderComponent*)collider;
 
   entity->render = Arena__Push(state->arena, sizeof(RendererComponent));
+  entity->render->type = SPRITE_RENDERER;
   entity->render->atlas = ATLAS_TEXTURE;
   entity->render->tx = Math__urandom2(0, 7);
   entity->render->ty = 1;
