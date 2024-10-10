@@ -1,5 +1,4 @@
-#ifndef HOT_RELOAD_H
-#define HOT_RELOAD_H
+#pragma once
 
 #include "../game/Logic.h"
 
@@ -11,5 +10,3 @@ extern logic_onupdate_t logic_onupdate;
 
 int load_logic(const char* file);
 int unload_logic(void);
-
-#endif  // HOT_RELOAD_H

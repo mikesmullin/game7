@@ -1,5 +1,4 @@
-#ifndef LOG_H
-#define LOG_H
+#pragma once
 
 void logit(const char* line, ...);
 
@@ -34,5 +33,3 @@ void logit(const char* line, ...);
         __VA_ARGS__);                                                                           \
     abort();                                                                                    \
   }
-
-#endif  // LOG_H

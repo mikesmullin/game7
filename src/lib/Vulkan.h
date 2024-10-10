@@ -1,5 +1,4 @@
-#ifndef VULKAN_H
-#define VULKAN_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -207,5 +206,3 @@ void Vulkan__AwaitNextFrame(Vulkan_t* self);
 void Vulkan__RecordCommandBuffer(Vulkan_t* same, VkCommandBuffer* commandBuffer, u32 imageIndex);
 void Vulkan__DrawFrame(Vulkan_t* self);
 void Vulkan__Cleanup(Vulkan_t* self);
-
-#endif

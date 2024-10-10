@@ -1,5 +1,4 @@
-#ifndef AUDIO_H
-#define AUDIO_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,5 +19,3 @@ void Audio__PlayAudio(Audio_t* self, const int id, const bool loop, const double
 void Audio__ResumeAudio(Audio_t* self, const int id, const bool loop, const double gain);
 void Audio__StopAudio(Audio_t* self, const int id);
 void Audio__Shutdown(Audio_t* self);
-
-#endif

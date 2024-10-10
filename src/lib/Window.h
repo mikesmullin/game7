@@ -1,5 +1,4 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -38,5 +37,3 @@ void Window__RenderLoop(
     void (*physicsCallback)(const f64, const f64),
     void (*renderCallback)(const f64, const f64, const u32, const u32));
 void Window__SetTitle(Window_t* window, const char* title);
-
-#endif

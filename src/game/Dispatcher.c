@@ -21,11 +21,8 @@ static void (*VTABLE_ENGINE[])() = {
     Dispatch__None,
 
     CatSpawnBlock__tick,  //
-    CatSpawnBlock__render,  //
     CatSpawnBlock__gui,
     SpawnBlock__tick,  //
-    SpawnBlock__render,  //
-    SpawnBlock__gui,  //
     WallBlock__render,  //
 
     CatEntity__tick,  //
@@ -42,10 +39,6 @@ static void (*VTABLE_ENGINE[])() = {
     TitleMenu__tick,  //
     TitleMenu__render,  //
     TitleMenu__gui,  //
-
-    Sprite__tick,  //
-    Sprite__render,  //
-    Sprite__gui,  //
 };
 
 // static / switch / tag / conditional dispatch

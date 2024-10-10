@@ -1,5 +1,4 @@
-#ifndef OS_H
-#define OS_H
+#pragma once
 
 // OS detection via compiler context
 
@@ -51,5 +50,3 @@
 #endif
 #endif
 #endif
-
-#endif  // OS_H

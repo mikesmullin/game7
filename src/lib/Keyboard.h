@@ -1,5 +1,4 @@
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#pragma once
 
 #include <stdbool.h>
 
@@ -35,5 +34,3 @@ typedef struct KbInputState_t {
 
 KbInputState_t* Keyboard__Alloc(Arena_t* arena);
 void Keyboard__Poll(KbInputState_t* kbState);
-
-#endif

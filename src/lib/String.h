@@ -1,5 +1,4 @@
-#ifndef STRING_H
-#define STRING_H
+#pragma once
 
 #include <stdint.h>
 typedef uint32_t u32;
@@ -13,5 +12,3 @@ typedef struct String_t {
 } String_t;
 
 String_t* String__alloc(Arena_t* arena, const char* str);
-
-#endif  // STRING_H

@@ -1,5 +1,4 @@
-#ifndef BITMAP_H
-#define BITMAP_H
+#pragma once
 
 #include <stdint.h>
 typedef uint8_t u8;
@@ -29,5 +28,3 @@ void Bitmap__SetText(Bitmap_t* screen, Bitmap_t* glyphs, char* str, u32 x, u32 y
 void Bitmap__DebugText(
     Bitmap_t* dst, Bitmap_t* src, u32 x, u32 y, u32 fg, u32 bg, char* format, ...);
 void Bitmap__DebugText2(Engine__State_t* game, u32 x, u32 y, u32 fg, u32 bg, char* format, ...);
-
-#endif  // BITMAP_H

@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 typedef struct Arena_t Arena_t;
 typedef struct Game_t Game_t;
@@ -10,5 +9,3 @@ void Game__init(Game_t* game, Engine__State_t* state);
 void Game__render(Game_t* game, Engine__State_t* state);
 void Game__gui(Game_t* game, Engine__State_t* state);
 void Game__tick(Game_t* game, Engine__State_t* state);
-
-#endif  // GAME_H

@@ -1,5 +1,4 @@
-#ifndef BASE_H
-#define BASE_H
+#pragma once
 
 // Scalars
 // #include <stdbool.h>
@@ -27,5 +26,3 @@
 
 // Suffixes
 // t for typedef
-
-#endif

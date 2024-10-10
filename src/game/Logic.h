@@ -207,14 +207,10 @@ typedef struct CatEntity_t {
 } CatEntity_t;
 
 typedef struct Sprite_t {
-  DispatchFnId tick;
-  DispatchFnId render;
-  DispatchFnId gui;
   v3 pos;  // (x, y, z)
   v3 rot;  // (yaw, pitch, roll)
   u32 tex;
   u32 color;
-  bool removed;
 } Sprite_t;
 
 typedef struct Block_t {

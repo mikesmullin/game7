@@ -1,5 +1,4 @@
-#ifndef MATH_H
-#define MATH_H
+#pragma once
 
 #include <stdint.h>
 typedef int32_t s32;
@@ -26,5 +25,3 @@ u32 Math__urandom2(u32 a, u32 b);
 f64 Math__triangleWave(f64 x, f64 period);
 f64 Math__fmod(f64 n, f64 max);
 f64 Math__mavg(u64 arr[], const u64 len, const u64 n, u64* idx, f64* sum);
-
-#endif

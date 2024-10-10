@@ -1,5 +1,4 @@
-#ifndef ARENA_H
-#define ARENA_H
+#pragma once
 
 #include <stdint.h>
 typedef uint64_t u64;
@@ -16,5 +15,3 @@ Arena_t* Arena__SubAlloc(Arena_t* a, u64 sz);
 void* Arena__Push(Arena_t* a, u64 sz);
 void Arena__Free(Arena_t* a);
 void Arena__Reset(Arena_t* a);
-
-#endif  // ARENA_H

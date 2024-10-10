@@ -1,5 +1,4 @@
-#ifndef ENGINE_H
-#define ENGINE_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -100,5 +99,3 @@ typedef struct Engine__State_t {
 } Engine__State_t;
 
 int Engine__Loop();
-
-#endif  // ENGINE_H

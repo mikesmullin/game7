@@ -13,8 +13,6 @@ void Sprite__init(Sprite_t* sprite, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Sprite_t* self = (Sprite_t*)sprite;
 
-  sprite->tick = SPRITE__TICK;
-  sprite->render = SPRITE__RENDER;
   sprite->pos.x = 0.0f;
   sprite->pos.y = 0.0f;
   sprite->pos.z = 0.0f;
@@ -23,20 +21,4 @@ void Sprite__init(Sprite_t* sprite, Engine__State_t* state) {
   sprite->rot.z = 0.0f;
   sprite->tex = 0;
   sprite->color = 0xffff0ff;
-  sprite->removed = false;
-}
-
-void Sprite__render(struct Sprite_t* sprite, Engine__State_t* state) {
-  Logic__State_t* logic = state->local;
-  Sprite_t* self = (Sprite_t*)sprite;
-}
-
-void Sprite__gui(struct Sprite_t* sprite, Engine__State_t* state) {
-  Logic__State_t* logic = state->local;
-  Sprite_t* self = (Sprite_t*)sprite;
-}
-
-void Sprite__tick(struct Sprite_t* sprite, Engine__State_t* state) {
-  Logic__State_t* logic = state->local;
-  Sprite_t* self = (Sprite_t*)sprite;
 }

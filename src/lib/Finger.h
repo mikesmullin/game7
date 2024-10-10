@@ -1,5 +1,4 @@
-#ifndef FINGER_H
-#define FINGER_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -45,5 +44,3 @@ typedef struct PointerInputState_t {
 PointerInputState_t* Finger__Alloc(Arena_t* arena);
 void Finger__OnEvent(const SDL_Event* event);
 void Finger__Poll(PointerInputState_t* state);
-
-#endif  // FINGER_H

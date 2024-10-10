@@ -1,5 +1,4 @@
-#ifndef GAMEPAD_H
-#define GAMEPAD_H
+#pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -24,5 +23,3 @@ void Gamepad__Shutdown(Gamepad_t* self);
 const char* Gamepad__GetControllerName(Gamepad_t* self);
 void Gamepad__Open(Gamepad_t* self);
 void Gamepad__OnInput(const SDL_Event* event);
-
-#endif

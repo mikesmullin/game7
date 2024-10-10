@@ -10,7 +10,6 @@ typedef struct OnCollideClosure_t OnCollideClosure;
 
 Entity_t* CatEntity__alloc(Arena_t* arena);
 void CatEntity__init(Entity_t* entity, Engine__State_t* state);
-void CatEntity__tick(Entity_t* entity, Engine__State_t* state);
 void CatEntity__render(Entity_t* entity, Engine__State_t* state);
-void CatEntity__gui(struct Entity_t* entity, Engine__State_t* state);
+void CatEntity__tick(Entity_t* entity, Engine__State_t* state);
 void CatEntity__collide(Entity_t* entity, Engine__State_t* state, OnCollideClosure* params);

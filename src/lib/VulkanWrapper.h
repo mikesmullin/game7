@@ -1,5 +1,4 @@
-#ifndef VULKAN_WRAPPER
-#define VULKAN_WRAPPER
+#pragma once
 
 typedef struct Bitmap_t Bitmap_t;
 
@@ -16,5 +15,3 @@ void VulkanWrapper__UpdateUniformBuffer(u8 frame, void* ubo);
 void VulkanWrapper__SetInstanceCount(u32 instanceCount);
 u8 VulkanWrapper__GetCurrentFrame();
 void VulkanWrapper__SetAspectRatio(f32 aspectRatio);
-
-#endif  // VULKAN_WRAPPER

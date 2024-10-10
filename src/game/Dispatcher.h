@@ -12,11 +12,8 @@ typedef enum DispatchFnId {
   DISPATCH_NONE,
 
   CAT_SPAWN_BLOCK__TICK,
-  CAT_SPAWN_BLOCK__RENDER,
   CAT_SPAWN_BLOCK__GUI,
   SPAWN_BLOCK__TICK,
-  SPAWN_BLOCK__RENDER,
-  SPAWN_BLOCK__GUI,
   WALL_BLOCK__RENDER,
 
   CAT_ENTITY__TICK,
@@ -33,10 +30,6 @@ typedef enum DispatchFnId {
   TITLE_MENU__TICK,
   TITLE_MENU__RENDER,
   TITLE_MENU__GUI,
-
-  SPRITE__TICK,
-  SPRITE__RENDER,
-  SPRITE__GUI,
 } DispatchFnId;
 
 void Dispatcher__engine(DispatchFnId id, void* self, Engine__State_t* state);

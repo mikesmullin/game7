@@ -1,5 +1,4 @@
-#ifndef TIMER_H
-#define TIMER_H
+#pragma once
 
 #include <stdint.h>
 typedef uint64_t u64;
@@ -15,5 +14,3 @@ typedef uint64_t u64;
 
 void Time__MeasureCycles();
 u64 Time__Now();
-
-#endif  // TIMER_H
