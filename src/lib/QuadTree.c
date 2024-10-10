@@ -65,6 +65,7 @@ bool QuadTreeNode_insert(Arena_t* arena, QuadTreeNode* node, Point point, void* 
 }
 
 // Query the quadtree for points within a given range
+// TODO: accept various shapes to search for intersections with
 void QuadTreeNode_query(
     QuadTreeNode* node, Rect range, u32 limit, void* matchData[], u32* matchCount) {
   // If the range does not intersect this node's boundary, return

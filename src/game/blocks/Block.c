@@ -21,7 +21,7 @@ void Block__init(Block_t* block, Engine__State_t* state, f32 x, f32 z) {
 
   BoxCollider2DComponent* collider = Arena__Push(state->arena, sizeof(BoxCollider2DComponent));
   collider->base.type = BOX_COLLIDER_2D;
-  f32 sq_r = 0.3f;  // square radius
+  f32 sq_r = 0.5f;  // square radius
   collider->hw = sq_r, collider->hh = sq_r;
   block->base.collider = (ColliderComponent*)collider;
 }

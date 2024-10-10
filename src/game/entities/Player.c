@@ -4,6 +4,7 @@
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
+#include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
@@ -145,9 +146,26 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
       entity->tform->pos.y = MATH_CLAMP(0, entity->tform->pos.y, logic->game->curLvl->height);
     }
 
-    f32 xm = self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime;
-    f32 zm = self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime;
-    self->bobPhase += sqrt(xm * xm + zm * zm) * 4.0f;
+    static const f32 SQRT_TWO = 1.414214f;
+
+    f32 xm = self->input.xAxis;
+    f32 zm = self->input.zAxis;
+    f32 d = sqrtf(xm * xm + zm * zm);
+    if (0 != self->input.zAxis && 0 != self->input.xAxis) {
+      // normalize diagonal movement, so it is not faster
+      entity->rb->xa /= SQRT_TWO;
+      entity->rb->za /= SQRT_TWO;
+    }
+
+    // headbob
+    if (d != 0) {
+      if (xm != 0 && zm != 0) {
+        // normalize diagonal movement, so it is not faster
+        d /= SQRT_TWO;
+      }
+      d *= PLAYER_WALK_SPEED * state->deltaTime * 4.0f;
+      self->bobPhase += d;
+    }
 
     Rigidbody2D__move(entity, state);
   }
