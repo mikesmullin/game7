@@ -159,11 +159,14 @@ typedef struct Components_t {
   Rigidbody2DComponent* rb;
 } Components;
 
-typedef enum EntityType_t {
-  ENTITY_NONE,
-  ENTITY_CAT,
-  ENTITY_WALL,
-} EntityType;
+typedef enum EntityTags1_t : u64 {
+  TAG_NONE = 0,
+  TAG_WALL = 1 << 1,  //
+  TAG_CAT = 1 << 2,  //
+  TAG_FLYING = 1 << 3,  //
+  TAG_DEAD = 1 << 4,  //
+  TAG_REMOVED = 1 << 5,  //
+} EntityTags1;
 
 typedef struct Entity_t {
   Components components;
@@ -174,10 +177,7 @@ typedef struct Entity_t {
   Transform_t transform;
   List_t* sprites;
   u32 id;
-  EntityType type;
-  bool flying;
-  bool dead;
-  bool removed;
+  u64 tags1;
   f32 hurtTime;
   f32 xa, za;  // movement deltas (pre-collision)
 } Entity_t;

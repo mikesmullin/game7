@@ -31,7 +31,7 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->tick = CAT_ENTITY__TICK;
   entity->render = CAT_ENTITY__RENDER;
   entity->collide = CAT_ENTITY__COLLIDE;
-  entity->type = ENTITY_CAT;
+  entity->tags1 |= TAG_CAT;
 
   entity->transform.position.x = 0.0f;
   entity->transform.position.y = 0.0f;
@@ -92,7 +92,7 @@ void CatEntity__collide(Entity_t* entity, Engine__State_t* state, OnCollideClosu
   CatEntity_t* self = (CatEntity_t*)entity;
 
   if (params->after) {  // onenter, onstay
-    if (ENTITY_CAT == params->target->type) {
+    if (TAG_CAT & params->target->tags1) {
       params->noclip = true;
     } else {
       self->xa = Math__random(-1, 1);

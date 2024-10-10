@@ -26,10 +26,7 @@ void Entity__init(Entity_t* entity, Engine__State_t* state) {
   // entity->sprites = List__alloc(state->arena);
 
   entity->id = 0;
-  entity->flying = false;
-  entity->removed = false;
   entity->hurtTime = 0;
-  entity->dead = false;
 
   entity->transform.position.x = 0;
   entity->transform.position.y = 0;

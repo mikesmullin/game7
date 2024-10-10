@@ -167,10 +167,10 @@ static void mat4_rotx(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   mat4 rot1;
   glm_rotate_x((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
-      {1, 0, 0, 0},   //
-      {0, c, s, 0},   //
+      {1, 0, 0, 0},  //
+      {0, c, s, 0},  //
       {0, -s, c, 0},  //
-      {0, 0, 0, 1},   //
+      {0, 0, 0, 1},  //
   };
   // print_mat4(state, 16, rot1);
   // print_mat4(state, 16 + 4, rot2);
@@ -185,9 +185,9 @@ static void mat4_roty(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   glm_rotate_y((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
       {c, 0, -s, 0},  //
-      {0, 1, 0, 0},   //
-      {s, 0, c, 0},   //
-      {0, 0, 0, 1},   //
+      {0, 1, 0, 0},  //
+      {s, 0, c, 0},  //
+      {0, 0, 0, 1},  //
   };
   // print_mat4(state, 16, rot1);
   // print_mat4(state, 16 + 4, rot2);
@@ -202,9 +202,9 @@ static void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   glm_rotate_z((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
       {c, -s, 0, 0},  //
-      {s, c, 0, 0},   //
-      {0, 0, 1, 0},   //
-      {0, 0, 0, 1},   //
+      {s, c, 0, 0},  //
+      {0, 0, 1, 0},  //
+      {0, 0, 0, 1},  //
   };
   mat4_mulv(rot2, vc, dest);
 }
@@ -301,7 +301,7 @@ static bool project(
   // Convert normalized device coordinates to screen space
   s32 sx = ((ndc[0] + 1.0f) * 0.5f * W);  // 0..W
   s32 sy = ((1.0f - ndc[1]) * 0.5f * H);  // 0..H
-  f32 sz = (ndc[2] + 1.0f) * 0.5f;        // 0..1
+  f32 sz = (ndc[2] + 1.0f) * 0.5f;  // 0..1
 
   dest[0] = sx;
   dest[1] = sy;
@@ -392,14 +392,14 @@ static void draw_triangle(
   }
 
   upper = true;
-  for (f32 y = a0[1]; y <= b0[1]; y++) {     // -n .. +n
+  for (f32 y = a0[1]; y <= b0[1]; y++) {  // -n .. +n
     f32 t0 = (y - a0[1]) / (c0[1] - a0[1]);  // 0 .. 1, ya to yc normalized
     f32 t1 = (y - a0[1]) / (b0[1] - a0[1]);  // 0 .. 1, ya to yb normalized
     if (isinf(t0) || isnan(t0)) t0 = 0;
     if (isinf(t1) || isnan(t1)) t1 = 0;
     f32 x0 = lerp(a0[0], c0[0], t0);  // -n .. +n, xa to xc by yc%
     f32 x1 = lerp(a0[0], b0[0], t1);  // -n .. +n, xa to xb by yb%
-    if (x0 > x1) {                    // -n .. n
+    if (x0 > x1) {  // -n .. n
       f32 tmpX;
       tmpX = x0, x0 = x1, x1 = tmpX;
     }
@@ -463,14 +463,14 @@ static void draw_triangle(
   // but t1 differs because the b-c side is at a different angle/slope than a-b
   upper = false;
   // tmp=a; a=b, b=c, c=tmp(a)
-  for (f32 y = b0[1]; y <= c0[1]; y++) {     // -n .. +n
+  for (f32 y = b0[1]; y <= c0[1]; y++) {  // -n .. +n
     f32 t0 = (y - a0[1]) / (c0[1] - a0[1]);  // 0 .. 1, diagonal
     f32 t1 = (y - b0[1]) / (c0[1] - b0[1]);  // 0 .. 1, vertical
     if (isinf(t0) || isnan(t0)) t0 = 0;
     if (isinf(t1) || isnan(t1)) t1 = 0;
     f32 x0 = lerp(a0[0], c0[0], t0);  // -n .. +n left edge
     f32 x1 = lerp(b0[0], c0[0], t1);  // -n .. +n right edge
-    if (x0 > x1) {                    // -n .. n
+    if (x0 > x1) {  // -n .. n
       f32 tmpX;
       tmpX = x0, x0 = x1, x1 = tmpX;
     }
@@ -801,7 +801,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   if (player->base.hurtTime > 0) {
     f32 t = 1 - (player->base.hurtTime / PLAYER_HURT_ANIM_TIME);
     f32 offs = 1.0f * easeInQuart(t);
-    if (player->base.dead) offs = 0.5;
+    if (player->base.tags1 & TAG_DEAD) offs = 0.5;
     for (u32 i = 0; i < logic->screen.len; i++) {
       f32 xp = ((i % logic->screen.w) - logic->screen.w / 2.0f) / logic->screen.w * 2.0f;
       f32 yp = (((f32)i / logic->screen.h) - logic->screen.h / 2.0f) / logic->screen.h * 2.0f;
