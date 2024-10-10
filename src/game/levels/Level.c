@@ -83,7 +83,7 @@ void Level__render(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    Dispatcher__engine(entity->render, entity, state);
+    Dispatcher__engine(entity->engine->render, entity, state);
     node = node->next;
   }
 }
@@ -94,7 +94,7 @@ void Level__gui(Level_t* level, Engine__State_t* state) {
   List__Node_t* node = level->entities->head;
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
-    Dispatcher__engine(entity->gui, entity, state);
+    Dispatcher__engine(entity->engine->gui, entity, state);
     node = node->next;
   }
 }
@@ -118,7 +118,7 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
     QuadTreeNode_insert(
         level->qtArena,
         level->qt,
-        (Point){entity->transform.position.x, entity->transform.position.z},
+        (Point){entity->tform->pos.x, entity->tform->pos.z},
         entity);
   }
 
@@ -126,6 +126,6 @@ void Level__tick(Level_t* level, Engine__State_t* state) {
   for (u32 i = 0; i < level->entities->len; i++) {
     Entity_t* entity = node->data;
     node = node->next;
-    Dispatcher__engine(entity->tick, entity, state);
+    Dispatcher__engine(entity->engine->tick, entity, state);
   }
 }

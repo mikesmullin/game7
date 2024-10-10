@@ -99,7 +99,7 @@ void Game__tick(Game_t* game, Engine__State_t* state) {
 
   // in-game
   else {
-    Dispatcher__engine(game->curPlyr->tick, game->curPlyr, state);
+    Dispatcher__engine(game->curPlyr->engine->tick, game->curPlyr, state);
     Level__tick(logic->game->curLvl, state);
   }
 }
@@ -150,9 +150,9 @@ void Game__gui(Game_t* game, Engine__State_t* state) {
         0xffffffff,
         0,
         "cam x %+06.1f y %+06.1f z %+06.1f r %+06.1f",
-        logic->game->curPlyr->transform.position.x,
-        logic->game->curPlyr->transform.position.y,
-        logic->game->curPlyr->transform.position.z,
-        logic->game->curPlyr->transform.rotation.y);
+        logic->game->curPlyr->tform->pos.x,
+        logic->game->curPlyr->tform->pos.y,
+        logic->game->curPlyr->tform->pos.z,
+        logic->game->curPlyr->tform->rot.y);
   }
 }

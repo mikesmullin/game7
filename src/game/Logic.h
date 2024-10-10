@@ -83,11 +83,6 @@ typedef struct Camera_t {
   mat4 view;  // view (camera) matrix
 } Camera_t;
 
-typedef struct Transform_t {
-  v3 position;  // (x, y, z)
-  v4 rotation;  // (yaw, pitch, roll)
-} Transform_t;
-
 typedef struct VirtualJoystick_t {
   f32 xAxis;
   f32 yAxis;
@@ -118,7 +113,8 @@ typedef struct HelpMenu_t {
 } HelpMenu_t;
 
 typedef struct TransformComponent_t {
-  v3 pos, rot;
+  v3 pos;  // (x, y, z)
+  v3 rot;  // (yaw, pitch, roll)
 } TransformComponent;
 
 typedef struct EventEmitterComponent_t {
@@ -135,6 +131,7 @@ typedef enum ColliderType_t {
 
 typedef struct ColliderComponent_t {
   ColliderType type;
+  DispatchFnId collide;
 } ColliderComponent;
 
 typedef struct BoxCollider2DComponent_t {
@@ -150,14 +147,23 @@ typedef struct CircleCollider2DComponent_t {
 } CircleCollider2DComponent;
 
 typedef struct Rigidbody2DComponent_t {
+  f32 xa, za;  // movement deltas (pre-collision)
 } Rigidbody2DComponent;
 
-typedef struct Components_t {
-  TransformComponent* xform;
-  EventEmitterComponent* event;
-  ColliderComponent* collider;
-  Rigidbody2DComponent* rb;
-} Components;
+typedef struct HealthComponent_t {
+  f32 hp;
+  f32 hurtTime;
+} HealthComponent;
+
+typedef struct SpriteRendererComponent_t {
+  List_t* sprites;
+} SpriteRendererComponent;
+
+typedef struct EngineComponent_t {
+  DispatchFnId tick;
+  DispatchFnId render;
+  DispatchFnId gui;
+} EngineComponent;
 
 typedef enum EntityTags1_t : u64 {
   TAG_NONE = 0,
@@ -169,17 +175,15 @@ typedef enum EntityTags1_t : u64 {
 } EntityTags1;
 
 typedef struct Entity_t {
-  Components components;
-  DispatchFnId tick;
-  DispatchFnId render;
-  DispatchFnId gui;
-  DispatchFnId collide;
-  Transform_t transform;
-  List_t* sprites;
   u32 id;
   u64 tags1;
-  f32 hurtTime;
-  f32 xa, za;  // movement deltas (pre-collision)
+  EngineComponent* engine;
+  TransformComponent* tform;
+  EventEmitterComponent* event;
+  ColliderComponent* collider;
+  Rigidbody2DComponent* rb;
+  SpriteRendererComponent* render;
+  HealthComponent* health;
 } Entity_t;
 
 typedef struct OnCollideClosure_t {
@@ -206,7 +210,8 @@ typedef struct Sprite_t {
   DispatchFnId tick;
   DispatchFnId render;
   DispatchFnId gui;
-  Transform_t transform;
+  v3 pos;  // (x, y, z)
+  v3 rot;  // (yaw, pitch, roll)
   u32 tex;
   u32 color;
   bool removed;

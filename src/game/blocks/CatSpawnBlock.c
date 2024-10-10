@@ -22,10 +22,10 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   CatSpawnBlock_t* self = (CatSpawnBlock_t*)block;
   Logic__State_t* logic = state->local;
   Block__init(block, state, x, y);
-  block->base.tick = CAT_SPAWN_BLOCK__TICK;
-  // block->render = CAT_SPAWN_BLOCK__RENDER;
-  block->base.gui = CAT_SPAWN_BLOCK__GUI;
-  block->base.components.collider = NULL;
+  block->base.engine->tick = CAT_SPAWN_BLOCK__TICK;
+  // block->base.engine->render = CAT_SPAWN_BLOCK__RENDER;
+  block->base.engine->gui = CAT_SPAWN_BLOCK__GUI;
+  block->base.collider = NULL;
 
   self->firstTick = true;
   self->spawnCount = 1;  // instances
@@ -71,9 +71,9 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
       // TODO: associate spawned entities with spawning block?
       Entity_t* entity = CatEntity__alloc(state->arena);
       CatEntity__init(entity, state);
-      entity->transform.position.x = block->base.transform.position.x + Math__random(-1, 1);
-      entity->transform.position.y = -0.25f;
-      entity->transform.position.z = block->base.transform.position.z + Math__random(-1, 1);
+      entity->tform->pos.x = block->base.tform->pos.x + Math__random(-1, 1);
+      entity->tform->pos.y = -0.25f;
+      entity->tform->pos.z = block->base.tform->pos.z + Math__random(-1, 1);
       List__append(state->arena, state->local->game->curLvl->entities, entity);
       self->spawnedCount++;
     }

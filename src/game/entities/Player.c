@@ -7,6 +7,7 @@
 #include "../../lib/Math.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
+#include "../components/Rigidbody2D.h"
 #include "Entity.h"
 
 Entity_t* Player__alloc(Arena_t* arena) {
@@ -19,8 +20,7 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
 
   Entity__init(entity, state);
 
-  entity->tick = PLAYER_ENTITY__TICK;
-  entity->render = PLAYER_ENTITY__RENDER;
+  entity->engine->tick = PLAYER_ENTITY__TICK;
 
   self->input.xAxis = 0.0f;
   self->input.yAxis = 0.0f;
@@ -34,17 +34,11 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
       Arena__Push(state->arena, sizeof(CircleCollider2DComponent));
   collider->base.type = CIRCLE_COLLIDER_2D;
   collider->r = 0.5f;
-  entity->components.collider = (ColliderComponent*)collider;
-}
+  entity->collider = (ColliderComponent*)collider;
 
-void Player__render(struct Entity_t* entity, Engine__State_t* state) {
-  Logic__State_t* logic = state->local;
-  Player_t* self = (Player_t*)entity;
-}
-
-void Player__gui(struct Entity_t* entity, Engine__State_t* state) {
-  Logic__State_t* logic = state->local;
-  Player_t* self = (Player_t*)entity;
+  entity->health = Arena__Push(state->arena, sizeof(HealthComponent));
+  entity->health->hp = 100;
+  entity->health->hurtTime = 0;
 }
 
 void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
@@ -56,16 +50,14 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     state->mState->y = 0;
   } else {
     if (0 != state->mState->x) {  // yaw (rotate around Y-axis)
-      logic->game->curPlyr->transform.rotation.y += -state->mState->x * PLAYER_LOOK_SPEED;
-      logic->game->curPlyr->transform.rotation.y =
-          Math__fmod(logic->game->curPlyr->transform.rotation.y, 360.0f);
+      logic->game->curPlyr->tform->rot.y += -state->mState->x * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->tform->rot.y = Math__fmod(logic->game->curPlyr->tform->rot.y, 360.0f);
       state->mState->x = 0;
     }
 
     if (0 != state->mState->y) {  // pitch (rotate around X-axis)
-      logic->game->curPlyr->transform.rotation.x += -state->mState->y * PLAYER_LOOK_SPEED;
-      logic->game->curPlyr->transform.rotation.x =
-          Math__fmod(logic->game->curPlyr->transform.rotation.x, 360.0f);
+      logic->game->curPlyr->tform->rot.x += -state->mState->y * PLAYER_LOOK_SPEED;
+      logic->game->curPlyr->tform->rot.x = Math__fmod(logic->game->curPlyr->tform->rot.x, 360.0f);
       state->mState->y = 0;
     }
 
@@ -111,7 +103,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     v3 forward, right, front;
 
     // Convert yaw to radians for direction calculation
-    f32 yaw_radians = glms_rad(entity->transform.rotation.y);
+    f32 yaw_radians = glms_rad(entity->tform->rot.y);
 
     // Calculate the front vector based on yaw only (for movement along the XZ plane)
     front.x = Math__sin(yaw_radians);
@@ -126,13 +118,13 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     // apply forward/backward motion
     v3 pos;
     // TODO: can manipulate this to simulate slipping/ice
-    entity->xa = 0;
-    entity->za = 0;
+    entity->rb->xa = 0;
+    entity->rb->za = 0;
     if (0 != self->input.zAxis) {
       glms_v3_scale(front, self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime, &forward);
-      glms_v3_add(entity->transform.position, forward, &pos);
-      entity->xa += pos.x - entity->transform.position.x;
-      entity->za += pos.z - entity->transform.position.z;
+      glms_v3_add(entity->tform->pos, forward, &pos);
+      entity->rb->xa += pos.x - entity->tform->pos.x;
+      entity->rb->za += pos.z - entity->tform->pos.z;
     }
 
     // apply left/right motion
@@ -141,28 +133,27 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
           right,
           -self->input.xAxis * PLAYER_WALK_SPEED * PLAYER_STRAFE_MOD * state->deltaTime,
           &forward);
-      glms_v3_add(entity->transform.position, forward, &pos);
-      entity->xa += pos.x - entity->transform.position.x;
-      entity->za += pos.z - entity->transform.position.z;
+      glms_v3_add(entity->tform->pos, forward, &pos);
+      entity->rb->xa += pos.x - entity->tform->pos.x;
+      entity->rb->za += pos.z - entity->tform->pos.z;
     }
 
     // apply up/down motion
     if (0 != self->input.yAxis) {
-      entity->transform.position.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
+      entity->tform->pos.y += self->input.yAxis * PLAYER_FLY_SPEED * state->deltaTime;
 
-      entity->transform.position.y =
-          MATH_CLAMP(0, entity->transform.position.y, logic->game->curLvl->height);
+      entity->tform->pos.y = MATH_CLAMP(0, entity->tform->pos.y, logic->game->curLvl->height);
     }
 
     f32 xm = self->input.xAxis * PLAYER_WALK_SPEED * state->deltaTime;
     f32 zm = self->input.zAxis * PLAYER_WALK_SPEED * state->deltaTime;
     self->bobPhase += sqrt(xm * xm + zm * zm) * 4.0f;
 
-    Entity__move(entity, state);
+    Rigidbody2D__move(entity, state);
   }
 
-  if (entity->hurtTime > 0) {
-    entity->hurtTime -= state->deltaTime;
-    if (entity->hurtTime < 0) entity->hurtTime = 0;
+  if (entity->health->hurtTime > 0) {
+    entity->health->hurtTime -= state->deltaTime;
+    if (entity->health->hurtTime < 0) entity->health->hurtTime = 0;
   }
 }

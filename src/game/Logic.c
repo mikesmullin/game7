@@ -74,7 +74,7 @@ __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   Player_t* player = (Player_t*)logic->game->curPlyr;
   if (NULL != player) {
-    player->base.hurtTime = PLAYER_HURT_ANIM_TIME;
+    player->base.health->hurtTime = PLAYER_HURT_ANIM_TIME;
   }
 }
 
@@ -114,9 +114,9 @@ __declspec(dllexport) void logic_onupdate(Engine__State_t* state) {
         title,
         "%s | FPS %u P %u R %u pFPS %u A %llu/%lluMB",
         state->WINDOW_TITLE->str,
-        frames,              // FPS = measured/counted frames per second
+        frames,  // FPS = measured/counted frames per second
         state->costPhysics,  // P = cost of last physics in ms
-        state->costRender,   // R = cost of last render in ms
+        state->costRender,  // R = cost of last render in ms
         // pFPS = potential frames per second (if it wasn't fixed)
         1000 / (state->costPhysics + state->costRender + 1),  // +1 avoids div/0
         // A = Arena memory used/capacity

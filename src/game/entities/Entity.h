@@ -15,5 +15,4 @@ void Entity__init(Entity_t* entity, Engine__State_t* state);
 void Entity__render(Entity_t* entity, Engine__State_t* state);
 void Entity__gui(Entity_t* entity, Engine__State_t* state);
 void Entity__tick(Entity_t* entity, Engine__State_t* state);
-void Entity__move(Entity_t* entity, Engine__State_t* state);
 bool Entity__collide(Entity_t* self, Engine__State_t* state, Entity_t* entity, f64 x, f64 y);

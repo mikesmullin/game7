@@ -20,29 +20,18 @@ static void Dispatch__None() {
 static void (*VTABLE_ENGINE[])() = {
     Dispatch__None,
 
-    Block__tick,  //
-    Block__render,  //
-    Block__gui,  //
     CatSpawnBlock__tick,  //
     CatSpawnBlock__render,  //
     CatSpawnBlock__gui,
     SpawnBlock__tick,  //
     SpawnBlock__render,  //
     SpawnBlock__gui,  //
-    WallBlock__tick,  //
     WallBlock__render,  //
-    WallBlock__gui,  //
 
-    Entity__tick,  //
-    Entity__render,  //
-    Entity__gui,  //
     CatEntity__tick,  //
     CatEntity__render,  //
-    CatEntity__gui,  //
     CatEntity__collide,  //
     Player__tick,  //
-    Player__render,  //
-    Player__gui,  //
 
     AboutMenu__tick,  //
     AboutMenu__render,  //

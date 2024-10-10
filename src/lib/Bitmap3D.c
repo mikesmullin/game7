@@ -256,11 +256,11 @@ static bool project(
   Player_t* player = (Player_t*)state->local->game->curPlyr;
 
   f32 cX = 0, cY = 0, cZ = 0, cRX, cRY;
-  cX = player->base.transform.position.x;
-  cY = player->base.transform.position.y;
-  cZ = player->base.transform.position.z;
-  cRX = player->base.transform.rotation.y;
-  cRY = player->base.transform.rotation.x;
+  cX = player->base.tform->pos.x;
+  cY = player->base.tform->pos.y;
+  cZ = player->base.tform->pos.z;
+  cRX = player->base.tform->rot.y;
+  cRY = player->base.tform->rot.x;
 
   // Create a vec4 for the point in model space (homogeneous coordinates)
   vec4 model_point = {v0[0], v0[1], v0[2], 1.0f};
@@ -570,11 +570,11 @@ void Bitmap3D__RenderHorizon(Engine__State_t* state) {
   Player_t* player = (Player_t*)state->local->game->curPlyr;
   W = screen->w, H = screen->h;
   f32 cX = 0, cY = 0, cZ = 0, cRX = 0, cRY = 0;
-  cX = player->base.transform.position.x;
-  cY = player->base.transform.position.y;
-  cZ = player->base.transform.position.z;
-  cRX = player->base.transform.rotation.y;
-  cRY = player->base.transform.rotation.x;
+  cX = player->base.tform->pos.x;
+  cY = player->base.tform->pos.y;
+  cZ = player->base.tform->pos.z;
+  cRX = player->base.tform->rot.y;
+  cRY = player->base.tform->rot.x;
 
   if (0 == cY) {  // grounded
     cY = Math__sin(player->bobPhase) * PLAYER_BOB;
@@ -671,7 +671,7 @@ void Bitmap3D__RenderSprite(
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
 
-  vec3* pos = (vec3*)&logic->game->curPlyr->transform.position;
+  vec3* pos = (vec3*)&logic->game->curPlyr->tform->pos;
   vec3 mpos = (vec3){x, y, z};
   vec3 to_camera;
   glm_vec3_sub(*pos, mpos,
@@ -770,8 +770,8 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   Player_t* player = (Player_t*)logic->game->curPlyr;
   u32* buf = (u32*)logic->screen.buf;
   f32 cRX = 0, cRY = 0;
-  cRX = player->base.transform.rotation.y;
-  cRY = player->base.transform.rotation.x;
+  cRX = player->base.tform->rot.y;
+  cRY = player->base.tform->rot.x;
 
   // fog distance by zbuf
   for (u32 i = 0; i < logic->screen.len; i++) {
@@ -798,8 +798,8 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   }
 
   // player hurt blood spatter
-  if (player->base.hurtTime > 0) {
-    f32 t = 1 - (player->base.hurtTime / PLAYER_HURT_ANIM_TIME);
+  if (player->base.health->hurtTime > 0) {
+    f32 t = 1 - (player->base.health->hurtTime / PLAYER_HURT_ANIM_TIME);
     f32 offs = 1.0f * easeInQuart(t);
     if (player->base.tags1 & TAG_DEAD) offs = 0.5;
     for (u32 i = 0; i < logic->screen.len; i++) {
