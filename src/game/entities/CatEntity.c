@@ -2,6 +2,7 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap3D.h"
+#include "../../lib/Color.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
@@ -12,6 +13,7 @@
 #include "../Logic.h"
 #include "../components/Collider.h"
 #include "../components/Rigidbody2D.h"
+#include "../components/SpriteRenderer.h"
 #include "Entity.h"
 
 static const f32 CAT_MOVE_SPEED = 0.1f;  // per-second
@@ -51,20 +53,21 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   collider->r = 0.5f;
   collider->base.collide = CAT_ENTITY__COLLIDE;
   entity->collider = (ColliderComponent*)collider;
+
+  entity->render = Arena__Push(state->arena, sizeof(RendererComponent));
+  entity->render->atlas = ATLAS_TEXTURE;
+  entity->render->tx = Math__urandom2(0, 7);
+  entity->render->ty = 1;
+  entity->render->useMask = true;
+  entity->render->mask = BLACK;
+  entity->render->color = TRANSPARENT;
 }
 
 void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  Bitmap3D__RenderSprite(
-      state,
-      entity->tform->pos.x,
-      entity->tform->pos.y,
-      entity->tform->pos.z,
-      self->tx,
-      1,
-      0x00000000);
+  SpriteRenderer__render(entity, state);
 }
 
 void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {

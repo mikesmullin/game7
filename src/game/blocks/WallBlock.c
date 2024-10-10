@@ -3,9 +3,9 @@
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
-#include "../../lib/Log.h"
 #include "../Dispatcher.h"
 #include "../Logic.h"
+#include "../components/MeshRenderer.h"
 #include "Block.h"
 
 Block_t* WallBlock__alloc(Arena_t* arena) {
@@ -13,21 +13,26 @@ Block_t* WallBlock__alloc(Arena_t* arena) {
 }
 
 void WallBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
+  Logic__State_t* logic = state->local;
+  Entity_t* entity = (Entity_t*)block;
   WallBlock_t* self = (WallBlock_t*)block;
   Block__init(block, state, x, y);
-  block->base.engine->render = WALL_BLOCK__RENDER;
-  block->base.tags1 |= TAG_WALL;
+  entity->engine->render = WALL_BLOCK__RENDER;
+  entity->tags1 |= TAG_WALL;
   block->meshId = MODEL_BOX;
+
+  entity->render = Arena__Push(state->arena, sizeof(RendererComponent));
+  entity->render->atlas = ATLAS_TEXTURE;
+  entity->render->tx = logic->game->curLvl->wallTex;
+  entity->render->ty = 0;
+  entity->render->color = logic->game->curLvl->wallCol;
+  entity->render->mesh = BOX_MESH;
 }
 
 void WallBlock__render(Block_t* block, Engine__State_t* state) {
-  WallBlock_t* self = (WallBlock_t*)block;
   Logic__State_t* logic = state->local;
-  f32 x = block->base.tform->pos.x;
-  f32 z = block->base.tform->pos.z;
-  u32 tex = logic->game->curLvl->wallTex;
-  u32 col = logic->game->curLvl->wallCol;
+  Entity_t* entity = (Entity_t*)block;
+  WallBlock_t* self = (WallBlock_t*)block;
 
-  // render block mesh/model
-  Bitmap3D__RenderWall(state, x, 0, z, tex, 0, col);
+  MeshRenderer__render(entity, state);
 }

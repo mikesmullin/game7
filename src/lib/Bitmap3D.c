@@ -4,21 +4,13 @@
 
 #include "../game/Logic.h"
 #include "../game/entities/Player.h"
-#include "Breakpoint.h"
 #include "Color.h"
 #include "Easing.h"
 #include "Engine.h"
 #include "GLMShim.h"
 #include "List.h"
-#include "Log.h"
 #include "Math.h"
 #include "Wavefront.h"
-
-static u32 BLACK = 0xff000000;
-static u32 LIME = 0xff00ff00;
-static u32 BLUE = 0xffff0000;
-static u32 PINK = 0xffff00ff;
-static u32 WHITE = 0xffffffff;
 
 static f32 W, H;
 static mat4 model = {
@@ -666,7 +658,15 @@ void Bitmap3D__RenderWall(
 }
 
 void Bitmap3D__RenderSprite(
-    Engine__State_t* state, f64 x, f64 y, f64 z, u32 tx0, u32 ty0, u32 color) {
+    Engine__State_t* state,
+    f64 x,
+    f64 y,
+    f64 z,
+    u32 tx0,
+    u32 ty0,
+    bool useMask,
+    u32 mask,
+    u32 color) {
   Logic__State_t* logic = state->local;
   Bitmap_t* atlas = &state->local->atlas;
   Bitmap_t* screen = &state->local->screen;
@@ -738,8 +738,8 @@ void Bitmap3D__RenderSprite(
       uv0,
       uv1,
       uv2,
-      true,
-      BLACK,
+      useMask,
+      mask,
       color);
 
   // face tri 2
@@ -759,8 +759,8 @@ void Bitmap3D__RenderSprite(
       uv0,
       uv3,
       uv2,
-      true,
-      BLACK,
+      useMask,
+      mask,
       color);
 }
 

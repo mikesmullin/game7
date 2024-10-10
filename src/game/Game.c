@@ -47,16 +47,17 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   logic->zbuf = Arena__Push(a, state->CANVAS_WIDTH * state->CANVAS_HEIGHT * sizeof(f32));
   logic->zbufWall = Arena__Push(a, state->CANVAS_WIDTH * sizeof(f32));
 
-  char* ASSETS_DIR = Path__join(a, "..", "assets", 0);
+  ASSETS_DIR = Path__join(a, "..", "assets", 0);
+  TEXTURES_DIR = Path__join(a, ASSETS_DIR, "textures", 0);
+  AUDIO_DIR = Path__join(a, ASSETS_DIR, "audio", 0);
+  SFX_DIR = Path__join(a, AUDIO_DIR, "sfx", 0);
+  MODELS_DIR = Path__join(a, ASSETS_DIR, "models", 0);
 
   // preload textures
-  char* TEXTURES_DIR = Path__join(a, ASSETS_DIR, "textures", 0);
   state->Vulkan__FReadImage(&logic->atlas, Path__join(a, TEXTURES_DIR, "atlas.png", 0));
   state->Vulkan__FReadImage(&logic->glyphs0, Path__join(a, TEXTURES_DIR, "glyphs0.png", 0));
 
   // preload audio
-  char* AUDIO_DIR = Path__join(a, ASSETS_DIR, "audio", 0);
-  char* SFX_DIR = Path__join(a, AUDIO_DIR, "sfx", 0);
   state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "title.wav", 0));
   state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "pickupCoin.wav", 0));
   state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "click.wav", 0));
@@ -67,7 +68,6 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "bash.wav", 0));
 
   // preload meshes
-  char* MODELS_DIR = Path__join(a, ASSETS_DIR, "models", 0);
   logic->game->meshes = List__alloc(a);
   Wavefront_t* obj = Wavefront__parse_obj(a, Path__join(a, MODELS_DIR, "box.obj", 0));
   List__append(a, logic->game->meshes, obj);

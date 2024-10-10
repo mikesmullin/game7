@@ -30,6 +30,12 @@ static const f32 PLAYER_LOOK_SPEED = 0.1f;  // deg/sec
 static const f32 PLAYER_BOB = 0.05f;
 static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
 
+static const char* ASSETS_DIR;
+static const char* TEXTURES_DIR;
+static const char* AUDIO_DIR;
+static const char* SFX_DIR;
+static const char* MODELS_DIR;
+
 enum INSTANCES {
   INSTANCE_QUAD1 = 0,
 };
@@ -155,9 +161,28 @@ typedef struct HealthComponent_t {
   f32 hurtTime;
 } HealthComponent;
 
-typedef struct SpriteRendererComponent_t {
-  List_t* sprites;
-} SpriteRendererComponent;
+typedef enum RendererType_t {
+  SPRITE_RENDERER,
+  MESH_RENDERER,
+} RendererType;
+
+typedef enum TextureAsset_t {
+  ATLAS_TEXTURE,
+  GLYPH0_TEXTURE,
+} TextureAsset;
+
+typedef enum MeshAsset_t {
+  BOX_MESH,
+} MeshAsset;
+
+typedef struct RendererComponent_t {
+  RendererType type;
+  TextureAsset atlas;
+  u32 tx, ty;
+  bool useMask;
+  u32 mask, color;
+  MeshAsset mesh;
+} RendererComponent;
 
 typedef struct EngineComponent_t {
   DispatchFnId tick;
@@ -182,7 +207,7 @@ typedef struct Entity_t {
   EventEmitterComponent* event;
   ColliderComponent* collider;
   Rigidbody2DComponent* rb;
-  SpriteRendererComponent* render;
+  RendererComponent* render;
   HealthComponent* health;
 } Entity_t;
 
