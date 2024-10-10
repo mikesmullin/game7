@@ -12,3 +12,5 @@ typedef struct String_t {
 } String_t;
 
 String_t* String__alloc(Arena_t* arena, const char* str);
+char* String__concat(Arena_t* arena, const char* a, const char* b);
+char* Path__join(Arena_t* arena, ...);

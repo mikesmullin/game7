@@ -597,7 +597,7 @@ void Vulkan__CreateSwapChain(Vulkan_t* self, bool hadPriorSwapChain) {
   createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
   if (self->m_SwapChain__queues.same) {
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-    createInfo.queueFamilyIndexCount = 0;   // default
+    createInfo.queueFamilyIndexCount = 0;  // default
     createInfo.pQueueFamilyIndices = NULL;  // default
   } else {
     createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -1256,7 +1256,7 @@ void Vulkan__FReadImage(Bitmap_t* bmp, const char* filePath) {
   bmp->chan = chan;
   bmp->len = bmp->w * bmp->h * bmp->chan;
 
-  ASSERT_CONTEXT(bmp->buf, "failed to load texture image!")
+  ASSERT_CONTEXT(bmp->buf, "failed to load texture image! file: %s", filePath);
   // stbi_image_free((stbi_uc*)bmp->buf);
 }
 
@@ -1396,8 +1396,8 @@ void Vulkan__CreateTextureSampler(Vulkan_t* self) {
   samplerInfo.pNext = NULL;
   samplerInfo.flags = 0;
   // nearest is best for pixel art, but a pixel shader is even better
-  samplerInfo.magFilter = VK_FILTER_NEAREST;                // VK_FILTER_LINEAR;
-  samplerInfo.minFilter = VK_FILTER_NEAREST;                // VK_FILTER_LINEAR;
+  samplerInfo.magFilter = VK_FILTER_NEAREST;  // VK_FILTER_LINEAR;
+  samplerInfo.minFilter = VK_FILTER_NEAREST;  // VK_FILTER_LINEAR;
   samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;  // VK_SAMPLER_MIPMAP_MODE_LINEAR;
   samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
   samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;

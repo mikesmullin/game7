@@ -45,7 +45,7 @@ static int check_load_logic() {
 int Engine__Loop() {
   LOG_INFOF("begin engine.");
 
-  // SLEEP(1000 * 5);  // wait for debugger attach
+  SLEEP(1000 * 5);  // wait for debugger attach
 
   Arena__Alloc(&arena, 1024 * 1024 * 50);  // MB
   state = Arena__Push(&arena, sizeof(Engine__State_t));
