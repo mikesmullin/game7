@@ -790,7 +790,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
     for (u32 i = 0; i < logic->screen.len; i++) {
       if (FLT_MIN == logic->zbuf[i]) {
         s32 xx = ((s32)floorf((i % (u32)W) - glms_rad(cRX) * 512 / (Math__PI * 2))) & 511;
-        s32 yy = ((s32)floorf((i / (u32)H) - glms_rad(cRY + 10) * 512 / (Math__PI))) & 511;
+        s32 yy = ((s32)floorf((i / H) - glms_rad(cRY + 10) * 512 / (Math__PI))) & 511;
         u32 color = Bitmap__Get2DPixel(level->world, xx, yy, BLACK);
         buf[i] = alpha_blend(color, level->ceilCol);
       }
