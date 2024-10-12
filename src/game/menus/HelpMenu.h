@@ -1,5 +1,4 @@
-#ifndef HELP_MENU_H
-#define HELP_MENU_H
+#pragma once
 
 typedef struct Arena_t Arena_t;
 typedef struct Menu_t Menu_t;
@@ -10,5 +9,3 @@ void HelpMenu__init(Menu_t* menu, Engine__State_t* state);
 void HelpMenu__render(struct Menu_t* menu, Engine__State_t* state);
 void HelpMenu__gui(struct Menu_t* menu, Engine__State_t* state);
 void HelpMenu__tick(struct Menu_t* menu, Engine__State_t* state);
-
-#endif  // HELP_MENU_H

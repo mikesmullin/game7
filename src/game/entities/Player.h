@@ -1,5 +1,4 @@
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 typedef struct Arena_t Arena_t;
 typedef struct Entity_t Entity_t;
@@ -9,5 +8,3 @@ typedef float f32;
 Entity_t* Player__alloc(Arena_t* arena);
 void Player__init(Entity_t* entity, Engine__State_t* state);
 void Player__tick(Entity_t* entity, Engine__State_t* state);
-
-#endif  // PLAYER_H

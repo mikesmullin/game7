@@ -1,5 +1,4 @@
-#ifndef SPAWN_BLOCK_H
-#define SPAWN_BLOCK_H
+#pragma once
 
 typedef float f32;
 
@@ -10,5 +9,3 @@ typedef struct Engine__State_t Engine__State_t;
 Block_t* SpawnBlock__alloc(Arena_t* arena);
 void SpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y);
 void SpawnBlock__tick(Block_t* block, Engine__State_t* state);
-
-#endif  // SPAWN_BLOCK_H

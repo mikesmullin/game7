@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdbool.h>
-typedef double f64;
-
 typedef struct Arena_t Arena_t;
 typedef struct Entity_t Entity_t;
 typedef struct Engine__State_t Engine__State_t;

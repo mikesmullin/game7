@@ -1,5 +1,4 @@
-#ifndef TITLE_MENU_H
-#define TITLE_MENU_H
+#pragma once
 
 typedef struct Arena_t Arena_t;
 typedef struct Menu_t Menu_t;
@@ -10,5 +9,3 @@ void TitleMenu__init(Menu_t* menu, Engine__State_t* state);
 void TitleMenu__render(struct Menu_t* menu, Engine__State_t* state);
 void TitleMenu__gui(struct Menu_t* menu, Engine__State_t* state);
 void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state);
-
-#endif  // TITLE_MENU_H

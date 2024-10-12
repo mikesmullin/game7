@@ -3,11 +3,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "Arena.h"
 #include "Geometry.h"
 
 typedef uint32_t u32;
 typedef float f32;
+
+typedef struct Arena_t Arena_t;
 
 #define QUAD_TREE_MAX_CAPACITY 4
 

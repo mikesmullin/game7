@@ -1,9 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-typedef uint32_t u32;
-typedef float f32;
-
 typedef struct Arena_t Arena_t;
 typedef struct Level_t Level_t;
 typedef struct Block_t Block_t;
