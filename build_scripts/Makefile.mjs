@@ -393,7 +393,7 @@ const compile_reload = async (outname) => {
   //   console.log(`compile unit performance. file: ${tu}, elapsed: ${((ended - started) / 1000).toFixed(2)}s`);
   // }
 
-  const ANALYZE = false;
+  const ANALYZE = true;
   const ANALYZER = path.join(process.cwd(), 'ClangBuildAnalyzer.exe');
   if (ANALYZE) await child_spawn(ANALYZER, ['--start', 'src/game']);
 

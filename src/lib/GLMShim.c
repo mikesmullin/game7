@@ -91,6 +91,14 @@ void glms_vec3_add(vec3 a, vec3 b, vec3 result) {
   result[2] = a[2] + b[2];
 }
 
+// Subtracts two vec3
+void glms_vec3_sub(vec3 a, vec3 b, vec3 result) {
+  // glm_vec3_sub(a, b, result);
+  result[0] = a[0] - b[0];
+  result[1] = a[1] - b[1];
+  result[2] = a[2] - b[2];
+}
+
 // Creates a "look at" matrix (4x4)
 void glms_lookat(vec3 eye, vec3 center, vec3 up, mat4 result) {
   // glm_lookat(eye, center, up, result);

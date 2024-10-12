@@ -1,5 +1,6 @@
 #include "Bitmap3D.h"
 
+#include <float.h>
 #include <math.h>
 
 #include "../game/Logic.h"
@@ -156,8 +157,8 @@ static void mat4_rotx(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   f32 s = Math__sin(glms_rad(deg));
   f32 c = Math__cos(glms_rad(deg));
   vec4 vc = (vec4){v[0], v[1], v[2], v[3]};
-  mat4 rot1;
-  glm_rotate_x((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
+  // mat4 rot1;
+  // glm_rotate_x((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
       {1, 0, 0, 0},  //
       {0, c, s, 0},  //
@@ -173,8 +174,8 @@ static void mat4_roty(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   f32 s = Math__sin(glms_rad(deg));
   f32 c = Math__cos(glms_rad(deg));
   vec4 vc = (vec4){v[0], v[1], v[2], v[3]};
-  mat4 rot1;
-  glm_rotate_y((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
+  // mat4 rot1;
+  // glm_rotate_y((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
       {c, 0, -s, 0},  //
       {0, 1, 0, 0},  //
@@ -190,8 +191,8 @@ static void mat4_rotz(Engine__State_t* state, vec4 v, f32 deg, vec4 dest) {
   f32 s = Math__sin(glms_rad(deg));
   f32 c = Math__cos(glms_rad(deg));
   vec4 vc = (vec4){v[0], v[1], v[2], v[3]};
-  mat4 rot1;
-  glm_rotate_z((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
+  // mat4 rot1;
+  // glm_rotate_z((mat4)GLM_MAT4_IDENTITY_INIT, glms_rad(deg), rot1);
   mat4 rot2 = {
       {c, -s, 0, 0},  //
       {s, c, 0, 0},  //
@@ -674,9 +675,9 @@ void Bitmap3D__RenderSprite(
   vec3* pos = (vec3*)&logic->game->curPlyr->tform->pos;
   vec3 mpos = (vec3){x, y, z};
   vec3 to_camera;
-  glm_vec3_sub(*pos, mpos,
-               to_camera);  // Vector from sprite to camera
-  glm_vec3_normalize(to_camera);
+  glms_vec3_sub(*pos, mpos,
+                to_camera);  // Vector from sprite to camera
+  glms_vec3_normalize(to_camera);
 
   // a 2D billboard that rotates around the Y axis only
   // Get the angle to rotate around the Y axis by projecting the "to_camera" vector on the XZ

@@ -1,5 +1,7 @@
 #include "Player.h"
 
+#include <math.h>
+
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
