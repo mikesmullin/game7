@@ -83,6 +83,10 @@ C:\> node build_scripts/Makefile.mjs watch
   - https://www.youtube.com/watch?v=z0YFFg_nBjw
 - DST BehaviorTree (AI), StateGraph (Animation), and Components (ECS)
   - https://github.com/taichunmin/dont-starve-together-game-scripts
+- ECS
+  - https://www.youtube.com/watch?v=71RSWVyOMEY
+- Game Design
+  - [The Art of Game Design: A Book of Lenses](https://www.amazon.com/gp/product/B08LDSZG1W/)
 
 ## Cool Tools
 
