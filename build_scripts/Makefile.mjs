@@ -105,15 +105,15 @@ else if (isMac) {
 }
 const COMPILER_TRANSLATION_UNITS = [
   rel(workspaceFolder, 'src', 'components', '*.c'),
-  rel(workspaceFolder, 'src', 'lib', '*.c'),
-  rel(workspaceFolder, 'src', 'game', '**', '*.c'),
+  rel(workspaceFolder, 'src', 'lib', '**', '*.c'),
+  // rel(workspaceFolder, 'src', 'game', '**', '*.c'),
   // rel(workspaceFolder, 'src', 'proto', '*.cc'),
   rel(workspaceFolder, 'vendor', 'cmixer-076653c', 'include', '*.c'),
 ];
-// const COMPILER_TRANSLATION_UNITS_DLL = [
-//   rel(workspaceFolder, 'src', 'lib', '*.c'),
-//   rel(workspaceFolder, 'src', 'game', '*.c'),
-// ];
+const COMPILER_TRANSLATION_UNITS_DLL = [
+  rel(workspaceFolder, 'src', 'lib', '**', '*.c'),
+  rel(workspaceFolder, 'src', 'game', '**', '*.c'),
+];
 const C_CONDITIONAL_COMPILER_ARGS = (src) => {
   if (src.includes('cmixer')) {
     return ['-Wno-deprecated-declarations'];
@@ -357,7 +357,7 @@ const compile_reload = async (outname) => {
   const absBuild = (...args) => path.join(workspaceFolder, BUILD_PATH, ...args);
 
   const dsts = [];
-  for (const u of COMPILER_TRANSLATION_UNITS) {
+  for (const u of COMPILER_TRANSLATION_UNITS_DLL) {
     for (const file of await glob(path.relative(workspaceFolder, absBuild(u)).replace(/\\/g, '/'))) {
       if (!ENGINE_ONLY.includes(nixPath(file))) {
         // console.log("===", nixPath(file));

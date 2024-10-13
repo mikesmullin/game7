@@ -23,24 +23,11 @@ typedef void (*logic_onreload_t)(Engine__State_t* state);
 typedef void (*logic_onfixedupdate_t)(Engine__State_t* state);
 typedef void (*logic_onupdate_t)(Engine__State_t* state);
 
-static const f32 PLAYER_WALK_SPEED = 5.0f;  // per-second
-static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
-static const f32 PLAYER_FLY_SPEED = 3.0f;  // per-second
-static const f32 PLAYER_LOOK_SPEED = 0.3f;  // deg/sec
-static const f32 PLAYER_BOB = 0.05f;
-static const f32 PLAYER_HURT_ANIM_TIME = 0.33;
-
-static const char* ASSETS_DIR;
-static const char* TEXTURES_DIR;
-static const char* AUDIO_DIR;
-static const char* SFX_DIR;
-static const char* MODELS_DIR;
-
 enum INSTANCES {
   INSTANCE_QUAD1 = 0,
 };
 
-enum AUDIO_FILES {
+typedef enum AUDIO_FILES_t {
   AUDIO_TITLE = 0,
   AUDIO_PICKUP_COIN = 1,
   AUDIO_CLICK = 2,
@@ -49,7 +36,8 @@ enum AUDIO_FILES {
   AUDIO_PUNCH = 5,
   AUDIO_HURT = 6,
   AUDIO_BASH = 7,
-};
+  AUDIO_MEOW = 8,
+} AUDIO_FILES;
 
 enum MODELS {
   MODEL_BOX = 0,  // models/box.obj
@@ -190,6 +178,12 @@ typedef struct EngineComponent_t {
   DispatchFnId gui;
 } EngineComponent;
 
+typedef struct AudioListenerComponent_t {
+} AudioListenerComponent;
+
+typedef struct AudioSourceComponent_t {
+} AudioSourceComponent;
+
 typedef enum EntityTags1_t : u64 {
   TAG_NONE = 0,
   TAG_WALL = 1 << 1,  //
@@ -209,6 +203,9 @@ typedef struct Entity_t {
   Rigidbody2DComponent* rb;
   RendererComponent* render;
   HealthComponent* health;
+  // TODO: if we don't need to iterate, these can be moved within subclass
+  AudioSourceComponent* audio;
+  AudioListenerComponent* hear;
 } Entity_t;
 
 typedef struct OnCollideClosure_t {
@@ -371,4 +368,10 @@ typedef struct Logic__State_t {
 
   f32 CANVAS_DEBUG_X;
   f32 CANVAS_DEBUG_Y;
+
+  const char* ASSETS_DIR;
+  const char* TEXTURES_DIR;
+  const char* AUDIO_DIR;
+  const char* SFX_DIR;
+  const char* MODELS_DIR;
 } Logic__State_t;

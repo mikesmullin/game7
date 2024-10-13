@@ -12,6 +12,11 @@
 #include "../components/Rigidbody2D.h"
 #include "Entity.h"
 
+static const f32 PLAYER_WALK_SPEED = 5.0f;  // per-second
+static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
+static const f32 PLAYER_FLY_SPEED = 3.0f;  // per-second
+static const f32 PLAYER_LOOK_SPEED = 0.3f;  // deg/sec
+
 Entity_t* Player__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Player_t));
 }
@@ -41,6 +46,8 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   entity->health = Arena__Push(state->arena, sizeof(HealthComponent));
   entity->health->hp = 100;
   entity->health->hurtTime = 0;
+
+  entity->hear = Arena__Push(state->arena, sizeof(AudioListenerComponent));
 }
 
 void Player__tick(struct Entity_t* entity, Engine__State_t* state) {

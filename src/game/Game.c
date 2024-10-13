@@ -47,29 +47,30 @@ void Game__init(Game_t* game, Engine__State_t* state) {
   logic->zbuf = Arena__Push(a, state->CANVAS_WIDTH * state->CANVAS_HEIGHT * sizeof(f32));
   logic->zbufWall = Arena__Push(a, state->CANVAS_WIDTH * sizeof(f32));
 
-  ASSETS_DIR = Path__join(a, "..", "assets", 0);
-  TEXTURES_DIR = Path__join(a, ASSETS_DIR, "textures", 0);
-  AUDIO_DIR = Path__join(a, ASSETS_DIR, "audio", 0);
-  SFX_DIR = Path__join(a, AUDIO_DIR, "sfx", 0);
-  MODELS_DIR = Path__join(a, ASSETS_DIR, "models", 0);
+  logic->ASSETS_DIR = Path__join(a, "..", "assets", 0);
+  logic->TEXTURES_DIR = Path__join(a, logic->ASSETS_DIR, "textures", 0);
+  logic->AUDIO_DIR = Path__join(a, logic->ASSETS_DIR, "audio", 0);
+  logic->SFX_DIR = Path__join(a, logic->AUDIO_DIR, "sfx", 0);
+  logic->MODELS_DIR = Path__join(a, logic->ASSETS_DIR, "models", 0);
 
   // preload textures
-  state->Vulkan__FReadImage(&logic->atlas, Path__join(a, TEXTURES_DIR, "atlas.png", 0));
-  state->Vulkan__FReadImage(&logic->glyphs0, Path__join(a, TEXTURES_DIR, "glyphs0.png", 0));
+  state->Vulkan__FReadImage(&logic->atlas, Path__join(a, logic->TEXTURES_DIR, "atlas.png", 0));
+  state->Vulkan__FReadImage(&logic->glyphs0, Path__join(a, logic->TEXTURES_DIR, "glyphs0.png", 0));
 
   // preload audio
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "title.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "pickupCoin.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "click.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "powerUp.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "chop.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "punch.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "hurt.wav", 0));
-  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, SFX_DIR, "bash.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "title.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "pickupCoin.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "click.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "powerUp.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "chop.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "punch.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "hurt.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "bash.wav", 0));
+  state->Audio__LoadAudioFile(a, state->audio, Path__join(a, logic->SFX_DIR, "meow.wav", 0));
 
   // preload meshes
   logic->game->meshes = List__alloc(a);
-  Wavefront_t* obj = Wavefront__parse_obj(a, Path__join(a, MODELS_DIR, "box.obj", 0));
+  Wavefront_t* obj = Wavefront__parse_obj(a, Path__join(a, logic->MODELS_DIR, "box.obj", 0));
   List__append(a, logic->game->meshes, obj);
 }
 

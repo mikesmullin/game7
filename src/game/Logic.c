@@ -11,6 +11,9 @@
 #include "../lib/Math.h"
 #include "../lib/String.h"
 #include "Game.h"
+#include "entities/Player.h"
+
+Engine__State_t* g_engine;
 
 // on init (data only)
 __declspec(dllexport) void logic_oninit_data(Engine__State_t* state) {
@@ -61,7 +64,8 @@ __declspec(dllexport) void logic_oninit_compute(Engine__State_t* state) {
 }
 
 __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
-  LOG_DEBUGF("Logic dll loaded.");
+  g_engine = state;
+  LOG_DEBUGF("Logic dll loaded state %p at %p", g_engine, &g_engine);
 
   if (!state->dllLoadedOnce) {
     state->dllLoadedOnce = true;

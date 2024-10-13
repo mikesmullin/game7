@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Logic.h"
+#include "../components/AudioSource.h"
 #include "StateGraph.h"
 
 static SGState idle, tail;
@@ -19,7 +20,7 @@ static void tailOnEnter(StateGraph* sg) {
 static void tailKF1(StateGraph* sg) {
   CatEntity_t* self = (CatEntity_t*)sg->entity;
   sg->entity->render->tx = 2;
-  // sg->entity->audio->play("meow");
+  AudioSource__play(sg->entity->audio, AUDIO_MEOW);
 }
 static void tailKF2(StateGraph* sg) {
   sg->entity->render->tx = 3;

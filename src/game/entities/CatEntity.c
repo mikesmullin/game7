@@ -68,6 +68,8 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   self->sg = Arena__Push(state->arena, sizeof(StateGraph));
   self->sg->currentState = &idle;
   self->sg->entity = entity;
+
+  entity->audio = Arena__Push(state->arena, sizeof(AudioSourceComponent));
 }
 
 void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
