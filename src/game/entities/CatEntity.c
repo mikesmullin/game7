@@ -14,6 +14,8 @@
 #include "../components/Collider.h"
 #include "../components/Rigidbody2D.h"
 #include "../components/SpriteRenderer.h"
+#include "../stategraphs/SGCat.h"
+#include "../stategraphs/StateGraph.h"
 #include "Entity.h"
 
 static const f32 CAT_MOVE_SPEED = 0.1f;  // per-second
@@ -57,11 +59,15 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->render = Arena__Push(state->arena, sizeof(RendererComponent));
   entity->render->type = SPRITE_RENDERER;
   entity->render->atlas = ATLAS_TEXTURE;
-  entity->render->tx = Math__urandom2(0, 7);
+  entity->render->tx = self->tx;
   entity->render->ty = 1;
   entity->render->useMask = true;
   entity->render->mask = BLACK;
   entity->render->color = TRANSPARENT;
+
+  self->sg = Arena__Push(state->arena, sizeof(StateGraph));
+  self->sg->currentState = &idle;
+  self->sg->entity = entity;
 }
 
 void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
@@ -80,8 +86,10 @@ void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {
     sinceLastTurn = 0;
   }
 
-  entity->rb->xa = self->xa * CAT_MOVE_SPEED;
-  entity->rb->za = self->za * CAT_MOVE_SPEED;
+  // entity->rb->xa = self->xa * CAT_MOVE_SPEED;
+  // entity->rb->za = self->za * CAT_MOVE_SPEED;
+
+  StateGraph__tick(self->sg);
 
   Rigidbody2D__move(entity, state);
 }

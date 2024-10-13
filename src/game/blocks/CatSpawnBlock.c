@@ -31,6 +31,7 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   self->spawnInterval = 1.0f;  // per sec
   self->animTime = 0;  // counter
   self->spawnedCount = 0;
+  self->maxSpawnCount = 1;
 }
 
 void CatSpawnBlock__gui(Block_t* block, Engine__State_t* state) {
@@ -62,6 +63,7 @@ void CatSpawnBlock__tick(Block_t* block, Engine__State_t* state) {
 
     // spawn entities (like a particle emitter)
     for (u32 i = 0; i < self->spawnCount; i++) {
+      if (self->spawnedCount >= self->maxSpawnCount) return;
       // TODO: associate spawned entities with spawning block?
       Entity_t* entity = CatEntity__alloc(state->arena);
       CatEntity__init(entity, state);

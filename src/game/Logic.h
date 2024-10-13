@@ -225,10 +225,75 @@ typedef struct Player_t {
   f32 bobPhase;
 } Player_t;
 
+#define MAX_LISTENERS 10
+
+typedef enum EventType_t {
+  EVENT_NONE,  //
+  EVENT_HELLO,
+  EVENT_GOODBYE,
+  EVENT_DEATH,
+  EVENT_ATTACKED,
+  EVENT_ANIMOVER,
+} EventType;
+
+typedef enum ListenerFnId_t {
+  BLOCK__HELLO,  //
+  ENTITY__HELLO,
+  CAT_ENTITY__GOODBYE,
+  LISTENER_FN_COUNT
+} ListenerFnId;
+
+typedef struct EventEmitter_t {
+  EventType event[MAX_LISTENERS];
+  ListenerFnId listeners[MAX_LISTENERS];
+  int count;
+} EventEmitter;
+
+typedef enum SGStateTags1_t : u64 {
+  SGST_NONE = 0,  //
+  SGST_BUSY = 1 << 1,
+} SGStateTags1;
+
+typedef struct StateGraph_t StateGraph;
+typedef struct SGState_t SGState;
+typedef void (*SGStateFn)(StateGraph* sg);
+
+typedef struct SGStateKeyframe_t {
+  u32 id;
+  SGStateFn cb;
+} SGStateKeyframe;
+
+typedef struct SGState_t {
+  SGStateFn onEnter;
+  SGStateFn onUpdate;
+  SGStateFn onExit;
+  u32 frame;
+  u32 frameCount;
+  u32 keyframeCount;
+  SGStateKeyframe* keyframes;
+  // eventListeners[];
+} SGState;
+
+typedef enum SGFSM_t {
+  SGFSM_NULL,  //
+  SGFSM_ENTERING,
+  SGFSM_UPDATING,
+  SGFSM_EXITING,
+} SGFSM;
+
+typedef struct StateGraph_t {
+  Entity_t* entity;
+  SGState* currentState;
+  SGFSM fsm;
+  EventEmitter events;
+  SGStateTags1 tags1;
+} StateGraph;
+
 typedef struct CatEntity_t {
   Entity_t base;
   f32 xa, ya, za;
   u32 tx;
+  StateGraph* sg;
 } CatEntity_t;
 
 typedef struct Sprite_t {
@@ -260,6 +325,7 @@ typedef struct CatSpawnBlock_t {
   f32 spawnInterval;
   f32 animTime;
   u32 spawnedCount;
+  u32 maxSpawnCount;
 } CatSpawnBlock_t;
 
 typedef struct Level_t {
