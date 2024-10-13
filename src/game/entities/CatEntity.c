@@ -34,6 +34,7 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
 
   entity->engine->tick = CAT_ENTITY__TICK;
   entity->engine->render = CAT_ENTITY__RENDER;
+  entity->engine->gui = CAT_ENTITY__GUI;
   entity->tags1 |= TAG_CAT;
 
   entity->tform->pos.x = 0.0f;
@@ -77,6 +78,22 @@ void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
   CatEntity_t* self = (CatEntity_t*)entity;
 
   SpriteRenderer__render(entity, state);
+}
+
+void CatEntity__gui(Entity_t* entity, Engine__State_t* state) {
+  Logic__State_t* logic = state->local;
+  CatEntity_t* self = (CatEntity_t*)entity;
+
+  Bitmap__DebugText2(
+      state,
+      6,
+      6 * 8,
+      WHITE,
+      TRANSPARENT,
+      "frame %d tx %d ty %d",
+      self->sg->currentState->frame,
+      entity->render->tx,
+      entity->render->ty);
 }
 
 void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {

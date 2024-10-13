@@ -4,9 +4,9 @@
 #include "../components/AudioSource.h"
 #include "StateGraph.h"
 
-static SGState idle, tail;
+static SGState meow;
 static void idleOnEnter(StateGraph* sg) {
-  StateGraph__gotoState(sg, &tail);
+  StateGraph__gotoState(sg, &meow);
 }
 static SGState idle = {
     .onEnter = idleOnEnter,
@@ -20,7 +20,6 @@ static void tailOnEnter(StateGraph* sg) {
 static void tailKF1(StateGraph* sg) {
   CatEntity_t* self = (CatEntity_t*)sg->entity;
   sg->entity->render->tx = 2;
-  AudioSource__play(sg->entity->audio, AUDIO_MEOW);
 }
 static void tailKF2(StateGraph* sg) {
   sg->entity->render->tx = 3;
@@ -47,6 +46,62 @@ static SGState tail = {
             {24, tailKF5},
         },
 };
+
+static void blinkKF1(StateGraph* sg) {  // b eyes open
+  sg->entity->render->tx = 3;
+  sg->entity->render->ty = 2;
+}
+// static void blinkKF2(StateGraph* sg) {  // l eye closed
+//   sg->entity->render->tx = 1;
+//   sg->entity->render->ty = 3;
+// }
+// static void blinkKF3(StateGraph* sg) {  // r eye closed
+//   sg->entity->render->tx = 2;
+//   sg->entity->render->ty = 3;
+// }
+static void blinkKF4(StateGraph* sg) {  // b eyes closed
+  sg->entity->render->tx = 3;
+  sg->entity->render->ty = 3;
+}
+
+static SGState blink = {
+    .frameCount = 12 * 4,
+    .keyframeCount = 4,
+    .keyframes =
+        (SGStateKeyframe[]){
+            {12 * 0, blinkKF1},  //
+            // {12 * 1, blinkKF2},
+            // {12 * 2, blinkKF3},
+            {12 * 3, blinkKF4},
+        },
+};
+
+static void meowKF1(StateGraph* sg) {  // eyes open, mouth closed
+  sg->entity->render->tx = 3;
+  sg->entity->render->ty = 2;
+}
+static void meowKF2(StateGraph* sg) {  // eyes open, mouth open
+  sg->entity->render->tx = 0;
+  sg->entity->render->ty = 4;
+  AudioSource__play(sg->entity->audio, AUDIO_MEOW);
+}
+static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
+  sg->entity->render->tx = 3;
+  sg->entity->render->ty = 4;
+}
+
+static SGState meow = {
+    .frameCount = 108,
+    .keyframeCount = 4,
+    .keyframes =
+        (SGStateKeyframe[]){
+            {0, meowKF1},  // eyes open, mouth closed
+            {3, meowKF2},  // eyes open, mouth open (sound)
+            // {9, meowKF3},  // eyes closed, mouth open
+            {15, meowKF1},  // eyes open, mouth closed
+        },
+};
+
 // static SGState* states[] = {
 //     &idle,  //
 //     &tail,

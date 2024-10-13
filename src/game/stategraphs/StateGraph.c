@@ -1,6 +1,9 @@
 #include "StateGraph.h"
 
+#include "../../lib/Color.h"
 #include "../Logic.h"
+
+extern Engine__State_t* g_engine;
 
 void StateGraph__gotoState(StateGraph* sg, SGState* state) {
   sg->fsm = SGFSM_EXITING;

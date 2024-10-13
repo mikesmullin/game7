@@ -18,6 +18,7 @@ typedef enum DispatchFnId {
 
   CAT_ENTITY__TICK,
   CAT_ENTITY__RENDER,
+  CAT_ENTITY__GUI,
   CAT_ENTITY__COLLIDE,
   PLAYER_ENTITY__TICK,
 

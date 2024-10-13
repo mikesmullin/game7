@@ -27,6 +27,7 @@ static void (*VTABLE_ENGINE[])() = {
 
     CatEntity__tick,  //
     CatEntity__render,  //
+    CatEntity__gui,  //
     CatEntity__collide,  //
     Player__tick,  //
 
