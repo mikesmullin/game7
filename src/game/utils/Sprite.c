@@ -1,9 +1,9 @@
 #include "Sprite.h"
 
-#include "../lib/Arena.h"
-#include "../lib/Engine.h"
+#include "../../lib/Arena.h"
+#include "../../lib/Engine.h"
+#include "../Logic.h"
 #include "Dispatcher.h"
-#include "Logic.h"
 
 Sprite_t* Sprite__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Sprite_t));

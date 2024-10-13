@@ -3,10 +3,10 @@
 #include <stdint.h>
 
 #include "../../lib/Arena.h"
-#include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
+#include "../utils/Bitmap3D.h"
+#include "../utils/Dispatcher.h"
 #include "Block.h"
 
 typedef int32_t s32;

@@ -6,9 +6,10 @@
 #include "../../lib/Bitmap.h"
 #include "../../lib/Engine.h"
 #include "../../lib/Keyboard.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
+#include "../utils/Dispatcher.h"
 #include "TitleMenu.h"
+
 
 Menu_t* HelpMenu__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(HelpMenu_t));

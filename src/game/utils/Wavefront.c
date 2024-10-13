@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "Arena.h"
+#include "../../lib/Arena.h"
+#include "../../lib/List.h"
+#include "../../lib/Log.h"
 #include "GLMShim.h"
-#include "List.h"
-#include "Log.h"
 
 // Wavefront Format Specification: http://www.martinreddy.net/gfx/3d/OBJ.spec
 

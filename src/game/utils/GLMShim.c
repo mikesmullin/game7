@@ -3,7 +3,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "Math.h"
+#include "../../lib/Math.h"
 
 // Adds two v3
 void glms_v3_add(v3 a, v3 b, v3* dest) {

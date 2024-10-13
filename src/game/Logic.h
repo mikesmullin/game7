@@ -7,7 +7,7 @@ typedef uint16_t u16;
 typedef double f64;
 
 #include "../lib/Bitmap.h"
-#include "../lib/GLMShim.h"
+#include "utils/GLMShim.h"
 
 typedef struct Arena_t Arena_t;
 typedef struct Engine__State_t Engine__State_t;

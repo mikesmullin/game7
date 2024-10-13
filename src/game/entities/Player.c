@@ -7,10 +7,11 @@
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
 #include "../../lib/Math.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../components/Rigidbody2D.h"
+#include "../utils/Dispatcher.h"
 #include "Entity.h"
+
 
 static const f32 PLAYER_WALK_SPEED = 5.0f;  // per-second
 static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk

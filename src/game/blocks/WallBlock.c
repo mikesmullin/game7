@@ -1,11 +1,11 @@
 #include "WallBlock.h"
 
 #include "../../lib/Arena.h"
-#include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../components/MeshRenderer.h"
+#include "../utils/Bitmap3D.h"
+#include "../utils/Dispatcher.h"
 #include "Block.h"
 
 Block_t* WallBlock__alloc(Arena_t* arena) {

@@ -1,6 +1,6 @@
 #include "EventEmitter.h"
 
-#include "Logic.h"
+#include "../Logic.h"
 
 // Initialize the EventEmitter
 void EventEmitter__init(EventEmitter* emitter) {

@@ -1,8 +1,8 @@
 #include "SpriteRenderer.h"
 
-#include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
 #include "../Logic.h"
+#include "../utils/Bitmap3D.h"
 
 void SpriteRenderer__render(Entity_t* entity, Engine__State_t* state) {
   if (NULL == entity->render) return;

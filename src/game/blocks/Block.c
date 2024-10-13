@@ -2,9 +2,10 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../entities/Entity.h"
+#include "../utils/Dispatcher.h"
+
 
 // blocks are 3d models instantiated from level RGB pixel data
 

@@ -3,9 +3,10 @@
 #include "../../lib/Arena.h"
 #include "../../lib/Engine.h"
 #include "../../lib/List.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../levels/Level.h"
+#include "../utils/Dispatcher.h"
+
 
 Entity_t* Entity__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(Entity_t));

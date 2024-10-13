@@ -2,19 +2,19 @@
 
 #include "../lib/Arena.h"
 #include "../lib/Bitmap.h"
-#include "../lib/Bitmap3D.h"
 #include "../lib/Engine.h"
 #include "../lib/Finger.h"
 #include "../lib/Keyboard.h"
 #include "../lib/List.h"
 #include "../lib/Math.h"
 #include "../lib/String.h"
-#include "../lib/Wavefront.h"
-#include "Dispatcher.h"
 #include "Logic.h"
 #include "entities/Player.h"
 #include "levels/Level.h"
 #include "menus/TitleMenu.h"
+#include "utils/Bitmap3D.h"
+#include "utils/Dispatcher.h"
+#include "utils/Wavefront.h"
 
 Game_t* Game__alloc(Arena_t* arena) {
   Game_t* g = Arena__Push(arena, sizeof(Game_t));

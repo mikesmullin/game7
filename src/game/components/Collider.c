@@ -1,10 +1,10 @@
 #include "Collider.h"
 
 #include "../../lib/Engine.h"
-#include "../../lib/Geometry.h"
-#include "../../lib/QuadTree.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
+#include "../utils/Dispatcher.h"
+#include "../utils/Geometry.h"
+#include "../utils/QuadTree.h"
 
 // TODO: add a box x circle checker
 

@@ -2,18 +2,18 @@
 
 #include "../../lib/Arena.h"
 #include "../../lib/Bitmap.h"
-#include "../../lib/Bitmap3D.h"
 #include "../../lib/Engine.h"
-#include "../../lib/Geometry.h"
 #include "../../lib/List.h"
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
-#include "../../lib/QuadTree.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../blocks/CatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"
 #include "../blocks/WallBlock.h"
+#include "../utils/Bitmap3D.h"
+#include "../utils/Dispatcher.h"
+#include "../utils/Geometry.h"
+#include "../utils/QuadTree.h"
 
 Level_t* Level__alloc(Arena_t* arena) {
   Level_t* level = Arena__Push(arena, sizeof(Level_t));

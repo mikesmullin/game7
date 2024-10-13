@@ -1,7 +1,7 @@
 
 #include "QuadTree.h"
 
-#include "Arena.h"
+#include "../../lib/Arena.h"
 #include "Geometry.h"
 
 // Create a new quadtree node

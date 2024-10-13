@@ -1,16 +1,16 @@
 #include "Dispatcher.h"
 
+#include "../blocks/Block.h"
+#include "../blocks/CatSpawnBlock.h"
+#include "../blocks/SpawnBlock.h"
+#include "../blocks/WallBlock.h"
+#include "../entities/CatEntity.h"
+#include "../entities/Entity.h"
+#include "../entities/Player.h"
+#include "../menus/AboutMenu.h"
+#include "../menus/HelpMenu.h"
+#include "../menus/TitleMenu.h"
 #include "Sprite.h"
-#include "blocks/Block.h"
-#include "blocks/CatSpawnBlock.h"
-#include "blocks/SpawnBlock.h"
-#include "blocks/WallBlock.h"
-#include "entities/CatEntity.h"
-#include "entities/Entity.h"
-#include "entities/Player.h"
-#include "menus/AboutMenu.h"
-#include "menus/HelpMenu.h"
-#include "menus/TitleMenu.h"
 
 typedef float f32;
 

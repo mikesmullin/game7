@@ -3,14 +3,14 @@
 #include <float.h>
 #include <math.h>
 
-#include "../game/Logic.h"
-#include "../game/entities/Player.h"
+#include "../../lib/Engine.h"
+#include "../../lib/List.h"
+#include "../../lib/Math.h"
+#include "../Logic.h"
+#include "../entities/Player.h"
 #include "Color.h"
 #include "Easing.h"
-#include "Engine.h"
 #include "GLMShim.h"
-#include "List.h"
-#include "Math.h"
 #include "Wavefront.h"
 
 static f32 W, H;

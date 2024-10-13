@@ -6,11 +6,12 @@
 #include "../../lib/Keyboard.h"
 #include "../../lib/List.h"
 #include "../../lib/String.h"
-#include "../Dispatcher.h"
 #include "../Logic.h"
 #include "../levels/Level.h"
+#include "../utils/Dispatcher.h"
 #include "AboutMenu.h"
 #include "HelpMenu.h"
+
 
 Menu_t* TitleMenu__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(TitleMenu_t));

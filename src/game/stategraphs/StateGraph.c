@@ -1,7 +1,7 @@
 #include "StateGraph.h"
 
-#include "../../lib/Color.h"
 #include "../Logic.h"
+#include "../utils/Color.h"
 
 extern Engine__State_t* g_engine;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Math.h"
+#include "../../lib/Math.h"
 
 typedef float f32;
 

@@ -3,8 +3,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "GLMShim.h"
-
 typedef uint8_t u8;
 typedef uint16_t u16;
 typedef uint32_t u32;
@@ -12,6 +10,9 @@ typedef uint64_t u64;
 typedef float f32;
 typedef double f64;
 typedef f32 vec2[2];
+typedef f32 vec3[3];
+typedef f32 vec4[4];
+typedef vec4 mat4[4];
 
 typedef struct Arena_t Arena_t;
 typedef struct Audio_t Audio_t;
