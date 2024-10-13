@@ -19,7 +19,7 @@
 #include "../utils/QuadTree.h"
 #include "Entity.h"
 
-static const f32 CAT_MOVE_SPEED = 0.1f;  // per-second
+static const f32 CAT_MOVE_SPEED = 0.03f;  // per-second
 static f32 lastTurnWait = 2.0f;
 static f32 sinceLastTurn = 0;
 
@@ -109,8 +109,8 @@ void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {
     sinceLastTurn = 0;
   }
 
-  // entity->rb->xa = self->xa * CAT_MOVE_SPEED;
-  // entity->rb->za = self->za * CAT_MOVE_SPEED;
+  entity->rb->xa = self->xa * CAT_MOVE_SPEED;
+  entity->rb->za = self->za * CAT_MOVE_SPEED;
 
   self->brain->tick(self->brain);
   StateGraph__tick(self->sg);

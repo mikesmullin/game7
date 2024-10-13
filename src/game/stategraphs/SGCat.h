@@ -1,10 +1,11 @@
 #pragma once
 
+#include "../../lib/Math.h"
 #include "../Logic.h"
 #include "../components/AudioSource.h"
 #include "StateGraph.h"
 
-static SGState SGmeow;
+static SGState SGmeow, SGtail, SGblink;
 static void idleOnEnter(StateGraph* sg) {
   StateGraph__gotoState(sg, &SGmeow);
 }
@@ -33,6 +34,9 @@ static void tailKF4(StateGraph* sg) {
 static void tailKF5(StateGraph* sg) {
   sg->entity->render->tx = 6;
 }
+static void tailKF6(StateGraph* sg) {
+  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGblink);
+}
 static SGState SGtail = {
     .onEnter = tailOnEnter,
     .frameCount = 32,
@@ -44,6 +48,7 @@ static SGState SGtail = {
             {12, tailKF3},
             {18, tailKF4},
             {24, tailKF5},
+            {31, tailKF6},
         },
 };
 
@@ -63,16 +68,20 @@ static void blinkKF4(StateGraph* sg) {  // b eyes closed
   sg->entity->render->tx = 3;
   sg->entity->render->ty = 3;
 }
+static void blinkKF5(StateGraph* sg) {
+  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGtail);
+}
 
 static SGState SGblink = {
     .frameCount = 12 * 4,
-    .keyframeCount = 4,
+    .keyframeCount = 5,
     .keyframes =
         (SGStateKeyframe[]){
             {12 * 0, blinkKF1},  //
             // {12 * 1, blinkKF2},
             // {12 * 2, blinkKF3},
             {12 * 3, blinkKF4},
+            {12 * 4 - 1, blinkKF5},
         },
 };
 
@@ -89,6 +98,9 @@ static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   sg->entity->render->tx = 3;
   sg->entity->render->ty = 4;
 }
+static void meowKF4(StateGraph* sg) {
+  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGblink : &SGtail);
+}
 
 static SGState SGmeow = {
     .frameCount = 108,
@@ -99,6 +111,7 @@ static SGState SGmeow = {
             {3, meowKF2},  // eyes open, mouth open (sound)
             // {9, meowKF3},  // eyes closed, mouth open
             {15, meowKF1},  // eyes open, mouth closed
+            {107, meowKF4},
         },
 };
 
