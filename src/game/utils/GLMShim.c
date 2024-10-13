@@ -5,6 +5,10 @@
 
 #include "../../lib/Math.h"
 
+f32 glms_v3_dot(v3 a, v3 b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
 // Adds two v3
 void glms_v3_add(v3 a, v3 b, v3* dest) {
   dest->x = a.x + b.x;
@@ -27,6 +31,15 @@ void glms_v3_normalize(v3* dest) {
     dest->y /= len;
     dest->z /= len;
   }
+}
+
+f32 glms_v3_distance(v3* a, v3* b) {
+  v3 d = {
+      b->x - a->x,  //
+      b->y - a->y,
+      b->z - a->z};
+  f32 len = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
+  return len;
 }
 
 // Cross product of two vec3

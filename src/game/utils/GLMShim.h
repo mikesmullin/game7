@@ -25,10 +25,12 @@ typedef struct m4 {
   vec4 a, b, c, d;
 } m4;
 
+f32 glms_v3_dot(v3 a, v3 b);
 void glms_v3_add(v3 a, v3 b, v3* dest);
 void glms_v3_scale(v3 v, f32 scale, v3* dest);
 void glms_v3_normalize(v3* dest);
 void glms_v3_cross(v3 a, v3 b, v3* dest);
+f32 glms_v3_distance(v3* a, v3* b);
 
 f32 glms_rad(f32 degrees);
 void glms_vec3_copy(vec3 src, vec3 dest);

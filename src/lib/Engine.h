@@ -87,7 +87,8 @@ typedef struct Engine__State_t {
 
   void (*Audio__LoadAudioFile)(Arena_t* arena, Audio_t* self, const char* path);
   void (*Audio__PlayAudio)(Audio_t* self, const int id, const bool loop, const double gain);
-  void (*Audio__ResumeAudio)(Audio_t* self, const int id, const bool loop, const double gain);
+  void (*Audio__ResumeAudio)(
+      Audio_t* self, const int id, const bool loop, const double gain, double pan);
   void (*Audio__StopAudio)(Audio_t* self, const int id);
 
   bool mouseCaptured;

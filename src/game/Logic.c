@@ -71,7 +71,7 @@ __declspec(dllexport) void logic_onreload(Engine__State_t* state) {
     state->dllLoadedOnce = true;
     // doesn't play audio the first time proc runs
   } else {
-    state->Audio__ResumeAudio(state->audio, AUDIO_HURT, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_HURT, false, 1.0f, 0);
   }
 
   // play player hurt animation (a visual queue on top of audio queue is nice when muted)

@@ -92,7 +92,7 @@ static void meowKF1(StateGraph* sg) {  // eyes open, mouth closed
 static void meowKF2(StateGraph* sg) {  // eyes open, mouth open
   sg->entity->render->tx = 0;
   sg->entity->render->ty = 4;
-  AudioSource__play(sg->entity->audio, AUDIO_MEOW);
+  AudioSource__play(sg->entity, AUDIO_MEOW);
 }
 static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   sg->entity->render->tx = 3;

@@ -77,12 +77,14 @@ void Audio__PlayAudio(Audio_t* self, const int id, const bool loop, const double
   cm_play(src);
 }
 
-void Audio__ResumeAudio(Audio_t* self, const int id, const bool loop, const double gain) {
+void Audio__ResumeAudio(
+    Audio_t* self, const int id, const bool loop, const double gain, const double pan) {
   cm_Source* src = List__get(self->sources, id);
   if (cm_get_state(src) == CM_STATE_PLAYING) {
     return;
   }
   cm_set_gain(src, gain);
+  cm_set_pan(src, pan);
   cm_set_loop(src, loop ? 1 : 0);
   cm_play(src);
 }

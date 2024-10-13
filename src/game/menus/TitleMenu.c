@@ -12,7 +12,6 @@
 #include "AboutMenu.h"
 #include "HelpMenu.h"
 
-
 Menu_t* TitleMenu__alloc(Arena_t* arena) {
   return Arena__Push(arena, sizeof(TitleMenu_t));
 }
@@ -75,23 +74,23 @@ void TitleMenu__tick(struct Menu_t* menu, Engine__State_t* state) {
   if (!self->playedAudio) {
     self->playedAudio = true;
     state->Audio__StopAudio(state->audio, AUDIO_TITLE);
-    state->Audio__ResumeAudio(state->audio, AUDIO_TITLE, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_TITLE, false, 1.0f, 0);
   }
   if (state->kbState->fwd && self->selection > 0) {
     self->selection--;
     state->Audio__StopAudio(state->audio, AUDIO_CLICK);
-    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f, 0);
   }
   if (state->kbState->back && self->selection < self->options->len - 1) {
     self->selection++;
     state->Audio__StopAudio(state->audio, AUDIO_CLICK);
-    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_CLICK, false, 1.0f, 0);
   }
   if (self->skip || state->kbState->use || state->kbState->up) {
     state->kbState->use = false;
     state->kbState->up = false;
     state->Audio__StopAudio(state->audio, AUDIO_POWERUP);
-    state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f);
+    state->Audio__ResumeAudio(state->audio, AUDIO_POWERUP, false, 1.0f, 0);
 
     if (self->skip || 0 == self->selection) {
       logic->game->menu = NULL;
