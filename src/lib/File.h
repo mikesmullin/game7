@@ -5,7 +5,7 @@
 typedef struct {
   const char* directory;
   const char* fileName;
-  char buffer[1024];
+  char buffer[1024 * 5];  // may increase to detect all events (variable per frame)
   DWORD bytesReturned;
   HANDLE hDir;
   HANDLE hEvent;
