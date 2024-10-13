@@ -7,6 +7,7 @@
 #include "../../lib/List.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
+#include "../behaviortrees/BTCat.h"
 #include "../components/Collider.h"
 #include "../components/Rigidbody2D.h"
 #include "../components/SpriteRenderer.h"
@@ -67,8 +68,11 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->render->color = TRANSPARENT;
 
   self->sg = Arena__Push(state->arena, sizeof(StateGraph));
-  self->sg->currentState = &idle;
+  self->sg->currentState = &SGidle;
   self->sg->entity = entity;
+
+  self->brain = (BTNode*)&BTroot;
+  self->brain->entity = entity;
 
   entity->audio = Arena__Push(state->arena, sizeof(AudioSourceComponent));
 }
@@ -108,6 +112,7 @@ void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {
   // entity->rb->xa = self->xa * CAT_MOVE_SPEED;
   // entity->rb->za = self->za * CAT_MOVE_SPEED;
 
+  self->brain->tick(self->brain);
   StateGraph__tick(self->sg);
 
   Rigidbody2D__move(entity, state);

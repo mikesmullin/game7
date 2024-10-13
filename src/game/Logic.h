@@ -16,6 +16,7 @@ typedef struct Wavefront_t Wavefront_t;
 typedef enum DispatchFnId DispatchFnId;
 typedef enum DispatchFn2Id DispatchFn2Id;
 typedef struct QuadTreeNode_t QuadTreeNode;
+typedef struct BTNode_t BTNode;
 
 typedef void (*logic_oninit_data_t)(Engine__State_t* state);
 typedef void (*logic_oninit_compute_t)(Engine__State_t* state);
@@ -184,44 +185,6 @@ typedef struct AudioListenerComponent_t {
 typedef struct AudioSourceComponent_t {
 } AudioSourceComponent;
 
-typedef enum EntityTags1_t : u64 {
-  TAG_NONE = 0,
-  TAG_WALL = 1 << 1,  //
-  TAG_CAT = 1 << 2,  //
-  TAG_FLYING = 1 << 3,  //
-  TAG_DEAD = 1 << 4,  //
-  TAG_REMOVED = 1 << 5,  //
-} EntityTags1;
-
-typedef struct Entity_t {
-  u32 id;
-  u64 tags1;
-  EngineComponent* engine;
-  TransformComponent* tform;
-  EventEmitterComponent* event;
-  ColliderComponent* collider;
-  Rigidbody2DComponent* rb;
-  RendererComponent* render;
-  HealthComponent* health;
-  // TODO: if we don't need to iterate, these can be moved within subclass
-  AudioSourceComponent* audio;
-  AudioListenerComponent* hear;
-} Entity_t;
-
-typedef struct OnCollideClosure_t {
-  Entity_t *source, *target;
-  f32 x, y;
-  bool before, after;
-  bool noclip;
-} OnCollideClosure;
-
-typedef struct Player_t {
-  Entity_t base;
-  Camera_t camera;
-  VirtualJoystick_t input;
-  f32 bobPhase;
-} Player_t;
-
 #define MAX_LISTENERS 10
 
 typedef enum EventType_t {
@@ -245,6 +208,45 @@ typedef struct EventEmitter_t {
   ListenerFnId listeners[MAX_LISTENERS];
   int count;
 } EventEmitter;
+
+typedef enum EntityTags1_t : u64 {
+  TAG_NONE = 0,
+  TAG_WALL = 1 << 1,  //
+  TAG_CAT = 1 << 2,  //
+  TAG_FLYING = 1 << 3,  //
+  TAG_DEAD = 1 << 4,  //
+  TAG_REMOVED = 1 << 5,  //
+} EntityTags1;
+
+typedef struct Entity_t {
+  u32 id;
+  u64 tags1;
+  EngineComponent* engine;
+  TransformComponent* tform;
+  EventEmitterComponent* event;
+  ColliderComponent* collider;
+  Rigidbody2DComponent* rb;
+  RendererComponent* render;
+  HealthComponent* health;
+  // TODO: if we don't need to iterate, these can be moved within subclass
+  AudioSourceComponent* audio;
+  AudioListenerComponent* hear;
+  EventEmitter* events;
+} Entity_t;
+
+typedef struct OnCollideClosure_t {
+  Entity_t *source, *target;
+  f32 x, y;
+  bool before, after;
+  bool noclip;
+} OnCollideClosure;
+
+typedef struct Player_t {
+  Entity_t base;
+  Camera_t camera;
+  VirtualJoystick_t input;
+  f32 bobPhase;
+} Player_t;
 
 typedef enum SGStateTags1_t : u64 {
   SGST_NONE = 0,  //
@@ -291,6 +293,7 @@ typedef struct CatEntity_t {
   f32 xa, ya, za;
   u32 tx;
   StateGraph* sg;
+  BTNode* brain;
 } CatEntity_t;
 
 typedef struct Sprite_t {

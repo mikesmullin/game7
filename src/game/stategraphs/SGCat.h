@@ -4,11 +4,11 @@
 #include "../components/AudioSource.h"
 #include "StateGraph.h"
 
-static SGState meow;
+static SGState SGmeow;
 static void idleOnEnter(StateGraph* sg) {
-  StateGraph__gotoState(sg, &meow);
+  StateGraph__gotoState(sg, &SGmeow);
 }
-static SGState idle = {
+static SGState SGidle = {
     .onEnter = idleOnEnter,
     .frame = 0,
 };
@@ -33,7 +33,7 @@ static void tailKF4(StateGraph* sg) {
 static void tailKF5(StateGraph* sg) {
   sg->entity->render->tx = 6;
 }
-static SGState tail = {
+static SGState SGtail = {
     .onEnter = tailOnEnter,
     .frameCount = 32,
     .keyframeCount = 6,
@@ -64,7 +64,7 @@ static void blinkKF4(StateGraph* sg) {  // b eyes closed
   sg->entity->render->ty = 3;
 }
 
-static SGState blink = {
+static SGState SGblink = {
     .frameCount = 12 * 4,
     .keyframeCount = 4,
     .keyframes =
@@ -90,7 +90,7 @@ static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   sg->entity->render->ty = 4;
 }
 
-static SGState meow = {
+static SGState SGmeow = {
     .frameCount = 108,
     .keyframeCount = 4,
     .keyframes =
@@ -103,6 +103,6 @@ static SGState meow = {
 };
 
 // static SGState* states[] = {
-//     &idle,  //
-//     &tail,
+//     &SGidle,  //
+//     &SGtail,
 // };
