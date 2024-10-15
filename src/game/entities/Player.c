@@ -6,12 +6,15 @@
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
+#include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
+#include "../behaviortrees/Action.h"
 #include "../components/Rigidbody2D.h"
 #include "../utils/Dispatcher.h"
+#include "../utils/Geometry.h"
+#include "../utils/QuadTree.h"
 #include "Entity.h"
-
 
 static const f32 PLAYER_WALK_SPEED = 5.0f;  // per-second
 static const f32 PLAYER_STRAFE_MOD = 0.5f;  // percent of walk
@@ -177,6 +180,34 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
     }
 
     Rigidbody2D__move(entity, state);
+
+    // Space (Use)
+    if (state->kbState->use) {
+      state->kbState->use = false;
+
+      // find nearest cat
+      // TODO: make into reusable FindNearestEntity() type of fn
+      u32 matchCount = 0;
+      void* matchData[10];  // TODO: don't limit search results?
+      Rect range = {entity->tform->pos.x, entity->tform->pos.z, 2, 2};
+      QuadTreeNode_query(logic->game->curLvl->qt, range, 10, matchData, &matchCount);
+
+      for (u32 i = 0; i < matchCount; i++) {
+        Entity_t* other = (Entity_t*)matchData[i];
+        if (entity == other) continue;
+        if (!(other->tags1 & TAG_CAT)) continue;
+
+        CatEntity_t* cat = (CatEntity_t*)other;
+        Action action = {.type = ACTION_USE, .actor = entity, .target = other};
+
+        // Action__PerformBuffered(other, &action);
+        if (NULL != cat->sg) {
+          if (NULL != cat->sg->actions) {
+            cat->sg->actions(cat->sg, &action);
+          }
+        }
+      }
+    }
   }
 
   if (entity->health->hurtTime > 0) {

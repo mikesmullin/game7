@@ -70,6 +70,7 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   self->sg = Arena__Push(state->arena, sizeof(StateGraph));
   self->sg->currentState = &SGidle;
   self->sg->entity = entity;
+  self->sg->actions = subbedActions;
 
   self->brain = (BTNode*)&BTroot;
   self->brain->entity = entity;

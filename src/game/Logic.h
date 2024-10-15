@@ -248,6 +248,17 @@ typedef struct Player_t {
   f32 bobPhase;
 } Player_t;
 
+typedef enum ActionType_t {
+  ACTION_NONE,  //
+  ACTION_USE,
+} ActionType;
+
+typedef struct Action_t {
+  ActionType type;
+  Entity_t* actor;
+  Entity_t* target;
+} Action;
+
 typedef enum SGStateTags1_t : u64 {
   SGST_NONE = 0,  //
   SGST_BUSY = 1 << 1,
@@ -256,6 +267,7 @@ typedef enum SGStateTags1_t : u64 {
 typedef struct StateGraph_t StateGraph;
 typedef struct SGState_t SGState;
 typedef void (*SGStateFn)(StateGraph* sg);
+typedef void (*SGActionFn)(StateGraph* sg, Action* action);
 
 typedef struct SGStateKeyframe_t {
   u32 id;
@@ -284,6 +296,7 @@ typedef struct StateGraph_t {
   Entity_t* entity;
   SGState* currentState;
   SGFSM fsm;
+  SGActionFn actions;
   EventEmitter events;
   SGStateTags1 tags1;
 } StateGraph;

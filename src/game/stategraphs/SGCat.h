@@ -5,9 +5,24 @@
 #include "../components/AudioSource.h"
 #include "StateGraph.h"
 
+// cat indexed palette
+// 1 unused
+// 2 spots
+// 3 r eye
+// 4 l eye
+// 5 back
+// 6 back foot
+// 7 body
+// 8 belly
+
 static SGState SGmeow, SGtail, SGblink;
+
+static void subbedActions(StateGraph* sg, Action* action) {
+  if (ACTION_USE == action->type) StateGraph__gotoState(sg, &SGmeow);
+}
+
 static void idleOnEnter(StateGraph* sg) {
-  StateGraph__gotoState(sg, &SGmeow);
+  StateGraph__gotoState(sg, &SGtail);
 }
 static SGState SGidle = {
     .onEnter = idleOnEnter,
@@ -35,7 +50,7 @@ static void tailKF5(StateGraph* sg) {
   sg->entity->render->tx = 6;
 }
 static void tailKF6(StateGraph* sg) {
-  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGblink);
+  if (Math__urandom2(0, 10) < 1) StateGraph__gotoState(sg, &SGblink);
 }
 static SGState SGtail = {
     .onEnter = tailOnEnter,
@@ -69,7 +84,7 @@ static void blinkKF4(StateGraph* sg) {  // b eyes closed
   sg->entity->render->ty = 3;
 }
 static void blinkKF5(StateGraph* sg) {
-  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGtail);
+  StateGraph__gotoState(sg, &SGidle);
 }
 
 static SGState SGblink = {
@@ -99,11 +114,11 @@ static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   sg->entity->render->ty = 4;
 }
 static void meowKF4(StateGraph* sg) {
-  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGblink : &SGtail);
+  StateGraph__gotoState(sg, &SGidle);
 }
 
 static SGState SGmeow = {
-    .frameCount = 108,
+    .frameCount = 17,
     .keyframeCount = 4,
     .keyframes =
         (SGStateKeyframe[]){
@@ -111,7 +126,7 @@ static SGState SGmeow = {
             {3, meowKF2},  // eyes open, mouth open (sound)
             // {9, meowKF3},  // eyes closed, mouth open
             {15, meowKF1},  // eyes open, mouth closed
-            {107, meowKF4},
+            {16, meowKF4},
         },
 };
 
