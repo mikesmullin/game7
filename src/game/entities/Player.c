@@ -11,6 +11,7 @@
 #include "../Logic.h"
 #include "../behaviortrees/Action.h"
 #include "../components/Rigidbody2D.h"
+#include "../entities/CatEntity.h"
 #include "../utils/Dispatcher.h"
 #include "../utils/Geometry.h"
 #include "../utils/QuadTree.h"
@@ -202,9 +203,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
 
         // Action__PerformBuffered(other, &action);
         if (NULL != cat->sg) {
-          if (NULL != cat->sg->actions) {
-            cat->sg->actions(cat->sg, &action);
-          }
+          CatEntity__callSGAction(cat->sg, &action);
         }
       }
     }

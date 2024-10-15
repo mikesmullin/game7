@@ -16,14 +16,12 @@
 // 7 body
 // 8 belly
 
-static SGState SGmeow, SGtail, SGblink;
-
 static void subbedActions(StateGraph* sg, Action* action) {
-  if (ACTION_USE == action->type) StateGraph__gotoState(sg, &SGmeow);
+  if (ACTION_USE == action->type) StateGraph__gotoState(sg, 3);  // meow
 }
 
 static void idleOnEnter(StateGraph* sg) {
-  StateGraph__gotoState(sg, &SGtail);
+  StateGraph__gotoState(sg, 1);  // tail
 }
 static SGState SGidle = {
     .onEnter = idleOnEnter,
@@ -50,7 +48,7 @@ static void tailKF5(StateGraph* sg) {
   sg->entity->render->tx = 6;
 }
 static void tailKF6(StateGraph* sg) {
-  if (Math__urandom2(0, 10) < 1) StateGraph__gotoState(sg, &SGblink);
+  if (Math__urandom2(0, 10) < 1) StateGraph__gotoState(sg, 2);  // blink
 }
 static SGState SGtail = {
     .onEnter = tailOnEnter,
@@ -84,7 +82,7 @@ static void blinkKF4(StateGraph* sg) {  // b eyes closed
   sg->entity->render->ty = 3;
 }
 static void blinkKF5(StateGraph* sg) {
-  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGidle);
+  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? 3 : 0);  // meow or idle
 }
 
 static SGState SGblink = {
@@ -114,7 +112,7 @@ static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   AudioSource__play(sg->entity, AUDIO_MEOW);
 }
 static void meowKF4(StateGraph* sg) {
-  StateGraph__gotoState(sg, &SGidle);
+  StateGraph__gotoState(sg, 0);  // idle
 }
 
 static SGState SGmeow = {

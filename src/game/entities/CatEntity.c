@@ -7,7 +7,7 @@
 #include "../../lib/List.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
-#include "../behaviortrees/BTCat.h"
+// #include "../behaviortrees/BTCat.h"
 #include "../components/Collider.h"
 #include "../components/Rigidbody2D.h"
 #include "../components/SpriteRenderer.h"
@@ -68,26 +68,31 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
   entity->render->color = TRANSPARENT;
 
   self->sg = Arena__Push(state->arena, sizeof(StateGraph));
-  self->sg->currentState = &SGidle;
+  self->sg->currentState = 0;
   self->sg->entity = entity;
-  self->sg->actions = subbedActions;
+  // self->sg->actions = subbedActions;
 
-  self->brain = (BTNode*)&BTroot;
-  self->brain->entity = entity;
+  // self->brain = (BTNode*)&BTroot;
+  // self->brain->entity = entity;
 
   entity->audio = Arena__Push(state->arena, sizeof(AudioSourceComponent));
+}
+
+SGState* CatEntity__getSGState(u32 id) {
+  if (0 == id) return &SGidle;
+  if (1 == id) return &SGtail;
+  if (2 == id) return &SGblink;
+  if (3 == id) return &SGmeow;
+  return &SGidle;
+}
+
+void CatEntity__callSGAction(StateGraph* sg, Action* action) {
+  subbedActions(sg, action);
 }
 
 void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
-
-  // experimental; relink following hot-reload
-  // TODO: remove after debug
-  // self->sg->currentState = &SGidle;
-  self->sg->actions = subbedActions;
-  self->brain = (BTNode*)&BTroot;
-  self->brain->entity = entity;
 
   SpriteRenderer__render(entity, state);
 }
@@ -96,16 +101,16 @@ void CatEntity__gui(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  Bitmap__DebugText2(
-      state,
-      6,
-      6 * 8,
-      WHITE,
-      TRANSPARENT,
-      "frame %d tx %d ty %d",
-      self->sg->frame,
-      entity->render->tx,
-      entity->render->ty);
+  // Bitmap__DebugText2(
+  //     state,
+  //     6,
+  //     6 * 8,
+  //     WHITE,
+  //     TRANSPARENT,
+  //     "frame %d tx %d ty %d",
+  //     self->sg->frame,
+  //     entity->render->tx,
+  //     entity->render->ty);
 }
 
 void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {
@@ -120,7 +125,7 @@ void CatEntity__tick(Entity_t* entity, Engine__State_t* state) {
   entity->rb->xa = self->xa * CAT_MOVE_SPEED;
   entity->rb->za = self->za * CAT_MOVE_SPEED;
 
-  self->brain->tick(self->brain);
+  // self->brain->tick(self->brain);
   StateGraph__tick(self->sg);
 
   Rigidbody2D__move(entity, state);

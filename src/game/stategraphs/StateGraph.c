@@ -1,39 +1,43 @@
 #include "StateGraph.h"
 
-#include "../../lib/Log.h"
+// #include "../../lib/Log.h"
 #include "../Logic.h"
+#include "../entities/CatEntity.h"
 #include "../utils/Color.h"
 
-extern Engine__State_t* g_engine;
-
-void StateGraph__gotoState(StateGraph* sg, SGState* state) {
+void StateGraph__gotoState(StateGraph* sg, u32 state) {
   sg->fsm = SGFSM_EXITING;
-  if (NULL != sg->currentState->onExit) sg->currentState->onExit(sg);
+  SGState* curState = CatEntity__getSGState(state);
+  if (NULL != curState->onExit) curState->onExit(sg);
   sg->currentState = state;
   sg->frame = 0;
 }
 
 void StateGraph__tick(StateGraph* sg) {
+  SGState* curState;
   while (sg->fsm == SGFSM_EXITING || sg->fsm == SGFSM_NULL) {
     sg->fsm = SGFSM_ENTERING;
-    if (NULL != sg->currentState->onEnter) sg->currentState->onEnter(sg);
+    curState = CatEntity__getSGState(sg->currentState);
+    if (NULL != curState->onEnter) curState->onEnter(sg);
 
     if (sg->fsm == SGFSM_UPDATING || sg->fsm == SGFSM_ENTERING) {
       sg->fsm = SGFSM_UPDATING;
-      if (NULL != sg->currentState->onUpdate) sg->currentState->onUpdate(sg);
+      curState = CatEntity__getSGState(sg->currentState);
+      if (NULL != curState->onUpdate) curState->onUpdate(sg);
     }
   }
 
-  for (u32 i = 0; i < sg->currentState->keyframeCount; i++) {
-    SGStateKeyframe* frame = &sg->currentState->keyframes[i];
+  curState = CatEntity__getSGState(sg->currentState);
+  for (u32 i = 0; i < curState->keyframeCount; i++) {
+    SGStateKeyframe* frame = &curState->keyframes[i];
     if (sg->frame == frame->id) {
       frame->cb(sg);
       break;
     }
   }
   if (sg->fsm == SGFSM_UPDATING || sg->fsm == SGFSM_ENTERING) {
-    if (sg->currentState->frameCount > 0) {
-      sg->frame = (sg->frame + 1) % sg->currentState->frameCount;
+    if (curState->frameCount > 0) {
+      sg->frame = (sg->frame + 1) % curState->frameCount;
     }
   }
 }

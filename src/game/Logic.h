@@ -293,10 +293,10 @@ typedef enum SGFSM_t {
 
 typedef struct StateGraph_t {
   Entity_t* entity;
-  SGState* currentState;
+  u32 currentState;
   SGFSM fsm;
   u32 frame;
-  SGActionFn actions;
+  // SGActionFn actions;
   EventEmitter events;
   SGStateTags1 tags1;
 } StateGraph;
