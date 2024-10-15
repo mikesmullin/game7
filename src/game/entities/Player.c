@@ -6,10 +6,11 @@
 #include "../../lib/Engine.h"
 #include "../../lib/Finger.h"
 #include "../../lib/Keyboard.h"
-// #include "../../lib/Log.h"
+#include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
 #include "../behaviortrees/Action.h"
+#include "../blocks/BreakBlock.h"
 #include "../components/Rigidbody2D.h"
 #include "../entities/CatEntity.h"
 #include "../utils/Dispatcher.h"
@@ -189,21 +190,37 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
       // find nearest cat
       // TODO: make into reusable FindNearestEntity() type of fn
       u32 matchCount = 0;
-      void* matchData[10];  // TODO: don't limit search results?
-      Rect range = {entity->tform->pos.x, entity->tform->pos.z, 2, 2};
-      QuadTreeNode_query(logic->game->curLvl->qt, range, 10, matchData, &matchCount);
+      void* matchData[40];  // TODO: don't limit search results?
+      glms_v3_scale(front, -2.0f, &forward);
+      glms_v3_add(entity->tform->pos, forward, &pos);
+      Rect range = {pos.x, pos.z, 0.5f, 0.5f};
+      QuadTreeNode_query(logic->game->curLvl->qt, range, 40, matchData, &matchCount);
 
       for (u32 i = 0; i < matchCount; i++) {
         Entity_t* other = (Entity_t*)matchData[i];
         if (entity == other) continue;
-        if (!(other->tags1 & TAG_CAT)) continue;
 
-        CatEntity_t* cat = (CatEntity_t*)other;
-        Action action = {.type = ACTION_USE, .actor = entity, .target = other};
+        if (TAG_CAT & other->tags1) {
+          CatEntity_t* cat = (CatEntity_t*)other;
+          Action action = {.type = ACTION_USE, .actor = entity, .target = other};
 
-        // Action__PerformBuffered(other, &action);
-        if (NULL != cat->sg) {
-          CatEntity__callSGAction(cat->sg, &action);
+          // Action__PerformBuffered(other, &action);
+          if (NULL != cat->sg) {
+            CatEntity__callSGAction(cat->sg, &action);
+          }
+          break;
+        }
+
+        if (TAG_BRICK & other->tags1) {
+          BreakBlock_t* brick = (BreakBlock_t*)other;
+          Action action = {.type = ACTION_USE, .actor = entity, .target = other};
+
+          if (!(TAG_BROKEN & other->tags1)) {
+            if (NULL != brick->sg) {
+              BreakBlock__callSGAction(brick->sg, &action);
+              break;
+            }
+          }
         }
       }
     }

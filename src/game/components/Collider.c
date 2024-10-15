@@ -64,13 +64,14 @@ bool Collider__check(Entity_t* entity, Engine__State_t* state, f32 x, f32 y) {
   }
 
   u32 matchCount = 0;
-  void* matchData[10];  // TODO: don't limit search results?
+  void* matchData[20];  // TODO: don't limit search results?
   // TODO: query can be the radius of the entity, to shorten this code?
-  QuadTreeNode_query(level->qt, range, 10, matchData, &matchCount);
+  QuadTreeNode_query(level->qt, range, 20, matchData, &matchCount);
   for (u32 i = 0; i < matchCount; i++) {
     Entity_t* other = (Entity_t*)matchData[i];
     if (entity == other) continue;
     if (NULL == other->collider) continue;
+    if (TAG_BROKEN & other->tags1) continue;
 
     if (BOX_COLLIDER_2D == other->collider->type) {
       BoxCollider2DComponent* collider = (BoxCollider2DComponent*)other->collider;

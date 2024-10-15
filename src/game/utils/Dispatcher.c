@@ -1,6 +1,7 @@
 #include "Dispatcher.h"
 
 #include "../blocks/Block.h"
+#include "../blocks/BreakBlock.h"
 #include "../blocks/CatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"
 #include "../blocks/WallBlock.h"
@@ -10,7 +11,7 @@
 #include "../menus/AboutMenu.h"
 #include "../menus/HelpMenu.h"
 #include "../menus/TitleMenu.h"
-#include "Sprite.h"
+#include "../sprites/Sprite.h"
 
 typedef float f32;
 
@@ -24,6 +25,8 @@ static void (*VTABLE_ENGINE[])() = {
     CatSpawnBlock__gui,
     SpawnBlock__tick,  //
     WallBlock__render,  //
+    BreakBlock__render,  //
+    BreakBlock__tick,
 
     CatEntity__tick,  //
     CatEntity__render,  //

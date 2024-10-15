@@ -79,6 +79,8 @@ void CatEntity__init(Entity_t* entity, Engine__State_t* state) {
 }
 
 SGState* CatEntity__getSGState(u32 id) {
+  // TODO: just define them as array ints too, instead of pointers
+  // or move this inside the SGCat.h like with subbedActions()
   if (0 == id) return &SGidle;
   if (1 == id) return &SGtail;
   if (2 == id) return &SGblink;
@@ -94,7 +96,7 @@ void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
-  SpriteRenderer__render(entity, state);
+  SpriteRenderer__render2(entity, state);
 }
 
 void CatEntity__gui(Entity_t* entity, Engine__State_t* state) {
