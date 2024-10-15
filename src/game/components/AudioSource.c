@@ -50,7 +50,8 @@ void AudioSource__play(Entity_t* entity, AUDIO_FILES sound) {
         1,
         0);
 
-    LOG_DEBUGF("d1 %f, d2 %f, pan %f", d1, d2, pan_value);
+    // LOG_DEBUGF("d1 %f, d2 %f, pan %f", d1, d2, pan_value);
+    g_engine->Audio__StopAudio(g_engine->audio, sound);
     g_engine->Audio__ResumeAudio(g_engine->audio, sound, false, d2, pan_value);
   }
 }

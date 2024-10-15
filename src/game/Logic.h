@@ -278,7 +278,6 @@ typedef struct SGState_t {
   SGStateFn onEnter;
   SGStateFn onUpdate;
   SGStateFn onExit;
-  u32 frame;
   u32 frameCount;
   u32 keyframeCount;
   SGStateKeyframe* keyframes;
@@ -296,6 +295,7 @@ typedef struct StateGraph_t {
   Entity_t* entity;
   SGState* currentState;
   SGFSM fsm;
+  u32 frame;
   SGActionFn actions;
   EventEmitter events;
   SGStateTags1 tags1;

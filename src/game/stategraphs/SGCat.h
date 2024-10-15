@@ -1,5 +1,6 @@
 #pragma once
 
+// #include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
 #include "../components/AudioSource.h"
@@ -26,7 +27,6 @@ static void idleOnEnter(StateGraph* sg) {
 }
 static SGState SGidle = {
     .onEnter = idleOnEnter,
-    .frame = 0,
 };
 
 static void tailOnEnter(StateGraph* sg) {
@@ -84,19 +84,19 @@ static void blinkKF4(StateGraph* sg) {  // b eyes closed
   sg->entity->render->ty = 3;
 }
 static void blinkKF5(StateGraph* sg) {
-  StateGraph__gotoState(sg, &SGidle);
+  StateGraph__gotoState(sg, Math__urandom2(0, 10) < 1 ? &SGmeow : &SGidle);
 }
 
 static SGState SGblink = {
-    .frameCount = 12 * 4,
-    .keyframeCount = 5,
+    .frameCount = 12,
+    .keyframeCount = 2,
     .keyframes =
         (SGStateKeyframe[]){
-            {12 * 0, blinkKF1},  //
+            // {12 * 0, blinkKF1},  //
             // {12 * 1, blinkKF2},
             // {12 * 2, blinkKF3},
-            {12 * 3, blinkKF4},
-            {12 * 4 - 1, blinkKF5},
+            {0, blinkKF4},
+            {11, blinkKF5},
         },
 };
 
@@ -107,11 +107,11 @@ static void meowKF1(StateGraph* sg) {  // eyes open, mouth closed
 static void meowKF2(StateGraph* sg) {  // eyes open, mouth open
   sg->entity->render->tx = 0;
   sg->entity->render->ty = 4;
-  AudioSource__play(sg->entity, AUDIO_MEOW);
 }
 static void meowKF3(StateGraph* sg) {  // eyes closed, mouth open
   sg->entity->render->tx = 3;
   sg->entity->render->ty = 4;
+  AudioSource__play(sg->entity, AUDIO_MEOW);
 }
 static void meowKF4(StateGraph* sg) {
   StateGraph__gotoState(sg, &SGidle);
@@ -122,9 +122,9 @@ static SGState SGmeow = {
     .keyframeCount = 4,
     .keyframes =
         (SGStateKeyframe[]){
-            {0, meowKF1},  // eyes open, mouth closed
-            {3, meowKF2},  // eyes open, mouth open (sound)
-            // {9, meowKF3},  // eyes closed, mouth open
+            // {0, meowKF1},  // eyes open, mouth closed
+            {0, meowKF3},  // eyes closed, mouth open
+            {6, meowKF2},  // eyes open, mouth open (sound)
             {15, meowKF1},  // eyes open, mouth closed
             {16, meowKF4},
         },

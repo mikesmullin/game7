@@ -19,7 +19,7 @@
 #include "../utils/QuadTree.h"
 #include "Entity.h"
 
-static const f32 CAT_MOVE_SPEED = 0.03f;  // per-second
+static const f32 CAT_MOVE_SPEED = 0.01f;  // per-second
 static f32 lastTurnWait = 2.0f;
 static f32 sinceLastTurn = 0;
 
@@ -82,6 +82,13 @@ void CatEntity__render(Entity_t* entity, Engine__State_t* state) {
   Logic__State_t* logic = state->local;
   CatEntity_t* self = (CatEntity_t*)entity;
 
+  // experimental; relink following hot-reload
+  // TODO: remove after debug
+  // self->sg->currentState = &SGidle;
+  self->sg->actions = subbedActions;
+  self->brain = (BTNode*)&BTroot;
+  self->brain->entity = entity;
+
   SpriteRenderer__render(entity, state);
 }
 
@@ -96,7 +103,7 @@ void CatEntity__gui(Entity_t* entity, Engine__State_t* state) {
       WHITE,
       TRANSPARENT,
       "frame %d tx %d ty %d",
-      self->sg->currentState->frame,
+      self->sg->frame,
       entity->render->tx,
       entity->render->ty);
 }

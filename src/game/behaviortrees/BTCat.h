@@ -1,8 +1,13 @@
 #pragma once
 
-#include "../../lib/Log.h"
+// #include "../../lib/Log.h"
 #include "../Logic.h"
 #include "BehaviorTree.h"
+
+// common BT Actions:
+// 1. changes state of world (external) or entity (internal)
+// 2. change physics (velocity, facing, etc.)
+// 3. change animation
 
 typedef struct IdleNode_t {
   BTNode base;

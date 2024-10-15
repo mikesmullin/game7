@@ -31,7 +31,7 @@ void CatSpawnBlock__init(Block_t* block, Engine__State_t* state, f32 x, f32 y) {
   self->spawnInterval = 1.0f;  // per sec
   self->animTime = 0;  // counter
   self->spawnedCount = 0;
-  self->maxSpawnCount = 2;
+  self->maxSpawnCount = 5;
 }
 
 void CatSpawnBlock__gui(Block_t* block, Engine__State_t* state) {
