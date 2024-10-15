@@ -7,6 +7,7 @@
 #include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
+#include "../blocks/BreakBlock.h"
 #include "../blocks/CatSpawnBlock.h"
 #include "../blocks/SpawnBlock.h"
 #include "../blocks/WallBlock.h"
@@ -53,6 +54,11 @@ Block_t* Level__makeBlock(Engine__State_t* state, u32 col, f32 x, f32 y) {
   if (0xff241ced == col) {  // red
     Block_t* block = CatSpawnBlock__alloc(state->arena);
     CatSpawnBlock__init(block, state, x, y);
+    return block;
+  }
+  if (0xff7f7f7f == col) {  // dark gray
+    Block_t* block = BreakBlock__alloc(state->arena);
+    BreakBlock__init(block, state, x, y);
     return block;
   }
 

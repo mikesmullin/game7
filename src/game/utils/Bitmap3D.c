@@ -802,7 +802,7 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
   if (player->base.health->hurtTime > 0) {
     f32 t = 1 - (player->base.health->hurtTime / PLAYER_HURT_ANIM_TIME);
     f32 offs = 1.0f * easeInQuart(t);
-    if (player->base.tags1 & TAG_DEAD) offs = 0.5;
+    // if (player->base.tags1 & TAG_DEAD) offs = 0.5;
     for (u32 i = 0; i < logic->screen.len; i++) {
       f32 xp = ((i % logic->screen.w) - logic->screen.w / 2.0f) / logic->screen.w * 2.0f;
       f32 yp = (((f32)i / logic->screen.h) - logic->screen.h / 2.0f) / logic->screen.h * 2.0f;

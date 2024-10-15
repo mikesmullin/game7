@@ -213,9 +213,8 @@ typedef enum EntityTags1_t : u64 {
   TAG_NONE = 0,
   TAG_WALL = 1 << 1,  //
   TAG_CAT = 1 << 2,  //
-  TAG_FLYING = 1 << 3,  //
-  TAG_DEAD = 1 << 4,  //
-  TAG_REMOVED = 1 << 5,  //
+  TAG_BRICK = 1 << 3,  //
+  TAG_BROKEN = 1 << 4,  //
 } EntityTags1;
 
 typedef struct Entity_t {
@@ -312,9 +311,16 @@ typedef struct CatEntity_t {
 typedef struct Sprite_t {
   v3 pos;  // (x, y, z)
   v3 rot;  // (yaw, pitch, roll)
-  u32 tex;
-  u32 color;
+  u32 tx, ty;
+  bool useMask;
+  u32 mask, color;
 } Sprite_t;
+
+typedef struct RubbleSprite_t {
+  Sprite_t base;
+  f32 xa, ya, za;
+  bool removed;
+} RubbleSprite;
 
 typedef struct Block_t {
   Entity_t base;
@@ -325,6 +331,12 @@ typedef struct Block_t {
 typedef struct WallBlock_t {
   Block_t base;
 } WallBlock_t;
+
+typedef struct BreakBlock_t {
+  Block_t base;
+  RubbleSprite* sprites[32];
+  StateGraph* sg;
+} BreakBlock_t;
 
 typedef struct SpawnBlock_t {
   Block_t base;
