@@ -336,6 +336,15 @@ static void barycentric_tri_lerp(
   dest[1] = lambda_a * uva[1] + lambda_b * uvb[1] + lambda_c * uvc[1];  // interpolated V
 }
 
+static f32 calculate_signed_area(vec2 p1, vec2 p2, vec2 p3) {
+  // signed area of a triangle (>0 = CCW, <0 = CW)
+  return  //
+      (p1[0] * (p2[1] - p3[1]) +  //
+       p2[0] * (p3[1] - p1[1]) +  //
+       p3[0] * (p1[1] - p2[1])) /
+      2.0f;
+}
+
 static void draw_triangle(
     Engine__State_t* state,
     Bitmap_t* screen,
@@ -368,6 +377,11 @@ static void draw_triangle(
   vec3_clamp(a0, W, H);
   vec3_clamp(b0, W, H);
   vec3_clamp(c0, W, H);
+
+  if (calculate_signed_area(a0, b0, c0) > 0) {  // CCW
+    // discard (not a front-facing face, relative to camera view)
+    return;
+  }
 
   // Sort vertices by y-coordinate (a[1] <= b[1] <= c[1])
   // such that a becomes a reference to the point furthest into the negative Y plane
