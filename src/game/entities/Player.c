@@ -46,7 +46,7 @@ void Player__init(Entity_t* entity, Engine__State_t* state) {
   CircleCollider2DComponent* collider =
       Arena__Push(state->arena, sizeof(CircleCollider2DComponent));
   collider->base.type = CIRCLE_COLLIDER_2D;
-  collider->r = 0.5f;
+  collider->r = 0.60f;
   entity->collider = (ColliderComponent*)collider;
 
   entity->health = Arena__Push(state->arena, sizeof(HealthComponent));
@@ -191,7 +191,7 @@ void Player__tick(struct Entity_t* entity, Engine__State_t* state) {
       // TODO: make into reusable FindNearestEntity() type of fn
       u32 matchCount = 0;
       void* matchData[40];  // TODO: don't limit search results?
-      glms_v3_scale(front, -2.0f, &forward);
+      glms_v3_scale(front, -1, &forward);
       glms_v3_add(entity->tform->pos, forward, &pos);
       Rect range = {pos.x, pos.z, 0.5f, 0.5f};
       QuadTreeNode_query(logic->game->curLvl->qt, range, 40, matchData, &matchCount);

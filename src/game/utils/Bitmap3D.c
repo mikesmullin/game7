@@ -5,6 +5,7 @@
 
 #include "../../lib/Engine.h"
 #include "../../lib/List.h"
+#include "../../lib/Log.h"
 #include "../../lib/Math.h"
 #include "../Logic.h"
 #include "../entities/Player.h"
@@ -53,8 +54,12 @@ static f32 safe_multiply(f32 a, f32 b) {
 }
 
 static void vec3_clamp(vec3 a, f32 w, f32 h) {
-  a[0] = MATH_CLAMP(0, a[0], w - 1);
-  a[1] = MATH_CLAMP(0, a[1], h - 1);
+  // a[0] = MATH_CLAMP(0, a[0], w - 1);
+  // a[1] = MATH_CLAMP(0, a[1], h - 1);
+  f32 hw = w / 2.0f;
+  f32 hh = h / 2.0f;
+  a[0] = MATH_CLAMP(-hw, a[0], w + hw);
+  a[1] = MATH_CLAMP(-hh, a[1], h + hh);
 }
 
 static void vec3_cp(vec3 a, vec3 dst) {
@@ -236,13 +241,20 @@ f32 lerp(f32 a, f32 b, f32 t) {
   return a + t * (b - a);
 }
 
-static bool project(
+f32 f32_zbuf_u8(f32 z) {
+  // convert z from 0.0001..0 to 0..255
+  // with a kind of ramp/cutoff close to znear
+  return Math__map(MATH_CLAMP(0, z * 100, 1), 0, 1, 0, 255);
+}
+
+static void project(
     Engine__State_t* state,
     bool debug,
     mat4 model,
     mat4 view,
     mat4 projection,
     vec3 v0,
+    vec4 ndc,
     vec4 dest) {
   Logic__State_t* logic = state->local;
   Bitmap_t* screen = &state->local->screen;
@@ -279,16 +291,17 @@ static bool project(
   if (debug) print_vec4(state, 6, "clip", clip_point, WHITE);
 
   // Perform perspective division (convert homogeneous to normalized device coordinates)
-  vec4 ndc;
+  // vec4 ndc;
   if (clip_point[3] != 0.0f) {
     ndc[0] = safe_divide(clip_point[0], clip_point[3]);
     ndc[1] = safe_divide(clip_point[1], clip_point[3]);
     ndc[2] = safe_divide(clip_point[2], clip_point[3]);
     ndc[3] = safe_divide(clip_point[3], clip_point[3]);
   }
-  if (ndc[0] < -1.0f || ndc[0] > 1.0f) return false;
-  if (ndc[1] < -1.0f || ndc[1] > 1.0f) return false;
-  if (ndc[2] < -1.0f || ndc[2] > 1.0f) return false;
+  // bool r = true;
+  // if (ndc[0] < -1.0f || ndc[0] > 1.0f) r = false;
+  // if (ndc[1] < -1.0f || ndc[1] > 1.0f) r = false;
+  // if (ndc[2] < -1.0f || ndc[2] > 0) r = false;
   if (debug) print_vec4(state, 7, "ndc", ndc, WHITE);
 
   // Convert normalized device coordinates to screen space
@@ -304,7 +317,7 @@ static bool project(
   // if (sz < FLT_EPSILON) sz = 0;  // clip rounding error
   if (debug) print_vec4(state, 8, "d", dest, LIME);
 
-  return true;
+  // return r;
 }
 
 // Function to compute the area of a triangle using its vertex positions
@@ -353,6 +366,9 @@ static void draw_triangle(
     vec3 a,
     vec3 b,
     vec3 c,
+    vec4 ndcA,
+    vec4 ndcB,
+    vec4 ndcC,
     bool upper,
     Bitmap_t* texture,
     u32 tx0,
@@ -373,10 +389,38 @@ static void draw_triangle(
   vec2_cp(uv1, uv01);
   vec2_cp(uv2, uv02);
 
-  // Perform basic clipping on each vertex
+  // TODO: remove this when geometry clipping is implemented
+  // DEBUG: perform backup clipping on each vertex
   vec3_clamp(a0, W, H);
   vec3_clamp(b0, W, H);
   vec3_clamp(c0, W, H);
+
+  if (
+      // if all 3 vertices X coord is outside -1..1
+      // then triangle is fully outside X (L/R) plane
+      (  //
+          (ndcA[0] < -ndcA[3] || ndcA[0] > ndcA[3]) &&  //
+          (ndcB[0] < -ndcB[3] || ndcB[0] > ndcB[3]) &&  //
+          (ndcC[0] < -ndcC[3] || ndcC[0] > ndcC[3])  //
+          ) ||
+      // if all 3 vertices Y coord is outside -1..1
+      // then triangle is fully outside Y (T/B) plane
+      (  //
+          (ndcA[1] < -ndcA[3] || ndcA[1] > ndcA[3]) &&  //
+          (ndcB[1] < -ndcB[3] || ndcB[1] > ndcB[3]) &&  //
+          (ndcC[1] < -ndcC[3] || ndcC[1] > ndcC[3])  //
+          ) ||
+      // if all 3 vertices Z coord is outside -1..0
+      // then triangle is fully behind camera or outside znear/zfar plane
+      (  //
+          (ndcA[2] < -ndcA[3] || ndcA[2] >= 0) &&  //
+          (ndcB[2] < -ndcB[3] || ndcB[2] >= 0) &&  //
+          (ndcC[2] < -ndcC[3] || ndcC[2] >= 0)  //
+          )  //
+  ) {
+    // only render triangles that are at least partially inside frustum
+    return;
+  }
 
   if (calculate_signed_area(a0, b0, c0) > 0) {  // CCW
     // discard (not a front-facing face, relative to camera view)
@@ -450,7 +494,7 @@ static void draw_triangle(
           // Update Z-buffer with the new depth value
           zbuffer[i] = z;
           // Draw the Z-buffer (for debugging)
-          // u32 zz = z * 100 * 255;
+          // u32 zz = f32_zbuf_u8(z);
           // color = 0xff000000 | zz << 16 | zz << 8 | zz;
 
           // Draw the pixel in the RGBA buffer
@@ -521,7 +565,7 @@ static void draw_triangle(
           // Update Z-buffer with the new depth value
           zbuffer[i] = z;
           // Draw the Z-buffer (for debugging)
-          // u32 zz = z * 100 * 255;
+          // u32 zz = f32_zbuf_u8(z);
           // color = 0xff000000 | zz << 16 | zz << 8 | zz;
 
           // Draw the pixel in the RGBA buffer
@@ -535,11 +579,32 @@ static void draw_triangle(
   //   f32 s = Math__sin(state->currentTime / 100);
   //   u32 cmp = Math__map(s, -1, 1, 128, 255);
   //   Bitmap__Set2DPixel(screen, a0[0], a0[1], 0xff000000 | cmp);
-  //   Bitmap__DebugText2(state, a0[0] + 2, a0[1] - 3, 0xff0000ff, 0x00000000, "%u", (u32)a0[1]);
+  //   Bitmap__DebugText2(
+  //       state,
+  //       a0[0] + 2,
+  //       a0[1] - 3,
+  //       0xff0000ff,
+  //       0x00000000,
+  //       "%+05.2f",
+  //       f32_zbuf_u8(a0[2]));
   //   Bitmap__Set2DPixel(screen, b0[0], b0[1], 0xff000000 | cmp << 8);
-  //   Bitmap__DebugText2(state, b0[0] + 2, b0[1] - 3, LIME, 0x00000000, "%u", (u32)b0[1]);
+  //   Bitmap__DebugText2(
+  //       state,
+  //       b0[0] + 2,
+  //       b0[1] - 3,
+  //       LIME,
+  //       0x00000000,
+  //       "%+05.2f",
+  //       f32_zbuf_u8(b0[2]));
   //   Bitmap__Set2DPixel(screen, c0[0], c0[1], 0xff000000 | cmp << 16);
-  //   Bitmap__DebugText2(state, c0[0] + 2, c0[1] - 3, BLUE, 0x00000000, "%u", (u32)c0[1]);
+  //   Bitmap__DebugText2(
+  //       state,
+  //       c0[0] + 2,
+  //       c0[1] - 3,
+  //       BLUE,
+  //       0x00000000,
+  //       "%+05.2f",
+  //       f32_zbuf_u8(c0[2]));
   // }
 }
 
@@ -624,7 +689,7 @@ void Bitmap3D__RenderWall(
   // render_mesh()
   // Project and draw all triangles that form the faces
   List__Node_t* c = obj->faces->head;
-  for (s32 i = 0; i < obj->faces->len; i++) {
+  for (u32 i = 0; i < obj->faces->len; i++) {
     Wavefront__Face_t* f = c->data;
     vec3* v00 = List__get(obj->vertices, f->vertex_idx[0] - 1);
     vec3* v01 = List__get(obj->vertices, f->vertex_idx[1] - 1);
@@ -635,10 +700,10 @@ void Bitmap3D__RenderWall(
     c = c->next;
 
     // Project the 3D vertices to 2D screen space
-    vec4 v0, v1, v2;
-    if (!project(state, false, model, view, projection, *v00, v0)) continue;
-    if (!project(state, false, model, view, projection, *v01, v1)) continue;
-    if (!project(state, false, model, view, projection, *v02, v2)) continue;
+    vec4 v0, v1, v2, ndc0, ndc1, ndc2;
+    project(state, false, model, view, projection, *v00, ndc0, v0);
+    project(state, false, model, view, projection, *v01, ndc1, v1);
+    project(state, false, model, view, projection, *v02, ndc2, v2);
 
     // Color for this face
     // u8 r = Math__map(Math__triangleWave(v0[1], 10), -1, 1, 128, 255);
@@ -657,6 +722,9 @@ void Bitmap3D__RenderWall(
         v0,
         v1,
         v2,
+        ndc0,
+        ndc1,
+        ndc2,
         true,
         &logic->atlas,
         tx0,
@@ -730,11 +798,11 @@ void Bitmap3D__RenderSprite(
   vec2 uv3 = {0, 0};  // bl
 
   // Project the 3D vertices to 2D screen space
-  vec4 v0, v1, v2, v3;
-  if (!project(state, false, model2, view, projection, v00, v0)) return;
-  if (!project(state, false, model2, view, projection, v01, v1)) return;
-  if (!project(state, false, model2, view, projection, v02, v2)) return;
-  if (!project(state, false, model2, view, projection, v03, v3)) return;
+  vec4 v0, v1, v2, v3, ndc0, ndc1, ndc2, ndc3;
+  project(state, false, model2, view, projection, v00, ndc0, v0);
+  project(state, false, model2, view, projection, v01, ndc1, v1);
+  project(state, false, model2, view, projection, v02, ndc2, v2);
+  project(state, false, model2, view, projection, v03, ndc3, v3);
 
   // face tri 1
   // upper tri: bl tl tr
@@ -743,16 +811,19 @@ void Bitmap3D__RenderSprite(
       screen,
       logic->zbuf,
       false,
-      v0,
-      v1,
       v2,
+      v1,
+      v0,
+      ndc2,
+      ndc1,
+      ndc0,
       true,
       &logic->atlas,
       tx0,
       ty0,
-      uv0,
-      uv1,
       uv2,
+      uv1,
+      uv0,
       useMask,
       mask,
       color);
@@ -767,6 +838,9 @@ void Bitmap3D__RenderSprite(
       v0,
       v3,
       v2,
+      ndc0,
+      ndc3,
+      ndc2,
       true,
       &logic->atlas,
       tx0,
@@ -790,14 +864,16 @@ void Bitmap3D__PostProcessing(Engine__State_t* state) {
 
   // fog distance by zbuf
   for (u32 i = 0; i < logic->screen.len; i++) {
-    f32 b0 = logic->zbuf[i] * 100;
+    f32 b0 = f32_zbuf_u8(logic->zbuf[i]);
     u32 color = buf[i];
     // cat eyes glow in the dark
-    if (0xff1de6b5 == color) b0 = MATH_CLAMP(0, 1.0f - b0, 1);
-    if (0xff00f2f4 == color) b0 = MATH_CLAMP(0, b0 * 2.4f, 1);
-    u32 b1 = Math__map(b0, 0, 1, 255, 0);
+    // if (0xff1de6b5 == color) b0 = MATH_CLAMP(0, 1.0f - b0, 1);
+    // if (0xff00f2f4 == color) b0 = MATH_CLAMP(0, b0 * 2.4f, 1);
+    if (0xff00f2f4 == color || 0xff1de6b5 == color) {
+      b0 = 200;
+    }
     // blackness of varying alpha overlaid on existing color
-    buf[i] = alpha_blend(color, b1 << 24);
+    buf[i] = alpha_blend(color, (u32)(255 - b0) << 24);
   }
 
   // skybox

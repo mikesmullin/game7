@@ -6,7 +6,6 @@
 #include "../entities/Entity.h"
 #include "../utils/Dispatcher.h"
 
-
 // blocks are 3d models instantiated from level RGB pixel data
 
 Block_t* Block__alloc(Arena_t* arena) {
