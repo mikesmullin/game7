@@ -14,6 +14,11 @@ This prototype explores 8-bit/retro style gaming.
 - Inheritance (via Struct Composition) w/ method overriding (via [Dispatcher](src/game/Dispatcher.c))
 - Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints, perf timers)
 
+my related Game prototypes: 
+[5](https://github.com/mikesmullin/cpp20-win11-x64-sdl2-vulkan?tab=readme-ov-file)
+[6](https://github.com/mikesmullin/c17-sdl2-vulkan)
+[8](https://github.com/mikesmullin/game8)
+
 ## Building
 
 ### on Windows
