@@ -7,17 +7,21 @@ This prototype explores 8-bit/retro style gaming.
 ![title screen](assets/textures/title.png)
 
 ### Features include:
+- CPU rendering (to GPU quad texture buffer; *pixelicious!*)
 - Stateful Hot-reloading (via .DLL + file watcher)
 - Metaprogramming (via [mikesmullin/metacode](https://github.com/mikesmullin/metacode/))
 - Modular
 - Object-Oriented (ie. `Class__Method` naming convention)
-- Inheritance (via Struct Composition) w/ method overriding (via [Dispatcher](src/game/Dispatcher.c))
+- Inheritance (via Struct Composition) w/ method overriding (via [Dispatcher](src/game/utils/Dispatcher.c))
 - Debug tools (sprintf to screen, Pixel Inspector, visual breakpoints, perf timers)
 
 my related Game prototypes: 
 [5](https://github.com/mikesmullin/cpp20-win11-x64-sdl2-vulkan?tab=readme-ov-file)
 [6](https://github.com/mikesmullin/c17-sdl2-vulkan)
 [8](https://github.com/mikesmullin/game8)
+
+## Screenshot
+![screenshot](docs/imgs/screenshot1.gif)
 
 ## Building
 
@@ -41,7 +45,7 @@ C:\> node build_scripts/Makefile.mjs watch
      [code](https://github.com/skeeto/Prelude-of-the-Chambered) |
      [host](https://s3.amazonaws.com/ld48/index.html)
 - Fyodor Agafonov 🇷🇺 ([Agafonoff](https://store.steampowered.com/pub/agafonoff_dev) | [@agafonoff_tw](https://x.com/agafonoff_tw))
-  - **(Agafonov 2023)** DR LIVESEY ROM AND DEATH EDITION
+  - **(Agafonov 2023)** *DR LIVESEY ROM AND DEATH EDITION*
     [steam game](https://store.steampowered.com/app/2181930/DR_LIVESEY_ROM_AND_DEATH_EDITION/) |
     [playthrough](https://www.youtube.com/watch?v=70OfnvGp1MU) |
     [original music](https://soundcloud.com/ghostfaceplaya/why-not)    
