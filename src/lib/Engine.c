@@ -36,7 +36,9 @@ static int check_load_logic() {
     strcat_s(path, 32, file);
     LOG_DEBUGF("path %s", path);
     int r = load_logic(path);
-    logic_onreload(state);
+    if (r) {
+      logic_onreload(state);
+    }
     return r;
   }
   return 0;
